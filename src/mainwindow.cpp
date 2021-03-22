@@ -454,15 +454,12 @@ void MainWindow::about()
         this, tr("About PlanPro Viewer"),
         tr("<h2>PlanPro Viewer</h2>"
            "Version: %1.%2.%3<br><br>"
-           "<b>Copyright &copy; 2018-2019 Stefan Dillmann<br>"
-           "Technische Universit&auml;t Darmstadt<br>"
-           "Department of Computer Science<br>"
-           "<a href=https://www.informatik.tu-darmstadt.de/se/homepage/index.en.jsp>Software Engineering Group</a><br><br>"
+           "<b>Copyright &copy; 2017-2021<br>"
+           "Technische Universit&auml;t Darmstadt<br><br>"
            "This program is released under the terms of the<br>"
-           "<a href=https://www.gnu.org/licenses/gpl.html>GNU General Public License</a><br><br></b>"
-           "<b>The work is supported by DB Netz AG in project<br>"
-           "FormETCS, part of the Innovationsallianz<br>"
-           "of TU Darmstadt and Deutsche Bahn AG</b>").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+           "BSD 3-Clause License<br><br></b>"
+           "<b>The work was supported by DB Netz AG in<br>"
+           "Project FormETCS</b>").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
 }
 
 void MainWindow::setTelegramInfo(const QString& text)
