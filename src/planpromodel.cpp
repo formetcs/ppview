@@ -108,11 +108,26 @@ bool PlanProModel::saveFile(const QString& filename)
 QDomElement PlanProModel::getContainerElement()
 {
     QDomElement docElem = domDocument.documentElement();
-    QDomElement planungProjektElement = docElem.firstChildElement("LST_Planung_Projekt");
-    QDomElement planungGruppeElement = planungProjektElement.firstChildElement("LST_Planung_Gruppe");
-    QDomElement planungEinzelElement = planungGruppeElement.firstChildElement("LST_Planung_Einzel");
-    QDomElement zustandZielElement = planungEinzelElement.firstChildElement("LST_Zustand_Ziel");
-    return zustandZielElement.firstChildElement("Container");
+    QDomElement childElement = docElem.firstChildElement("LST_Planung_Projekt");
+    childElement = childElement.firstChildElement("LST_Planung_Gruppe");
+    childElement = childElement.firstChildElement("LST_Planung_Einzel");
+    childElement = childElement.firstChildElement("LST_Zustand_Ziel");
+    QDomElement containerElement = childElement.firstChildElement("Container");
+
+    if(containerElement.isNull())
+    {
+        childElement = docElem.firstChildElement("LST_Planung");
+        childElement = childElement.firstChildElement("Fachdaten");
+        childElement = childElement.firstChildElement("Ausgabe_Fachdaten");
+        childElement = childElement.firstChildElement("LST_Zustand_Ziel");
+        containerElement = childElement.firstChildElement("Container");
+    }
+    if(containerElement.isNull())
+    {
+        childElement = docElem.firstChildElement("LST_Zustand");
+        containerElement = childElement.firstChildElement("Container");
+    }
+    return containerElement;
 }
 
 QDomElement PlanProModel::getObjectById(QString id)
