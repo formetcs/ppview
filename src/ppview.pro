@@ -51,6 +51,7 @@ SOURCES += \
     graphicsscene.cpp \
     domitem.cpp \
     nexttopkanteresult.cpp \
+    preferences.cpp \
     punktobjekt.cpp
 
 HEADERS += \
@@ -61,6 +62,7 @@ HEADERS += \
     graphicsscene.h \
     domitem.h \
     nexttopkanteresult.h \
+    preferences.h \
     punktobjekt.h \
     version.h \
     makro.h

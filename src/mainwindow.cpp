@@ -9,6 +9,7 @@
 #include "filterwidget.h"
 #include "planpromodel.h"
 #include "graphicsscene.h"
+#include "preferences.h"
 #include "version.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
@@ -104,21 +105,23 @@ void MainWindow::closeEvent(QCloseEvent* ev)
 
 void MainWindow::readSettings()
 {
-    QSettings settings;
-    resize(settings.value("geometry/size", QSize(500, 450)).toSize());
-    move(settings.value("geometry/pos", QPoint(200, 200)).toPoint());
-    restoreState(settings.value("geometry/windowState").toByteArray());
-    language = settings.value("preferences/language", "en").toString();
+    Preferences* prefs = Preferences::getInstance();
+    resize(prefs->getSize());
+    move(prefs->getPos());
+    restoreState(prefs->getWindowState());
+    language = prefs->getLanguage();
 }
 
 
 void MainWindow::writeSettings()
 {
-    QSettings settings;
-    settings.setValue("geometry/size", size());
-    settings.setValue("geometry/pos", pos());
-    settings.setValue("geometry/windowState", saveState());
-    settings.setValue("preferences/language", language);
+    Preferences* prefs = Preferences::getInstance();
+    prefs->setSize(size());
+    prefs->setPos(pos());
+    prefs->setWindowState(saveState());
+    prefs->setLanguage(language);
+
+    prefs->writeSettings();
 }
 
 void MainWindow::openFile()

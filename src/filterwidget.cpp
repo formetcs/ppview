@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QtWidgets>
 #include "filterwidget.h"
+#include "preferences.h"
 
 FilterWidget::FilterWidget()
 {
@@ -122,22 +123,20 @@ FilterWidget::FilterWidget()
 
 void FilterWidget::readSettings()
 {
-    QSettings settings;
     for(int i = 0; i < buttongroup->buttons().count(); i++)
     {
         QCheckBox* cb = (QCheckBox*) buttongroup->buttons().at(i);
-        bool enabled = settings.value("filterSettings/" + cb->text(), true).toBool();
+        bool enabled = Preferences::getInstance()->getFilterSetting(cb->text());
         cb->setChecked(enabled);
     }
 }
 
 void FilterWidget::writeSettings()
 {
-    QSettings settings;
     for(int i = 0; i < buttongroup->buttons().count(); i++)
     {
         QCheckBox* cb = (QCheckBox*) buttongroup->buttons().at(i);
-        settings.setValue("filterSettings/" + cb->text(), cb->isChecked());
+        Preferences::getInstance()->setFilterSetting(cb->text(), cb->isChecked());
     }
 }
 
