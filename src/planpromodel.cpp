@@ -4,130 +4,54 @@
 PlanProModel::PlanProModel(QObject* parent)
     :QAbstractItemModel(parent)
 {
-    domDocument = QDomDocument("objectlist");
-    rootItem = new DomItem(domDocument, 0);
+    //domDocument = QDomDocument("objectlist");
+    //rootItem = new DomItem(domDocument, 0);
+    doc = NULL;
 }
 
 PlanProModel::~PlanProModel()
 {
-    delete rootItem;
+    //delete rootItem;
 }
 
-bool PlanProModel::loadFile(const QString& filename)
+void PlanProModel::setDocument(PlanProDocument* d)
 {
-    QFile dataFile(filename);
-    if (!dataFile.open(QIODevice::ReadOnly|QIODevice::Text))
-    {
-        return false;
-    }
-    else
-    {
-        emit layoutAboutToBeChanged();
-        domDocument = QDomDocument("objectlist");
-
-        if(!domDocument.setContent(&dataFile))
-        {
-            emit layoutChanged();
-            dataFile.close();
-            return false;
-        }
-        delete rootItem;
-        QDomElement containerElem = getContainerElement();
-        rootItem = new DomItem(containerElem, 0);
-        emit layoutChanged();
-    }
-    dataFile.close();
-    return true;
-}
-
-bool PlanProModel::addFile(const QString& filename)
-{
-    QFile dataFile(filename);
-    QDomDocument doc = QDomDocument("objectlist");
-    if (!dataFile.open(QIODevice::ReadOnly|QIODevice::Text))
-    {
-        return false;
-    }
-    else
-    {
-        doc = QDomDocument("objectlist");
-
-        if(!doc.setContent(&dataFile))
-        {
-            dataFile.close();
-            return false;
-        }
-    }
-    dataFile.close();
-
-    QDomElement srcDocElem = doc.documentElement();
-    QDomElement srcPlanungProjektElement = srcDocElem.firstChildElement("LST_Planung_Projekt");
-    QDomElement srcPlanungGruppeElement = srcPlanungProjektElement.firstChildElement("LST_Planung_Gruppe");
-    QDomElement srcPlanungEinzelElement = srcPlanungGruppeElement.firstChildElement("LST_Planung_Einzel");
-    QDomElement srcZustandZielElement = srcPlanungEinzelElement.firstChildElement("LST_Zustand_Ziel");
-    QDomElement srcContainerElement = srcZustandZielElement.firstChildElement("Container");
-
-    QDomElement containerElement = getContainerElement();
-
-    emit layoutAboutToBeChanged();
-    QDomNode n = srcContainerElement.firstChild();
-    while (!n.isNull())
-    {
-        if (n.isElement())
-        {
-            QDomNode tempNode = srcContainerElement.removeChild(n);
-            containerElement.appendChild(tempNode);
-        }
-        n = srcContainerElement.firstChild();
-    }
-    delete rootItem;
-    rootItem = new DomItem(containerElement, 0);
+    doc = d;
     emit layoutChanged();
-
-    return true;
 }
 
-bool PlanProModel::saveFile(const QString& filename)
+void PlanProModel::modelChanged()
 {
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-      return false;
-    }
-    else
-    {
-      QTextStream ts(&file);
-      //ts.setCodec("UTF-8");
-      ts << domDocument.toString(2);
-      file.close();
-    }
-
-    return true;
+    emit layoutChanged();
 }
+
+
 
 QDomElement PlanProModel::getContainerElement()
 {
-    QDomElement docElem = domDocument.documentElement();
-    QDomElement childElement = docElem.firstChildElement("LST_Planung_Projekt");
-    childElement = childElement.firstChildElement("LST_Planung_Gruppe");
-    childElement = childElement.firstChildElement("LST_Planung_Einzel");
-    childElement = childElement.firstChildElement("LST_Zustand_Ziel");
-    QDomElement containerElement = childElement.firstChildElement("Container");
+//    QDomElement docElem = domDocument.documentElement();
+//    QDomElement childElement = docElem.firstChildElement("LST_Planung_Projekt");
+//    childElement = childElement.firstChildElement("LST_Planung_Gruppe");
+//    childElement = childElement.firstChildElement("LST_Planung_Einzel");
+//    childElement = childElement.firstChildElement("LST_Zustand_Ziel");
+//    QDomElement containerElement = childElement.firstChildElement("Container");
 
-    if(containerElement.isNull())
-    {
-        childElement = docElem.firstChildElement("LST_Planung");
-        childElement = childElement.firstChildElement("Fachdaten");
-        childElement = childElement.firstChildElement("Ausgabe_Fachdaten");
-        childElement = childElement.firstChildElement("LST_Zustand_Ziel");
-        containerElement = childElement.firstChildElement("Container");
-    }
-    if(containerElement.isNull())
-    {
-        childElement = docElem.firstChildElement("LST_Zustand");
-        containerElement = childElement.firstChildElement("Container");
-    }
-    return containerElement;
+//    if(containerElement.isNull())
+//    {
+//        childElement = docElem.firstChildElement("LST_Planung");
+//        childElement = childElement.firstChildElement("Fachdaten");
+//        childElement = childElement.firstChildElement("Ausgabe_Fachdaten");
+//        childElement = childElement.firstChildElement("LST_Zustand_Ziel");
+//        containerElement = childElement.firstChildElement("Container");
+//    }
+//    if(containerElement.isNull())
+//    {
+//        childElement = docElem.firstChildElement("LST_Zustand");
+//        containerElement = childElement.firstChildElement("Container");
+//    }
+//    return containerElement;
+
+    return QDomElement();
 }
 
 QDomElement PlanProModel::getObjectById(QString id)
@@ -173,45 +97,45 @@ QModelIndex PlanProModel::getModelIndexById(QString id)
 
 QString PlanProModel::getBinaryFileName(QModelIndex index)
 {
-    if (!index.isValid())
-        return QString();
+//    if (!index.isValid())
+//        return QString();
 
-    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-    QDomNode node = item->node();
-    if(node.nodeName() == "Anhang")
-    {
-        QString filename = node.firstChildElement("Anhang_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
-        QString fileextension = node.firstChildElement("Anhang_Allg").firstChildElement("Dateityp").firstChildElement("Wert").text();
-        return filename + "." + fileextension;
-    }
-    else if(node.nodeName() == "Binaerdatei")
-    {
-        QString filename = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
-        QString fileextension = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateityp_Binaerdatei").firstChildElement("Wert").text();
-        return filename + "." + fileextension;
-    }
+//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
+//    QDomNode node = item->node();
+//    if(node.nodeName() == "Anhang")
+//    {
+//        QString filename = node.firstChildElement("Anhang_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
+//        QString fileextension = node.firstChildElement("Anhang_Allg").firstChildElement("Dateityp").firstChildElement("Wert").text();
+//        return filename + "." + fileextension;
+//    }
+//    else if(node.nodeName() == "Binaerdatei")
+//    {
+//        QString filename = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
+//        QString fileextension = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateityp_Binaerdatei").firstChildElement("Wert").text();
+//        return filename + "." + fileextension;
+//    }
     return QString();
 }
 
 QByteArray PlanProModel::extractBinaryFile(QModelIndex index)
 {
-    if (!index.isValid())
-        return QByteArray();
+//    if (!index.isValid())
+//        return QByteArray();
 
-    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-    QDomNode node = item->node();
-    if(node.nodeName() == "Anhang")
-    {
-        QByteArray encodedData = node.firstChildElement("Anhang_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
-        QByteArray finalData = QByteArray::fromBase64(encodedData);
-        return finalData;
-    }
-    else if(node.nodeName() == "Binaerdatei")
-    {
-        QByteArray encodedData = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
-        QByteArray finalData = QByteArray::fromBase64(encodedData);
-        return finalData;
-    }
+//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
+//    QDomNode node = item->node();
+//    if(node.nodeName() == "Anhang")
+//    {
+//        QByteArray encodedData = node.firstChildElement("Anhang_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
+//        QByteArray finalData = QByteArray::fromBase64(encodedData);
+//        return finalData;
+//    }
+//    else if(node.nodeName() == "Binaerdatei")
+//    {
+//        QByteArray encodedData = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
+//        QByteArray finalData = QByteArray::fromBase64(encodedData);
+//        return finalData;
+//    }
     return QByteArray();
 }
 
@@ -219,29 +143,29 @@ QStringList PlanProModel::findReferencingObjects(QModelIndex index)
 {
     QStringList returnlist;
 
-    if (!index.isValid())
-        return returnlist;
+//    if (!index.isValid())
+//        return returnlist;
 
-    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-    QDomNode node = item->node();
-    if(node.firstChildElement("Identitaet").isNull())
-    {
-        return returnlist;
-    }
-    QString identitaet = node.firstChildElement("Identitaet").firstChildElement("Wert").text();
+//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
+//    QDomNode node = item->node();
+//    if(node.firstChildElement("Identitaet").isNull())
+//    {
+//        return returnlist;
+//    }
+//    QString identitaet = node.firstChildElement("Identitaet").firstChildElement("Wert").text();
 
-    QDomNodeList nodelist = getContainerElement().childNodes();
-    for(int i = 0; i < nodelist.count(); i++)
-    {
-        QDomNode n = nodelist.at(i);
-        if (n.isElement())
-        {
-            QString name = n.nodeName();
-            QString id = n.firstChildElement("Identitaet").firstChildElement("Wert").text();
-            QStringList partlist = findReferencingObjectsRec(n, identitaet, name, id);
-            returnlist.append(partlist);
-        }
-    }
+//    QDomNodeList nodelist = getContainerElement().childNodes();
+//    for(int i = 0; i < nodelist.count(); i++)
+//    {
+//        QDomNode n = nodelist.at(i);
+//        if (n.isElement())
+//        {
+//            QString name = n.nodeName();
+//            QString id = n.firstChildElement("Identitaet").firstChildElement("Wert").text();
+//            QStringList partlist = findReferencingObjectsRec(n, identitaet, name, id);
+//            returnlist.append(partlist);
+//        }
+//    }
 
     return returnlist;
 }
@@ -388,119 +312,119 @@ QList<NextTopKanteResult> PlanProModel::getNextTopKante(QDomNode topKante, bool 
 
 double PlanProModel::calculateDistance(QModelIndexList selectedIndexes)
 {
-    QModelIndex index1 = selectedIndexes.at(0);
-    QModelIndex index2 = selectedIndexes.at(1);
-    DomItem* item1 = static_cast<DomItem*>(index1.internalPointer());
-    QDomNode node1 = item1->node();
-    DomItem* item2 = static_cast<DomItem*>(index2.internalPointer());
-    QDomNode node2 = item2->node();
-    if(node1.firstChildElement("Punkt_Objekt_TOP_Kante").isNull() || node2.firstChildElement("Punkt_Objekt_TOP_Kante").isNull())
-    {
-        return -5;
-    }
+//    QModelIndex index1 = selectedIndexes.at(0);
+//    QModelIndex index2 = selectedIndexes.at(1);
+//    DomItem* item1 = static_cast<DomItem*>(index1.internalPointer());
+//    QDomNode node1 = item1->node();
+//    DomItem* item2 = static_cast<DomItem*>(index2.internalPointer());
+//    QDomNode node2 = item2->node();
+//    if(node1.firstChildElement("Punkt_Objekt_TOP_Kante").isNull() || node2.firstChildElement("Punkt_Objekt_TOP_Kante").isNull())
+//    {
+//        return -5;
+//    }
 
-    QString identitaet1 = node1.firstChildElement("Identitaet").firstChildElement("Wert").text();
-    QDomElement punktObjektTopKanteElement1 = node1.firstChildElement("Punkt_Objekt_TOP_Kante");
-    while(!punktObjektTopKanteElement1.isNull())
-    {
-        QString idTopKante1 = punktObjektTopKanteElement1.firstChildElement("ID_TOP_Kante").firstChildElement("Wert").text();
-        double abstand1 = punktObjektTopKanteElement1.firstChildElement("Abstand").firstChildElement("Wert").text().toDouble();
-        QString wirkrichtung1 = punktObjektTopKanteElement1.firstChildElement("Wirkrichtung").firstChildElement("Wert").text();
+//    QString identitaet1 = node1.firstChildElement("Identitaet").firstChildElement("Wert").text();
+//    QDomElement punktObjektTopKanteElement1 = node1.firstChildElement("Punkt_Objekt_TOP_Kante");
+//    while(!punktObjektTopKanteElement1.isNull())
+//    {
+//        QString idTopKante1 = punktObjektTopKanteElement1.firstChildElement("ID_TOP_Kante").firstChildElement("Wert").text();
+//        double abstand1 = punktObjektTopKanteElement1.firstChildElement("Abstand").firstChildElement("Wert").text().toDouble();
+//        QString wirkrichtung1 = punktObjektTopKanteElement1.firstChildElement("Wirkrichtung").firstChildElement("Wert").text();
 
-        QString identitaet2 = node2.firstChildElement("Identitaet").firstChildElement("Wert").text();
-        QDomElement punktObjektTopKanteElement2 = node2.firstChildElement("Punkt_Objekt_TOP_Kante");
-        while(!punktObjektTopKanteElement2.isNull())
-        {
-            QString idTopKante2 = punktObjektTopKanteElement2.firstChildElement("ID_TOP_Kante").firstChildElement("Wert").text();
-            double abstand2 = punktObjektTopKanteElement2.firstChildElement("Abstand").firstChildElement("Wert").text().toDouble();
-            QString wirkrichtung2 = punktObjektTopKanteElement2.firstChildElement("Wirkrichtung").firstChildElement("Wert").text();
+//        QString identitaet2 = node2.firstChildElement("Identitaet").firstChildElement("Wert").text();
+//        QDomElement punktObjektTopKanteElement2 = node2.firstChildElement("Punkt_Objekt_TOP_Kante");
+//        while(!punktObjektTopKanteElement2.isNull())
+//        {
+//            QString idTopKante2 = punktObjektTopKanteElement2.firstChildElement("ID_TOP_Kante").firstChildElement("Wert").text();
+//            double abstand2 = punktObjektTopKanteElement2.firstChildElement("Abstand").firstChildElement("Wert").text().toDouble();
+//            QString wirkrichtung2 = punktObjektTopKanteElement2.firstChildElement("Wirkrichtung").firstChildElement("Wert").text();
 
-            PunktObjekt po1(identitaet1, idTopKante1, abstand1, wirkrichtung1);
-            PunktObjekt po2(identitaet2, idTopKante2, abstand2, wirkrichtung2);
+//            PunktObjekt po1(identitaet1, idTopKante1, abstand1, wirkrichtung1);
+//            PunktObjekt po2(identitaet2, idTopKante2, abstand2, wirkrichtung2);
 
-            double result = calculateDistance(po1, po2, true);
-            if(result >= 0)
-            {
-                return result;
-            }
-            result = calculateDistance(po1, po2, false);
-            if(result >= 0)
-            {
-                return result;
-            }
-            punktObjektTopKanteElement2 = punktObjektTopKanteElement2.nextSiblingElement("Punkt_Objekt_TOP_Kante");
-        }
-        punktObjektTopKanteElement1 = punktObjektTopKanteElement1.nextSiblingElement("Punkt_Objekt_TOP_Kante");
-    }
+//            double result = calculateDistance(po1, po2, true);
+//            if(result >= 0)
+//            {
+//                return result;
+//            }
+//            result = calculateDistance(po1, po2, false);
+//            if(result >= 0)
+//            {
+//                return result;
+//            }
+//            punktObjektTopKanteElement2 = punktObjektTopKanteElement2.nextSiblingElement("Punkt_Objekt_TOP_Kante");
+//        }
+//        punktObjektTopKanteElement1 = punktObjektTopKanteElement1.nextSiblingElement("Punkt_Objekt_TOP_Kante");
+//    }
     return -1;
 }
 
 double PlanProModel::calculateDistance(PunktObjekt startpos, PunktObjekt endpos, bool forward)
 {
     double returnval = -1;
-    QString startGuid = startpos.getIdTopKante();
-    double startAbstand = startpos.getAbstand();
-    QString startWirkrichtung = startpos.getWirkrichtung();
-    QString endGuid = endpos.getIdTopKante();
-    double endAbstand = endpos.getAbstand();
-    //QString endWirkrichtung = endpos.getWirkrichtung();
-    if (startGuid == endGuid && startWirkrichtung != "gegen" && forward) { // both positions are on the
-        // same edge
-        returnval = endAbstand - startAbstand;
-    } else if (startGuid == endGuid && startWirkrichtung != "gegen" && !forward) { // both positions are
-        // on the same edge
-        returnval = startAbstand - endAbstand;
-    } else if (startGuid == endGuid && startWirkrichtung == "gegen" && !forward) { // both positions are
-        // on the same edge
-        returnval = endAbstand - startAbstand;
-    } else if (startGuid == endGuid && startWirkrichtung == "gegen" && forward) { // both positions are on
-        // the same edge
-        returnval = startAbstand - endAbstand;
-    } else {
-        QDomElement startEdge = getObjectById(startGuid);
-        if (!startEdge.isNull()) {
-            double currentDistance = -1;
-            double remainingDistance = -1;
-            bool direction = true;
-            if (startWirkrichtung != "gegen" && forward) {
-                double edgeLength = startEdge.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
-                currentDistance = edgeLength - startAbstand;
-                direction = true;
-            } else if (startWirkrichtung != "gegen" && !forward) {
-                currentDistance = startAbstand;
-                direction = false;
-            } else if (startWirkrichtung == "gegen" && forward) {
-                currentDistance = startAbstand;
-                direction = false;
-            } else if (startWirkrichtung == "gegen" && !forward) {
-                double edgeLength = startEdge.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
-                currentDistance = edgeLength - startAbstand;
-                direction = true;
-            }
-            QList<NextTopKanteResult> edgelist = getNextTopKante(startEdge, direction);
-            for (int i = 0; i < edgelist.size(); i++) {
-                NextTopKanteResult edgeresult = edgelist.at(i);
-                QDomNode tka = edgeresult.getTopKanteElement();
-                QString tka_id = tka.firstChildElement("Identitaet").firstChildElement("Wert").text();
-                bool newdir = edgeresult.getDirection();
-                PunktObjekt newStart(tka_id, 0.0, "in");
-                if (newdir) {
-                    newStart.setAbstand(0.0);
-                } else {
-                    double tka_len = tka.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
-                    newStart.setAbstand(tka_len);
-                }
-                double tempdist = calculateDistance(newStart, endpos, newdir);
-                if ((remainingDistance < 0 && tempdist >= 0)
-                        || (remainingDistance >= 0 && tempdist >= 0 && tempdist < remainingDistance)) {
-                    remainingDistance = tempdist;
-                }
-            }
-            if (remainingDistance >= 0) {
-                returnval = currentDistance + remainingDistance;
-            }
-        }
-    }
+//    QString startGuid = startpos.getIdTopKante();
+//    double startAbstand = startpos.getAbstand();
+//    QString startWirkrichtung = startpos.getWirkrichtung();
+//    QString endGuid = endpos.getIdTopKante();
+//    double endAbstand = endpos.getAbstand();
+//    //QString endWirkrichtung = endpos.getWirkrichtung();
+//    if (startGuid == endGuid && startWirkrichtung != "gegen" && forward) { // both positions are on the
+//        // same edge
+//        returnval = endAbstand - startAbstand;
+//    } else if (startGuid == endGuid && startWirkrichtung != "gegen" && !forward) { // both positions are
+//        // on the same edge
+//        returnval = startAbstand - endAbstand;
+//    } else if (startGuid == endGuid && startWirkrichtung == "gegen" && !forward) { // both positions are
+//        // on the same edge
+//        returnval = endAbstand - startAbstand;
+//    } else if (startGuid == endGuid && startWirkrichtung == "gegen" && forward) { // both positions are on
+//        // the same edge
+//        returnval = startAbstand - endAbstand;
+//    } else {
+//        QDomElement startEdge = getObjectById(startGuid);
+//        if (!startEdge.isNull()) {
+//            double currentDistance = -1;
+//            double remainingDistance = -1;
+//            bool direction = true;
+//            if (startWirkrichtung != "gegen" && forward) {
+//                double edgeLength = startEdge.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
+//                currentDistance = edgeLength - startAbstand;
+//                direction = true;
+//            } else if (startWirkrichtung != "gegen" && !forward) {
+//                currentDistance = startAbstand;
+//                direction = false;
+//            } else if (startWirkrichtung == "gegen" && forward) {
+//                currentDistance = startAbstand;
+//                direction = false;
+//            } else if (startWirkrichtung == "gegen" && !forward) {
+//                double edgeLength = startEdge.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
+//                currentDistance = edgeLength - startAbstand;
+//                direction = true;
+//            }
+//            QList<NextTopKanteResult> edgelist = getNextTopKante(startEdge, direction);
+//            for (int i = 0; i < edgelist.size(); i++) {
+//                NextTopKanteResult edgeresult = edgelist.at(i);
+//                QDomNode tka = edgeresult.getTopKanteElement();
+//                QString tka_id = tka.firstChildElement("Identitaet").firstChildElement("Wert").text();
+//                bool newdir = edgeresult.getDirection();
+//                PunktObjekt newStart(tka_id, 0.0, "in");
+//                if (newdir) {
+//                    newStart.setAbstand(0.0);
+//                } else {
+//                    double tka_len = tka.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Laenge").firstChildElement("Wert").text().toDouble();
+//                    newStart.setAbstand(tka_len);
+//                }
+//                double tempdist = calculateDistance(newStart, endpos, newdir);
+//                if ((remainingDistance < 0 && tempdist >= 0)
+//                        || (remainingDistance >= 0 && tempdist >= 0 && tempdist < remainingDistance)) {
+//                    remainingDistance = tempdist;
+//                }
+//            }
+//            if (remainingDistance >= 0) {
+//                returnval = currentDistance + remainingDistance;
+//            }
+//        }
+//    }
 
     return returnval;
 }
@@ -515,23 +439,21 @@ QVariant PlanProModel::data(const QModelIndex& index, int role) const
 
     DomItem* item = static_cast<DomItem*>(index.internalPointer());
 
-    QDomNode node = item->node();
-
     QStringList attributes;
-    QDomNamedNodeMap attributeMap = node.attributes();
+    QHash<QString, QString> attributeMap = item->getAttributeMap();
+    QHashIterator<QString, QString> i(attributeMap);
+    while(i.hasNext())
+    {
+        i.next();
+        attributes << i.key() + "=\"" + i.value() + '"';
+    }
 
     switch (index.column()) {
     case 0:
-        return node.nodeName();
+        return item->getName();
     case 1:
-        return node.nodeValue().split("\n").join(' ');
+        return item->getValue().split("\n").join(' ');
     case 2:
-        for (int i = 0; i < attributeMap.count(); ++i)
-        {
-            QDomNode attribute = attributeMap.item(i);
-            attributes << attribute.nodeName() + "=\""
-                          +attribute.nodeValue() + '"';
-        }
         return attributes.join(' ');
 
     default:
@@ -575,11 +497,11 @@ QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) 
     DomItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = doc->getRootItem();
     else
         parentItem = static_cast<DomItem*>(parent.internalPointer());
 
-    DomItem* childItem = parentItem->child(row);
+    DomItem* childItem = parentItem->getChild(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -594,10 +516,10 @@ QModelIndex PlanProModel::parent(const QModelIndex& child) const
     DomItem* childItem = static_cast<DomItem*>(child.internalPointer());
     DomItem* parentItem = childItem->parent();
 
-    if (!parentItem || parentItem == rootItem)
+    if (!parentItem || parentItem == doc->getRootItem())
         return QModelIndex();
 
-    return createIndex(parentItem->row(), 0, parentItem);
+    return createIndex(parentItem->getOwnPosition(), 0, parentItem);
 }
 
 int PlanProModel::rowCount(const QModelIndex& parent) const
@@ -608,11 +530,16 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
     DomItem* parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = doc->getRootItem();
     else
         parentItem = static_cast<DomItem*>(parent.internalPointer());
 
-    return parentItem->node().childNodes().count();
+    if(!parentItem)
+    {
+        return 0;
+    }
+
+    return parentItem->childCount();
 }
 
 int PlanProModel::columnCount(const QModelIndex& /*parent*/) const

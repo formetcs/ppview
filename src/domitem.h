@@ -1,25 +1,35 @@
 #ifndef DOMITEM_H
 #define DOMITEM_H
 
-#include <QDomNode>
+#include <QString>
 #include <QHash>
+#include <QList>
 
 
 class DomItem
 {
 public:
-    DomItem(QDomNode& node, int row, DomItem* parent = 0);
+    DomItem(const QString& name, const QString& value, DomItem* parent = 0);
+    DomItem(const QString& name, DomItem* parent = 0);
     ~DomItem();
-    DomItem* child(int i);
+    QString getName() const;
+    QString getValue() const;
+    void setValue(const QString& v);
+    DomItem* getChild(int i);
+    void addChild(DomItem* c);
+    int childCount() const;
+    int getOwnPosition() const;
+    QString getAttribute(const QString& name) const;
+    void addAttribute(const QString& name, const QString& value);
+    QHash<QString, QString> getAttributeMap();
     DomItem* parent();
-    QDomNode node() const;
-    int row();
 
 private:
-    QDomNode domNode;
-    QHash<int, DomItem*> childItems;
+    QString name;
+    QString value;
+    QList<DomItem*> childItems;
+    QHash<QString, QString> attributes;
     DomItem* parentItem;
-    int rowNumber;
 };
 
 #endif // DOMITEM_H

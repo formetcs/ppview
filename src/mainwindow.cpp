@@ -8,6 +8,7 @@
 #include "parser.h"
 #include "filterwidget.h"
 #include "planpromodel.h"
+#include "planproxmldocument.h"
 #include "graphicsscene.h"
 #include "preferences.h"
 #include "version.h"
@@ -22,6 +23,8 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
 
     scene = new GraphicsScene();
     model = new PlanProModel();
+    document = new PlanProXmlDocument();
+    model->setDocument(document);
 
     objectInfo = new QTextEdit();
     objectInfo->setReadOnly(true);
@@ -41,7 +44,8 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
     filterWidget->readSettings();
 
     //view = new QGraphicsView(scene->getGraphicsScene(), this);
-    view = new QGraphicsView(this);
+    view = new QGraphicsView(this); //TODO: only to be compile-clean
+
     setCentralWidget(view);
 
     createActions();
@@ -133,27 +137,27 @@ void MainWindow::openFile()
     openNamedFile(s);
 }
 
-void MainWindow::addFile()
-{
-    QString s = QFileDialog::getOpenFileName(
-        this, tr("Add file"), QString(),
-        tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
+//void MainWindow::addFile()
+//{
+//    QString s = QFileDialog::getOpenFileName(
+//        this, tr("Add file"), QString(),
+//        tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
 
-    if (!s.isEmpty())
-    {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-        bool success = model->addFile(s);
-        Parser::createGraphicsScene(model,scene);
-        if(!success)
-        {
-            QApplication::restoreOverrideCursor();
-            QMessageBox::critical(0, tr("File Reading Error"),
-                            tr("File\n%1\ncould not be opened")
-                            .arg(s));
-        }
-        QApplication::restoreOverrideCursor();
-    }
-}
+//    if (!s.isEmpty())
+//    {
+//        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//        bool success = model->addFile(s);
+//        Parser::createGraphicsScene(model,scene);
+//        if(!success)
+//        {
+//            QApplication::restoreOverrideCursor();
+//            QMessageBox::critical(0, tr("File Reading Error"),
+//                            tr("File\n%1\ncould not be opened")
+//                            .arg(s));
+//        }
+//        QApplication::restoreOverrideCursor();
+//    }
+//}
 
 void MainWindow::saveFile()
 {
@@ -168,7 +172,7 @@ void MainWindow::saveFile()
     if (!s.isEmpty())
     {
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      bool success = model->saveFile(s);
+      bool success = document->saveFile(s);
       QApplication::restoreOverrideCursor();
       if(!success)
       {
@@ -190,20 +194,22 @@ void MainWindow::openNamedFile(const QString& filename)
         //disconnect(scene, SIGNAL(sendObjectInfo(QString)), this, SLOT(setTelegramInfo(QString)));
         //disconnect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
         //disconnect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
-        disconnect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
+        //disconnect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
         //disconnect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
         //disconnect(referenceList, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
 
-        favoriteList->clear();
-        referenceList->clear();
 
-        delete scene;
-        delete model;
-        scene = new GraphicsScene();
-        model = new PlanProModel();
 
-        bool success = model->loadFile(filename);
-        objectTreeView->setModel(model);
+
+        //delete model;
+        //delete document;
+
+        //model = new PlanProModel();
+        //document = new PlanProXmlDocument();
+        //model->setDocument(document);
+
+        bool success = document->loadFile(filename);
+        //objectTreeView->setModel(model);
         if(!success)
         {
             QApplication::restoreOverrideCursor();
@@ -211,18 +217,24 @@ void MainWindow::openNamedFile(const QString& filename)
                             tr("File\n%1\ncould not be opened")
                             .arg(filename));
 
-            setWindowTitle(tr("PlanPro Viewer"));
-            addFileAct->setEnabled(false);
-            saveFileAct->setEnabled(false);
-            exportToPictureAct->setEnabled(false);
-            exportToPdfAct->setEnabled(false);
-            printFileAct->setEnabled(false);
-            fileName = QString();
+            //setWindowTitle(tr("PlanPro Viewer"));
+            //addFileAct->setEnabled(false);
+            //saveFileAct->setEnabled(false);
+            //exportToPictureAct->setEnabled(false);
+            //exportToPdfAct->setEnabled(false);
+            //printFileAct->setEnabled(false);
+            //fileName = QString();
         }
         else
         {
-            Parser::createGraphicsScene(model,scene);
+            model->modelChanged();
+            delete scene;
+            scene = new GraphicsScene();
+            //Parser::createGraphicsScene(model,scene);
             scene->changeFilterSettings(filterWidget->getFilterState());
+
+            favoriteList->clear();
+            referenceList->clear();
 
             QFileInfo fi(filename);
             setWindowTitle(fi.fileName() + tr(" - PlanPro Viewer"));
@@ -318,114 +330,114 @@ void MainWindow::printFile()
 
 void MainWindow::extractFile()
 {
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QModelIndexList selectedList = selectionModel->selectedIndexes();
-    if(selectedList.count() != 1)
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
-        return;
-    }
-    QModelIndex index = selectedList.at(0);
-    QString filename = model->getBinaryFileName(index);
-    if(filename.isEmpty())
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Selected object contains no binary data"));
-        return;
-    }
-    QString selectedFilename = QFileDialog::getSaveFileName(
-        this, tr("Save file"), filename);
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QModelIndexList selectedList = selectionModel->selectedIndexes();
+//    if(selectedList.count() != 1)
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+//        return;
+//    }
+//    QModelIndex index = selectedList.at(0);
+//    QString filename = model->getBinaryFileName(index);
+//    if(filename.isEmpty())
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("Selected object contains no binary data"));
+//        return;
+//    }
+//    QString selectedFilename = QFileDialog::getSaveFileName(
+//        this, tr("Save file"), filename);
 
-    if (!selectedFilename.isEmpty())
-    {
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      QByteArray data = model->extractBinaryFile(index);
-      QFile file(selectedFilename);
-      if (!file.open(QIODevice::WriteOnly))
-      {
-        QMessageBox::critical(0, tr("File Saving Error"),
-                                tr("File\n%1\ncould not be written")
-                                .arg(selectedFilename));
-        QApplication::restoreOverrideCursor();
-        return;
-      }
-      QDataStream out(&file);
-      out << data;
-      file.close();
-      QApplication::restoreOverrideCursor();
-    }
+//    if (!selectedFilename.isEmpty())
+//    {
+//      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//      QByteArray data = model->extractBinaryFile(index);
+//      QFile file(selectedFilename);
+//      if (!file.open(QIODevice::WriteOnly))
+//      {
+//        QMessageBox::critical(0, tr("File Saving Error"),
+//                                tr("File\n%1\ncould not be written")
+//                                .arg(selectedFilename));
+//        QApplication::restoreOverrideCursor();
+//        return;
+//      }
+//      QDataStream out(&file);
+//      out << data;
+//      file.close();
+//      QApplication::restoreOverrideCursor();
+//    }
 }
 
 void MainWindow::measureDistance()
 {
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QModelIndexList selectedList = selectionModel->selectedIndexes();
-    if(selectedList.count() != 2)
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 2 objects must be selected"));
-        return;
-    }
-    double result = model->calculateDistance(selectedList);
-    if(result < -2)
-    {
-        QMessageBox::critical(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
-        return;
-    }
-    if(result < 0)
-    {
-        QMessageBox::information(this, tr("Distance"), tr("The selected objects have no direct connection"));
-        return;
-    }
-    QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(result));
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QModelIndexList selectedList = selectionModel->selectedIndexes();
+//    if(selectedList.count() != 2)
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("Exactly 2 objects must be selected"));
+//        return;
+//    }
+//    double result = model->calculateDistance(selectedList);
+//    if(result < -2)
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
+//        return;
+//    }
+//    if(result < 0)
+//    {
+//        QMessageBox::information(this, tr("Distance"), tr("The selected objects have no direct connection"));
+//        return;
+//    }
+//    QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(result));
 }
 
 void MainWindow::addToFavorites()
 {
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QModelIndexList selectedList = selectionModel->selectedIndexes();
-    QModelIndex index;
-    foreach (index, selectedList)
-    {
-        QModelIndex parentIndex = model->parent(index);
-        while(parentIndex.isValid())
-        {
-            index = parentIndex;
-            parentIndex = model->parent(index);
-        }
-        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-        QString name = domitem->node().nodeName();
-        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QModelIndexList selectedList = selectionModel->selectedIndexes();
+//    QModelIndex index;
+//    foreach (index, selectedList)
+//    {
+//        QModelIndex parentIndex = model->parent(index);
+//        while(parentIndex.isValid())
+//        {
+//            index = parentIndex;
+//            parentIndex = model->parent(index);
+//        }
+//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
+//        QString name = domitem->node().nodeName();
+//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
 
-        QListWidgetItem* newItem = new QListWidgetItem;
-        newItem->setText(name + " [" + id + "]");
-        favoriteList->addItem(newItem);
-    }
+//        QListWidgetItem* newItem = new QListWidgetItem;
+//        newItem->setText(name + " [" + id + "]");
+//        favoriteList->addItem(newItem);
+//    }
 }
 
 void MainWindow::removeFromFavorites()
 {
-    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
-    for(int i = 0; i < selectedList.size(); i++)
-    {
-        QListWidgetItem* item = selectedList.at(i);
-        int row = favoriteList->row(item);
-        favoriteList->takeItem(row);
-        delete item;
-    }
+//    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
+//    for(int i = 0; i < selectedList.size(); i++)
+//    {
+//        QListWidgetItem* item = selectedList.at(i);
+//        int row = favoriteList->row(item);
+//        favoriteList->takeItem(row);
+//        delete item;
+//    }
 }
 
 void MainWindow::findReferencingObjects()
 {
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QModelIndexList selectedList = selectionModel->selectedIndexes();
-    if(selectedList.count() != 1)
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
-        return;
-    }
-    QModelIndex index = selectedList.at(0);
-    QStringList resultlist = model->findReferencingObjects(index);
-    referenceList->clear();
-    referenceList->addItems(resultlist);
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QModelIndexList selectedList = selectionModel->selectedIndexes();
+//    if(selectedList.count() != 1)
+//    {
+//        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+//        return;
+//    }
+//    QModelIndex index = selectedList.at(0);
+//    QStringList resultlist = model->findReferencingObjects(index);
+//    referenceList->clear();
+//    referenceList->addItems(resultlist);
 }
 
 void MainWindow::setLanguage()
@@ -498,341 +510,341 @@ void MainWindow::centerObject()
 
 void MainWindow::handleObjectSearch(QString id)
 {
-    if(selectionSource != SelectionSourceNotSelected)
-    {
-        return;
-    }
-    if(selectionSource == SelectionSourceNotSelected)
-    {
-        selectionSource = SelectionSourceExternal;
-    }
+//    if(selectionSource != SelectionSourceNotSelected)
+//    {
+//        return;
+//    }
+//    if(selectionSource == SelectionSourceNotSelected)
+//    {
+//        selectionSource = SelectionSourceExternal;
+//    }
 
-    QModelIndex index = model->getModelIndexById(id);
-    if(!index.isValid())
-    {
-        QMessageBox::critical(0, tr("Search Error"),
-                        tr("Object with GUID\n%1\ncould not be found")
-                        .arg(id));
+//    QModelIndex index = model->getModelIndexById(id);
+//    if(!index.isValid())
+//    {
+//        QMessageBox::critical(0, tr("Search Error"),
+//                        tr("Object with GUID\n%1\ncould not be found")
+//                        .arg(id));
 
-        selectionSource = SelectionSourceNotSelected;
-        return;
-    }
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    selectionModel->select(index, QItemSelectionModel::ClearAndSelect);
-    objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+//        selectionSource = SelectionSourceNotSelected;
+//        return;
+//    }
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    selectionModel->select(index, QItemSelectionModel::ClearAndSelect);
+//    objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
 
-    QList<QGraphicsItem*> graphicsItemList = scene->getGraphicsScene()->items();
-    for(int i = 0; i < graphicsItemList.count(); i++)
-    {
-        QGraphicsItem* item = graphicsItemList[i];
-        if((item->data(GRAPHICSITEM_ID)).toString() == id)
-        {
-            item->setSelected(true);
-            view->ensureVisible(item);
-        }
-        else
-        {
-            item->setSelected(false);
-        }
-    }
+//    QList<QGraphicsItem*> graphicsItemList = scene->getGraphicsScene()->items();
+//    for(int i = 0; i < graphicsItemList.count(); i++)
+//    {
+//        QGraphicsItem* item = graphicsItemList[i];
+//        if((item->data(GRAPHICSITEM_ID)).toString() == id)
+//        {
+//            item->setSelected(true);
+//            view->ensureVisible(item);
+//        }
+//        else
+//        {
+//            item->setSelected(false);
+//        }
+//    }
 
-    for(int i = 0; i < favoriteList->count(); i++)
-    {
-        QListWidgetItem* item = favoriteList->item(i);
-        if(item->text().contains(id))
-        {
-            item->setSelected(true);
-            favoriteList->scrollToItem(item);
-        }
-        else
-        {
-            item->setSelected(false);
-        }
-    }
+//    for(int i = 0; i < favoriteList->count(); i++)
+//    {
+//        QListWidgetItem* item = favoriteList->item(i);
+//        if(item->text().contains(id))
+//        {
+//            item->setSelected(true);
+//            favoriteList->scrollToItem(item);
+//        }
+//        else
+//        {
+//            item->setSelected(false);
+//        }
+//    }
 
-    for(int i = 0; i < referenceList->count(); i++)
-    {
-        QListWidgetItem* item = referenceList->item(i);
-        if(item->text().contains(id))
-        {
-            item->setSelected(true);
-            referenceList->scrollToItem(item);
-        }
-        else
-        {
-            item->setSelected(false);
-        }
-    }
+//    for(int i = 0; i < referenceList->count(); i++)
+//    {
+//        QListWidgetItem* item = referenceList->item(i);
+//        if(item->text().contains(id))
+//        {
+//            item->setSelected(true);
+//            referenceList->scrollToItem(item);
+//        }
+//        else
+//        {
+//            item->setSelected(false);
+//        }
+//    }
 
-    if(selectionSource == SelectionSourceExternal)
-    {
-        selectionSource = SelectionSourceNotSelected;
-    }
+//    if(selectionSource == SelectionSourceExternal)
+//    {
+//        selectionSource = SelectionSourceNotSelected;
+//    }
 }
 
 void MainWindow::handleGraphicsSceneSelection()
 {
-    if(selectionSource != SelectionSourceNotSelected)
-    {
-        return;
-    }
-    if(selectionSource == SelectionSourceNotSelected)
-    {
-        selectionSource = SelectionSourceGraphicsView;
-    }
+//    if(selectionSource != SelectionSourceNotSelected)
+//    {
+//        return;
+//    }
+//    if(selectionSource == SelectionSourceNotSelected)
+//    {
+//        selectionSource = SelectionSourceGraphicsView;
+//    }
 
-    QList<QGraphicsItem*> itemlist = scene->getGraphicsScene()->selectedItems();
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QItemSelection selection;
-    favoriteList->clearSelection();
-    referenceList->clearSelection();
-    for(int i = 0; i < itemlist.count(); i++)
-    {
-        QString id = itemlist[i]->data(GRAPHICSITEM_ID).toString();
-        QModelIndex index = model->getModelIndexById(id);
-        if(index.isValid())
-        {
-            selection.select(index, index);
-            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-        }
-        //std::cout << "handleGraphicsSceneSelection: " << qPrintable(id) << std::endl;
+//    QList<QGraphicsItem*> itemlist = scene->getGraphicsScene()->selectedItems();
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QItemSelection selection;
+//    favoriteList->clearSelection();
+//    referenceList->clearSelection();
+//    for(int i = 0; i < itemlist.count(); i++)
+//    {
+//        QString id = itemlist[i]->data(GRAPHICSITEM_ID).toString();
+//        QModelIndex index = model->getModelIndexById(id);
+//        if(index.isValid())
+//        {
+//            selection.select(index, index);
+//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+//        }
+//        //std::cout << "handleGraphicsSceneSelection: " << qPrintable(id) << std::endl;
 
-        for(int i = 0; i < favoriteList->count(); i++)
-        {
-            QListWidgetItem* item = favoriteList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                favoriteList->scrollToItem(item);
-            }
-        }
+//        for(int i = 0; i < favoriteList->count(); i++)
+//        {
+//            QListWidgetItem* item = favoriteList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                favoriteList->scrollToItem(item);
+//            }
+//        }
 
-        for(int i = 0; i < referenceList->count(); i++)
-        {
-            QListWidgetItem* item = referenceList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                referenceList->scrollToItem(item);
-            }
-        }
-    }
-    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
+//        for(int i = 0; i < referenceList->count(); i++)
+//        {
+//            QListWidgetItem* item = referenceList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                referenceList->scrollToItem(item);
+//            }
+//        }
+//    }
+//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
 
-    if(selectionSource == SelectionSourceGraphicsView)
-    {
-        selectionSource = SelectionSourceNotSelected;
-    }
+//    if(selectionSource == SelectionSourceGraphicsView)
+//    {
+//        selectionSource = SelectionSourceNotSelected;
+//    }
 }
 
 void MainWindow::handleFavoriteListSelection()
 {
-    if(selectionSource != SelectionSourceNotSelected)
-    {
-        return;
-    }
-    if(selectionSource == SelectionSourceNotSelected)
-    {
-        selectionSource = SelectionSourceFavoriteList;
-    }
+//    if(selectionSource != SelectionSourceNotSelected)
+//    {
+//        return;
+//    }
+//    if(selectionSource == SelectionSourceNotSelected)
+//    {
+//        selectionSource = SelectionSourceFavoriteList;
+//    }
 
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QItemSelection selection;
-    referenceList->clearSelection();
-    scene->getGraphicsScene()->clearSelection();
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QItemSelection selection;
+//    referenceList->clearSelection();
+//    scene->getGraphicsScene()->clearSelection();
 
-    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
-    for(int i = 0; i < selectedList.count(); i++)
-    {
-        QString itemtext = selectedList.at(i)->text();
-        int charindex = itemtext.indexOf("[");
-        QString id = itemtext.mid(charindex + 1, 36);
+//    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
+//    for(int i = 0; i < selectedList.count(); i++)
+//    {
+//        QString itemtext = selectedList.at(i)->text();
+//        int charindex = itemtext.indexOf("[");
+//        QString id = itemtext.mid(charindex + 1, 36);
 
-        QModelIndex index = model->getModelIndexById(id);
-        if(index.isValid())
-        {
-            selection.select(index, index);
-            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-        }
+//        QModelIndex index = model->getModelIndexById(id);
+//        if(index.isValid())
+//        {
+//            selection.select(index, index);
+//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+//        }
 
-        QGraphicsItem* graphicsitem = scene->getItemById(id);
-        if(graphicsitem != NULL)
-        {
-            graphicsitem->setSelected(true);
-            view->ensureVisible(graphicsitem);
-        }
+//        QGraphicsItem* graphicsitem = scene->getItemById(id);
+//        if(graphicsitem != NULL)
+//        {
+//            graphicsitem->setSelected(true);
+//            view->ensureVisible(graphicsitem);
+//        }
 
-        for(int j = 0; j < referenceList->count(); j++)
-        {
-            QListWidgetItem* item = referenceList->item(j);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                referenceList->scrollToItem(item);
-            }
-        }
-    }
-    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
+//        for(int j = 0; j < referenceList->count(); j++)
+//        {
+//            QListWidgetItem* item = referenceList->item(j);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                referenceList->scrollToItem(item);
+//            }
+//        }
+//    }
+//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
 
-    if(selectionSource == SelectionSourceFavoriteList)
-    {
-        selectionSource = SelectionSourceNotSelected;
-    }
+//    if(selectionSource == SelectionSourceFavoriteList)
+//    {
+//        selectionSource = SelectionSourceNotSelected;
+//    }
 }
 
 void MainWindow::handleReferenceListSelection()
 {
-    if(selectionSource != SelectionSourceNotSelected)
-    {
-        return;
-    }
-    if(selectionSource == SelectionSourceNotSelected)
-    {
-        selectionSource = SelectionSourceReferenceList;
-    }
+//    if(selectionSource != SelectionSourceNotSelected)
+//    {
+//        return;
+//    }
+//    if(selectionSource == SelectionSourceNotSelected)
+//    {
+//        selectionSource = SelectionSourceReferenceList;
+//    }
 
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-    QItemSelection selection;
-    favoriteList->clearSelection();
-    scene->getGraphicsScene()->clearSelection();
+//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+//    QItemSelection selection;
+//    favoriteList->clearSelection();
+//    scene->getGraphicsScene()->clearSelection();
 
-    QList<QListWidgetItem*> selectedList = referenceList->selectedItems();
-    for(int i = 0; i < selectedList.count(); i++)
-    {
-        QString itemtext = selectedList.at(i)->text();
-        int charindex = itemtext.indexOf("[");
-        QString id = itemtext.mid(charindex + 1, 36);
+//    QList<QListWidgetItem*> selectedList = referenceList->selectedItems();
+//    for(int i = 0; i < selectedList.count(); i++)
+//    {
+//        QString itemtext = selectedList.at(i)->text();
+//        int charindex = itemtext.indexOf("[");
+//        QString id = itemtext.mid(charindex + 1, 36);
 
-        QModelIndex index = model->getModelIndexById(id);
-        if(index.isValid())
-        {
-            selection.select(index, index);
-            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-        }
+//        QModelIndex index = model->getModelIndexById(id);
+//        if(index.isValid())
+//        {
+//            selection.select(index, index);
+//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+//        }
 
-        QGraphicsItem* graphicsitem = scene->getItemById(id);
-        if(graphicsitem != NULL)
-        {
-            graphicsitem->setSelected(true);
-            view->ensureVisible(graphicsitem);
-        }
+//        QGraphicsItem* graphicsitem = scene->getItemById(id);
+//        if(graphicsitem != NULL)
+//        {
+//            graphicsitem->setSelected(true);
+//            view->ensureVisible(graphicsitem);
+//        }
 
-        for(int j = 0; j < favoriteList->count(); j++)
-        {
-            QListWidgetItem* item = favoriteList->item(j);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                favoriteList->scrollToItem(item);
-            }
-        }
-    }
-    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
+//        for(int j = 0; j < favoriteList->count(); j++)
+//        {
+//            QListWidgetItem* item = favoriteList->item(j);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                favoriteList->scrollToItem(item);
+//            }
+//        }
+//    }
+//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
 
-    if(selectionSource == SelectionSourceReferenceList)
-    {
-        selectionSource = SelectionSourceNotSelected;
-    }
+//    if(selectionSource == SelectionSourceReferenceList)
+//    {
+//        selectionSource = SelectionSourceNotSelected;
+//    }
 }
 
 void MainWindow::handleObjectListSelection(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    if(selectionSource != SelectionSourceNotSelected)
-    {
-        return;
-    }
-    if(selectionSource == SelectionSourceNotSelected)
-    {
-        selectionSource = SelectionSourceObjectList;
-    }
+//    if(selectionSource != SelectionSourceNotSelected)
+//    {
+//        return;
+//    }
+//    if(selectionSource == SelectionSourceNotSelected)
+//    {
+//        selectionSource = SelectionSourceObjectList;
+//    }
 
-    QModelIndex index;
-    QModelIndexList items = selected.indexes();
+//    QModelIndex index;
+//    QModelIndexList items = selected.indexes();
 
-    foreach (index, items)
-    {
-        QModelIndex parentIndex = model->parent(index);
-        while(parentIndex.isValid())
-        {
-            index = parentIndex;
-            parentIndex = model->parent(index);
-        }
-        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-        QGraphicsItem* graphicsitem = scene->getItemById(id);
-        if(graphicsitem != NULL)
-        {
-            graphicsitem->setSelected(true);
-            view->ensureVisible(graphicsitem);
-        }
-        //QString text = QString("Selected: (%1,%2)").arg(index.row()).arg(index.column());
-        //std::cout << qPrintable(text) << std::endl;
+//    foreach (index, items)
+//    {
+//        QModelIndex parentIndex = model->parent(index);
+//        while(parentIndex.isValid())
+//        {
+//            index = parentIndex;
+//            parentIndex = model->parent(index);
+//        }
+//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
+//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
+//        QGraphicsItem* graphicsitem = scene->getItemById(id);
+//        if(graphicsitem != NULL)
+//        {
+//            graphicsitem->setSelected(true);
+//            view->ensureVisible(graphicsitem);
+//        }
+//        //QString text = QString("Selected: (%1,%2)").arg(index.row()).arg(index.column());
+//        //std::cout << qPrintable(text) << std::endl;
 
-        for(int i = 0; i < favoriteList->count(); i++)
-        {
-            QListWidgetItem* item = favoriteList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                favoriteList->scrollToItem(item);
-            }
-        }
+//        for(int i = 0; i < favoriteList->count(); i++)
+//        {
+//            QListWidgetItem* item = favoriteList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                favoriteList->scrollToItem(item);
+//            }
+//        }
 
-        for(int i = 0; i < referenceList->count(); i++)
-        {
-            QListWidgetItem* item = referenceList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(true);
-                referenceList->scrollToItem(item);
-            }
-        }
-    }
+//        for(int i = 0; i < referenceList->count(); i++)
+//        {
+//            QListWidgetItem* item = referenceList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(true);
+//                referenceList->scrollToItem(item);
+//            }
+//        }
+//    }
 
-    items = deselected.indexes();
+//    items = deselected.indexes();
 
-    foreach (index, items)
-    {
-        QModelIndex parentIndex = model->parent(index);
-        while(parentIndex.isValid())
-        {
-            index = parentIndex;
-            parentIndex = model->parent(index);
-        }
-        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-        QGraphicsItem* graphicsitem = scene->getItemById(id);
-        if(graphicsitem != NULL)
-        {
-            graphicsitem->setSelected(false);
-        }
+//    foreach (index, items)
+//    {
+//        QModelIndex parentIndex = model->parent(index);
+//        while(parentIndex.isValid())
+//        {
+//            index = parentIndex;
+//            parentIndex = model->parent(index);
+//        }
+//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
+//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
+//        QGraphicsItem* graphicsitem = scene->getItemById(id);
+//        if(graphicsitem != NULL)
+//        {
+//            graphicsitem->setSelected(false);
+//        }
 
-        //QString text = QString("Deselected: (%1,%2)").arg(index.row()).arg(index.column());
-        //std::cout << qPrintable(text) << std::endl;
+//        //QString text = QString("Deselected: (%1,%2)").arg(index.row()).arg(index.column());
+//        //std::cout << qPrintable(text) << std::endl;
 
-        for(int i = 0; i < favoriteList->count(); i++)
-        {
-            QListWidgetItem* item = favoriteList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(false);
-            }
-        }
+//        for(int i = 0; i < favoriteList->count(); i++)
+//        {
+//            QListWidgetItem* item = favoriteList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(false);
+//            }
+//        }
 
-        for(int i = 0; i < referenceList->count(); i++)
-        {
-            QListWidgetItem* item = referenceList->item(i);
-            if(item->text().contains(id))
-            {
-                item->setSelected(false);
-            }
-        }
-    }
+//        for(int i = 0; i < referenceList->count(); i++)
+//        {
+//            QListWidgetItem* item = referenceList->item(i);
+//            if(item->text().contains(id))
+//            {
+//                item->setSelected(false);
+//            }
+//        }
+//    }
 
-    if(selectionSource == SelectionSourceObjectList)
-    {
-        selectionSource = SelectionSourceNotSelected;
-    }
+//    if(selectionSource == SelectionSourceObjectList)
+//    {
+//        selectionSource = SelectionSourceNotSelected;
+//    }
 }
 
 void MainWindow::createActions()

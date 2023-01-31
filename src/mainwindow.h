@@ -18,6 +18,7 @@ class QListWidget;
 class FilterWidget;
 class PlanProModel;
 class GraphicsScene;
+class PlanProXmlDocument;
 
 enum SelectionSource
 {
@@ -47,7 +48,7 @@ protected:
 
 private slots:
     void openFile();
-    void addFile();
+    //void addFile();
     void saveFile();
     void exportToPicture();
     void exportToPdf();
@@ -127,6 +128,7 @@ private:
 
     QString fileName;
     QString language;
+    PlanProXmlDocument* document;
 
     SelectionSource selectionSource;
 

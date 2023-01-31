@@ -47,10 +47,12 @@ SOURCES += \
         mainwindow.cpp \
     parser.cpp \
     filterwidget.cpp \
+    planprodocument.cpp \
     planpromodel.cpp \
     graphicsscene.cpp \
     domitem.cpp \
     nexttopkanteresult.cpp \
+    planproxmldocument.cpp \
     preferences.cpp \
     punktobjekt.cpp
 
@@ -58,10 +60,12 @@ HEADERS += \
         mainwindow.h \
     parser.h \
     filterwidget.h \
+    planprodocument.h \
     planpromodel.h \
     graphicsscene.h \
     domitem.h \
     nexttopkanteresult.h \
+    planproxmldocument.h \
     preferences.h \
     punktobjekt.h \
     version.h \

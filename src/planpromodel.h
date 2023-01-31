@@ -6,7 +6,8 @@
 #include <QByteArray>
 #include <QtXml>
 
-#include "domitem.h"
+//#include "domitem.h"
+#include "planprodocument.h"
 #include "nexttopkanteresult.h"
 #include "punktobjekt.h"
 
@@ -16,9 +17,9 @@ class PlanProModel : public QAbstractItemModel
 public:
     PlanProModel(QObject* parent = 0);
     ~PlanProModel();
-    bool loadFile(const QString& filename);
-    bool addFile(const QString& filename);
-    bool saveFile(const QString& filename);
+    void setDocument(PlanProDocument* d);
+    void modelChanged();
+
     QDomElement getContainerElement();
     QDomElement getObjectById(QString id);
     QModelIndex getModelIndexById(QString id);
@@ -40,8 +41,9 @@ public:
 
 private:
     QStringList findReferencingObjectsRec(QDomNode node, QString searchId, QString objectName, QString objectId);
-    QDomDocument domDocument;
-    DomItem* rootItem;
+    //QDomDocument domDocument;
+    //DomItem* rootItem;
+    PlanProDocument* doc;
 };
 
 #endif // PLANPROMODEL_H
