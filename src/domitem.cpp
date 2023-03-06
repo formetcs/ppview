@@ -37,7 +37,76 @@ void DomItem::setValue(const QString& v)
 
 DomItem* DomItem::getChild(int i)
 {
+    if(i < 0 || i > childItems.count())
+    {
+        return NULL;
+    }
     return childItems[i];
+}
+
+DomItem* DomItem::getFirstChildItem(const QString& c)
+{
+    for(int i = 0; i < childItems.count(); i++)
+    {
+        DomItem* temp = childItems[i];
+        if(temp->getName() == c)
+        {
+            return temp;
+        }
+    }
+    return NULL;
+}
+
+QList<DomItem*> DomItem::getChildItems(const QString& c)
+{
+    QList<DomItem*> returnlist;
+    for(int i = 0; i < childItems.count(); i++)
+    {
+        DomItem* temp = childItems[i];
+        if(temp->getName() == c)
+        {
+            returnlist.append(temp);
+        }
+    }
+
+    return returnlist;
+}
+
+DomItem* DomItem::getFirstItemAtPath(const QString& p)
+{
+    if(p.isEmpty())
+    {
+        return this;
+    }
+
+    int pos = p.indexOf("/");
+    QString first = p;
+    QString last = QString();
+    if(pos >= 0)
+    {
+        first = p.first(pos);
+        last = p.last(p.length() - pos - 1);
+    }
+
+    for(int i = 0; i < childItems.count(); i++)
+    {
+        DomItem* temp = childItems[i];
+        if(temp->getName() == first)
+        {
+            return temp->getFirstItemAtPath(last);
+        }
+    }
+    return NULL;
+}
+
+QString DomItem::getFirstValueAtPath(const QString& p)
+{
+    DomItem* d = getFirstItemAtPath(p);
+    if(d)
+    {
+        return d->getValue();
+    }
+    return QString();
 }
 
 void DomItem::addChild(DomItem* c)

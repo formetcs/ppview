@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "mainwindow.h"
+//#include "makro.h"
 #include "parser.h"
 #include "filterwidget.h"
 #include "planpromodel.h"
@@ -172,6 +173,8 @@ void MainWindow::saveFile()
     if (!s.isEmpty())
     {
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+      document->setRemark("Saved with PlanPro Viewer");
+      document->updateHeader("PlanPro Viewer", QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
       bool success = document->saveFile(s);
       QApplication::restoreOverrideCursor();
       if(!success)
@@ -460,7 +463,36 @@ void MainWindow::setLanguage()
 
 void MainWindow::showHelp()
 {
-    QMessageBox::information(this, "Info", "TODO");
+    QList<PlanProDocument::ObjectListItem> domlist = document->getCombinedObjectList("ESTW");
+    for(int i = 0; i < domlist.count(); i++)
+    {
+        PlanProDocument::ObjectListItem oli = domlist.at(i);
+        if(oli.state == PlanProDocument::Start)
+        {
+            qDebug("Start: " + oli.item->getName().toLatin1());
+        }
+        if(oli.state == PlanProDocument::End)
+        {
+            qDebug("End:   " + oli.item->getName().toLatin1());
+        }
+        if(oli.state == PlanProDocument::Both)
+        {
+            qDebug("Both:  " + oli.item->getName().toLatin1());
+        }
+
+    }
+
+    //DomItem* root = document->getRootItem();
+    QString text = "No file loaded";
+    //if(root)
+    //{
+        QString timestamp = document->getTimestamp().toString();
+        QString toolname = document->getToolName();
+        QString toolversion = document->getToolVersion();
+        QString remark = document->getRemark();
+        text = "Timestamp: " + timestamp + "\nTool: " + toolname + ", Version " + toolversion + "\nRemark: " + remark;
+    //}
+    QMessageBox::information(this, "Info", text);
 }
 
 void MainWindow::about()

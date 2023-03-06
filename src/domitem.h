@@ -16,6 +16,10 @@ public:
     QString getValue() const;
     void setValue(const QString& v);
     DomItem* getChild(int i);
+    DomItem* getFirstChildItem(const QString& c);
+    QList<DomItem*> getChildItems(const QString& c);
+    DomItem* getFirstItemAtPath(const QString& p);
+    QString getFirstValueAtPath(const QString& p);
     void addChild(DomItem* c);
     int childCount() const;
     int getOwnPosition() const;
