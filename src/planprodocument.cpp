@@ -7,6 +7,7 @@ PlanProDocument::PlanProDocument(QObject *parent)
     : QObject{parent}
 {
     rootItem = NULL;
+    cachedDocumentType = Unknown;
 }
 
 PlanProDocument::~PlanProDocument()
@@ -15,6 +16,16 @@ PlanProDocument::~PlanProDocument()
     {
         delete rootItem;
     }
+}
+
+void PlanProDocument::documentChanged()
+{
+    cachedDocumentType = Unknown;
+    cachedStartObjectList.clear();
+    cachedEndObjectList.clear();
+    cachedCombinedObjectList.clear();
+
+    emit dataChanged();
 }
 
 DomItem* PlanProDocument::getRootItem()
@@ -100,19 +111,28 @@ void PlanProDocument::updateHeader(const QString& toolname, const QString& toolv
 
 PlanProDocument::DocumentType PlanProDocument::getDocumentType() const
 {
+    if(cachedDocumentType != Unknown)
+    {
+        return cachedDocumentType;
+    }
+
     if(rootItem == NULL)
     {
-        return Invalid;
+        cachedDocumentType = Invalid;
     }
-    if(rootItem->getFirstItemAtPath("LST_Zustand") != NULL)
+    else if(rootItem->getFirstItemAtPath("LST_Zustand") != NULL)
     {
-        return State;
+        cachedDocumentType = State;
     }
-    if(rootItem->getFirstItemAtPath("LST_Planung") != NULL)
+    else if(rootItem->getFirstItemAtPath("LST_Planung") != NULL)
     {
-        return Planning;
+        cachedDocumentType = Planning;
     }
-    return Invalid;
+    else
+    {
+        cachedDocumentType = Invalid;
+    }
+    return cachedDocumentType;
 }
 
 QStringList PlanProDocument::getCategoryList() const
@@ -124,7 +144,7 @@ QStringList PlanProDocument::getCategoryList() const
     }
     DomItem* fachdatenItem = rootItem->getFirstItemAtPath("LST_Planung/Fachdaten");
     QList<DomItem*> ausgabeFachdatenList = fachdatenItem->getChildItems("Ausgabe_Fachdaten");
-    for(int i = 0; i < ausgabeFachdatenList.count(); i++)
+    for(int i = 0; i < ausgabeFachdatenList.count(); ++i)
     {
         returnlist.append(ausgabeFachdatenList[i]->getFirstValueAtPath("Untergewerk_Art/Wert"));
     }
@@ -133,6 +153,15 @@ QStringList PlanProDocument::getCategoryList() const
 
 QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState state, const QString& category)
 {
+    if(state == Start && cachedStartObjectList.contains(category))
+    {
+        return cachedStartObjectList.value(category);
+    }
+    if(state != Start && cachedEndObjectList.contains(category))
+    {
+        return cachedEndObjectList.value(category);
+    }
+
     QList<DomItem*> returnlist;
     if(rootItem == NULL || getDocumentType() == Invalid)
     {
@@ -142,11 +171,12 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
     if(getDocumentType() == State)
     {
         DomItem* containerItem = rootItem->getFirstItemAtPath("LST_Zustand/Container");
-        for(int i = 0; i < containerItem->childCount(); i++)
+        for(int i = 0; i < containerItem->childCount(); ++i)
         {
             returnlist.append(containerItem->getChild(i));
         }
-
+        cachedStartObjectList.insert(category, returnlist);
+        cachedEndObjectList.insert(category, returnlist);
     }
     else if(getDocumentType() == Planning)
     {
@@ -157,17 +187,25 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
             statestring = "LST_Zustand_Start";
         }
         QList<DomItem*> ausgabeFachdatenList = fachdatenItem->getChildItems("Ausgabe_Fachdaten");
-        for(int i = 0; i < ausgabeFachdatenList.count(); i++)
+        for(int i = 0; i < ausgabeFachdatenList.count(); ++i)
         {
             QString cat = ausgabeFachdatenList[i]->getFirstValueAtPath("Untergewerk_Art/Wert");
             if(category.isEmpty() || category == cat)
             {
                 DomItem* containerItem = ausgabeFachdatenList[i]->getFirstItemAtPath(statestring + "/Container");
-                for(int j = 0; j < containerItem->childCount(); j++)
+                for(int j = 0; j < containerItem->childCount(); ++j)
                 {
                     returnlist.append(containerItem->getChild(j));
                 }
             }
+        }
+        if(state == Start)
+        {
+            cachedStartObjectList.insert(category, returnlist);
+        }
+        else
+        {
+            cachedEndObjectList.insert(category, returnlist);
         }
     }
 
@@ -176,6 +214,11 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
 
 QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(const QString& category)
 {
+    if(cachedCombinedObjectList.contains(category))
+    {
+        return cachedCombinedObjectList.value(category);
+    }
+
     QList<ObjectListItem> returnlist;
     if(rootItem == NULL || getDocumentType() != Planning)
     {
@@ -183,18 +226,18 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
     }
     DomItem* fachdatenItem = rootItem->getFirstItemAtPath("LST_Planung/Fachdaten");
     QList<DomItem*> ausgabeFachdatenList = fachdatenItem->getChildItems("Ausgabe_Fachdaten");
-    for(int i = 0; i < ausgabeFachdatenList.count(); i++)
+    for(int i = 0; i < ausgabeFachdatenList.count(); ++i)
     {
         QString cat = ausgabeFachdatenList[i]->getFirstValueAtPath("Untergewerk_Art/Wert");
         if(category.isEmpty() || category == cat)
         {
             DomItem* startContainerItem = ausgabeFachdatenList[i]->getFirstItemAtPath("LST_Zustand_Start/Container");
             DomItem* endContainerItem = ausgabeFachdatenList[i]->getFirstItemAtPath("LST_Zustand_Ziel/Container");
-            for(int j = 0; j < startContainerItem->childCount(); j++)
+            for(int j = 0; j < startContainerItem->childCount(); ++j)
             {
                 DomItem* currentItem = startContainerItem->getChild(j);
                 bool found = false;
-                for(int k = 0; k < endContainerItem->childCount(); k++)
+                for(int k = 0; k < endContainerItem->childCount(); ++k)
                 {
                     DomItem* compareItem = endContainerItem->getChild(k);
                     if(currentItem->getFirstValueAtPath("Identitaet/Wert") == compareItem->getFirstValueAtPath("Identitaet/Wert"))
@@ -216,11 +259,11 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
                 }
             }
 
-            for(int j = 0; j < endContainerItem->childCount(); j++)
+            for(int j = 0; j < endContainerItem->childCount(); ++j)
             {
                 DomItem* currentItem = endContainerItem->getChild(j);
                 bool found = false;
-                for(int k = 0; k < startContainerItem->childCount(); k++)
+                for(int k = 0; k < startContainerItem->childCount(); ++k)
                 {
                     DomItem* compareItem = startContainerItem->getChild(k);
                     if(currentItem->getFirstValueAtPath("Identitaet/Wert") == compareItem->getFirstValueAtPath("Identitaet/Wert"))
@@ -241,6 +284,7 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
         }
     }
 
+    cachedCombinedObjectList.insert(category, returnlist);
     return returnlist;
 }
 
@@ -254,7 +298,7 @@ DomItem* PlanProDocument::getObjectById(const QString& id, PlanningState state)
     if(getDocumentType() == State)
     {
         DomItem* containerItem = rootItem->getFirstItemAtPath("LST_Zustand/Container");
-        for(int i = 0; i < containerItem->childCount(); i++)
+        for(int i = 0; i < containerItem->childCount(); ++i)
         {
             DomItem* currentItem = containerItem->getChild(i);
             QString currentId = currentItem->getFirstValueAtPath("Identitaet/Wert");
@@ -273,12 +317,12 @@ DomItem* PlanProDocument::getObjectById(const QString& id, PlanningState state)
             statestring = "LST_Zustand_Start";
         }
         QList<DomItem*> ausgabeFachdatenList = fachdatenItem->getChildItems("Ausgabe_Fachdaten");
-        for(int i = 0; i < ausgabeFachdatenList.count(); i++)
+        for(int i = 0; i < ausgabeFachdatenList.count(); ++i)
         {
             DomItem* containerItem = ausgabeFachdatenList[i]->getFirstItemAtPath(statestring + "/Container");
-            for(int j = 0; j < containerItem->childCount(); j++)
+            for(int j = 0; j < containerItem->childCount(); ++j)
             {
-                DomItem* currentItem = containerItem->getChild(i);
+                DomItem* currentItem = containerItem->getChild(j);
                 QString currentId = currentItem->getFirstValueAtPath("Identitaet/Wert");
                 if(currentId == id)
                 {

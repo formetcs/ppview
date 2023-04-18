@@ -6,13 +6,14 @@
 
 #include "mainwindow.h"
 //#include "makro.h"
-#include "parser.h"
+#include "graphicsscenebuilder.h"
 #include "filterwidget.h"
 #include "planpromodel.h"
 #include "planproxmldocument.h"
 #include "graphicsscene.h"
 #include "preferences.h"
 #include "version.h"
+#include "objectinfowidget.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
     : QMainWindow(parent)
@@ -27,8 +28,12 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
     document = new PlanProXmlDocument();
     model->setDocument(document);
 
-    objectInfo = new QTextEdit();
-    objectInfo->setReadOnly(true);
+    objectlistmodel = new ObjectListModel();
+    objectlistmodel->setDocument(document);
+    objectlistmodel->changeCategory("");
+    objectlistmodel->changePlanningState(PlanProDocument::Both);
+
+    objectInfo = new ObjectInfoWidget();
     filterWidget = new FilterWidget();
     searchEdit = new QLineEdit();
     searchEdit->setPlaceholderText(tr("Object GUID"));
@@ -42,10 +47,13 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
     referenceList = new QListWidget();
     referenceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    objectListView = new QTreeView();
+    objectListView->setModel(objectlistmodel);
+
     filterWidget->readSettings();
 
-    //view = new QGraphicsView(scene->getGraphicsScene(), this);
-    view = new QGraphicsView(this); //TODO: only to be compile-clean
+    view = new QGraphicsView(scene, this);
+    //view = new QGraphicsView(this); //TODO: only to be compile-clean
 
     setCentralWidget(view);
 
@@ -68,7 +76,6 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
     connect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
     connect(referenceList, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
 
-    addFileAct->setEnabled(false);
     saveFileAct->setEnabled(false);
     exportToPictureAct->setEnabled(false);
     exportToPdfAct->setEnabled(false);
@@ -137,28 +144,6 @@ void MainWindow::openFile()
 
     openNamedFile(s);
 }
-
-//void MainWindow::addFile()
-//{
-//    QString s = QFileDialog::getOpenFileName(
-//        this, tr("Add file"), QString(),
-//        tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
-
-//    if (!s.isEmpty())
-//    {
-//        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-//        bool success = model->addFile(s);
-//        Parser::createGraphicsScene(model,scene);
-//        if(!success)
-//        {
-//            QApplication::restoreOverrideCursor();
-//            QMessageBox::critical(0, tr("File Reading Error"),
-//                            tr("File\n%1\ncould not be opened")
-//                            .arg(s));
-//        }
-//        QApplication::restoreOverrideCursor();
-//    }
-//}
 
 void MainWindow::saveFile()
 {
@@ -231,9 +216,11 @@ void MainWindow::openNamedFile(const QString& filename)
         else
         {
             model->modelChanged();
-            delete scene;
-            scene = new GraphicsScene();
-            //Parser::createGraphicsScene(model,scene);
+            objectlistmodel->modelChanged();
+            //delete scene;
+            //scene = new GraphicsScene();
+            GraphicsSceneBuilder builder(document, scene);
+            builder.createGraphicsScene();
             scene->changeFilterSettings(filterWidget->getFilterState());
 
             favoriteList->clear();
@@ -241,7 +228,6 @@ void MainWindow::openNamedFile(const QString& filename)
 
             QFileInfo fi(filename);
             setWindowTitle(fi.fileName() + tr(" - PlanPro Viewer"));
-            addFileAct->setEnabled(true);
             saveFileAct->setEnabled(true);
             exportToPictureAct->setEnabled(true);
             exportToPdfAct->setEnabled(true);
@@ -249,11 +235,11 @@ void MainWindow::openNamedFile(const QString& filename)
             fileName = fi.fileName();
 
             //objectTreeView->setModel(model);
-            view->setScene(scene->getGraphicsScene());
+            //view->setScene(scene);
             view->show();
 
             connect(scene, SIGNAL(sendObjectInfo(QString)), this, SLOT(setTelegramInfo(QString)));
-            connect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
+            //connect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
             connect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
             connect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
             //connect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
@@ -509,10 +495,10 @@ void MainWindow::about()
            "Project FormETCS</b>").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
 }
 
-void MainWindow::setTelegramInfo(const QString& text)
-{
-    objectInfo->setHtml(text);
-}
+//void MainWindow::setTelegramInfo(const QString& text)
+//{
+//    objectInfo->setHtml(text);
+//}
 
 void MainWindow::handleObjectSearchFromSearchWindow()
 {
@@ -532,7 +518,7 @@ void MainWindow::handleObjectSearchFromMenu()
 
 void MainWindow::centerObject()
 {
-    QList<QGraphicsItem*> itemlist = scene->getGraphicsScene()->selectedItems();
+    QList<QGraphicsItem*> itemlist = scene->selectedItems();
     for(int i = 0; i < itemlist.count(); i++)
     {
         QGraphicsItem* item = itemlist[i];
@@ -886,11 +872,6 @@ void MainWindow::createActions()
     openFileAct->setStatusTip(tr("Open a PlanPro XML file"));
     connect(openFileAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    addFileAct = new QAction(QIcon(":/images/fileopen.png"), tr("&Add file..."), this);
-    addFileAct->setShortcut(tr("Ctrl+A"));
-    addFileAct->setStatusTip(tr("Add the contents of a file to the existing data"));
-    connect(addFileAct, SIGNAL(triggered()), this, SLOT(addFile()));
-
     saveFileAct = new QAction(QIcon(":/images/save.png"), tr("&Save file..."), this);
     saveFileAct->setShortcut(tr("Ctrl+S"));
     saveFileAct->setStatusTip(tr("Save the current view data to a PlanPro XML file"));
@@ -983,7 +964,6 @@ void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openFileAct);
-    //fileMenu->addAction(addFileAct);
     fileMenu->addSeparator();
     fileMenu->addAction(saveFileAct);
     fileMenu->addSeparator();
@@ -1036,7 +1016,6 @@ void MainWindow::createToolBars()
     toolBar = addToolBar(tr("ToolBar"));
     toolBar->setObjectName("ToolBar");
     toolBar->addAction(openFileAct);
-    //toolBar->addAction(addFileAct);
     toolBar->addAction(saveFileAct);
     toolBar->addSeparator();
     //toolBar->addAction(exportToPictureAct);
@@ -1090,9 +1069,9 @@ void MainWindow::createDockWindows()
     addDockWidget(Qt::RightDockWidgetArea, dock3);
     viewDockSubmenu->addAction(dock3->toggleViewAction());
 
-    QDockWidget *dock4 = new QDockWidget(tr("Object List"), this);
+    QDockWidget *dock4 = new QDockWidget(tr("Document Structure"), this);
     dock4->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock4->setObjectName("Object List");
+    dock4->setObjectName("Document Structure");
     dock4->setWidget(objectTreeView);
     addDockWidget(Qt::LeftDockWidgetArea, dock4);
     viewDockSubmenu->addAction(dock4->toggleViewAction());
@@ -1110,4 +1089,11 @@ void MainWindow::createDockWindows()
     dock6->setWidget(referenceList);
     addDockWidget(Qt::RightDockWidgetArea, dock6);
     viewDockSubmenu->addAction(dock6->toggleViewAction());
+
+    QDockWidget *dock7 = new QDockWidget(tr("Object List"), this);
+    dock7->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dock7->setObjectName("Object List");
+    dock7->setWidget(objectListView);
+    addDockWidget(Qt::LeftDockWidgetArea, dock7);
+    viewDockSubmenu->addAction(dock7->toggleViewAction());
 }

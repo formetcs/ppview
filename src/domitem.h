@@ -9,8 +9,8 @@
 class DomItem
 {
 public:
-    DomItem(const QString& name, const QString& value, DomItem* parent = 0);
-    DomItem(const QString& name, DomItem* parent = 0);
+    DomItem(const QString& name, const QString& value, DomItem* parent = NULL);
+    DomItem(const QString& name, DomItem* parent = NULL);
     ~DomItem();
     QString getName() const;
     QString getValue() const;

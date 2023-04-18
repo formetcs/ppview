@@ -2,50 +2,44 @@
 #include <QtWidgets>
 #include "graphicsscene.h"
 
-GraphicsScene::GraphicsScene(QObject *parent) : QObject(parent)
+GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent)
 {
-    graphicsScene = new QGraphicsScene();
-    connect(graphicsScene, SIGNAL(selectionChanged()), this, SLOT(handleItemSelection()));
 }
 
 GraphicsScene::~GraphicsScene()
 {
-    delete graphicsScene;
 }
 
-QGraphicsScene* GraphicsScene::getGraphicsScene()
+void GraphicsScene::changeFilterSettings(const QString& key, bool state)
 {
-    return graphicsScene;
-}
-
-void GraphicsScene::changeFilterSettings(QString key, bool state)
-{
-    QList<QGraphicsItem*> graphicsItemList = graphicsScene->items();
-    for(int i = 0; i < graphicsItemList.count(); i++)
+    QString mod_key(key);
+    mod_key.remove(QChar('&'));
+    QList<QGraphicsItem*> graphicsItemList = items();
+    for(int i = 0; i < graphicsItemList.count(); ++i)
     {
-        QGraphicsItem* item = graphicsItemList[i];
-        if((item->data(GRAPHICSITEM_TYPE)).toString() == key.remove(QChar('&')))
+        QGraphicsItem* item = graphicsItemList.at(i);
+        if((item->data(GRAPHICSITEM_TYPE)).toString() == mod_key)
         {
             item->setVisible(state);
         }
     }
 }
 
-void GraphicsScene::changeFilterSettings(QList<FilterState> statelist)
+void GraphicsScene::changeFilterSettings(const QList<FilterState>& statelist)
 {
-    for(int i = 0; i < statelist.count(); i++)
+    for(int i = 0; i < statelist.count(); ++i)
     {
         FilterState fs = statelist.at(i);
         changeFilterSettings(fs.name, fs.state);
     }
 }
 
-QGraphicsItem* GraphicsScene::getItemById(QString id)
+QGraphicsItem* GraphicsScene::getItemById(const QString& id)
 {
-    QList<QGraphicsItem*> graphicsItemList = graphicsScene->items();
-    for(int i = 0; i < graphicsItemList.count(); i++)
+    QList<QGraphicsItem*> graphicsItemList = items();
+    for(int i = 0; i < graphicsItemList.count(); ++i)
     {
-        QGraphicsItem* item = graphicsItemList[i];
+        QGraphicsItem* item = graphicsItemList.at(i);
         if((item->data(GRAPHICSITEM_ID)).toString() == id)
         {
             return item;
@@ -56,23 +50,10 @@ QGraphicsItem* GraphicsScene::getItemById(QString id)
 
 void GraphicsScene::unselectAllItems()
 {
-    QList<QGraphicsItem*> graphicsItemList = graphicsScene->items();
-    for(int i = 0; i < graphicsItemList.count(); i++)
+    QList<QGraphicsItem*> graphicsItemList = items();
+    for(int i = 0; i < graphicsItemList.count(); ++i)
     {
-        QGraphicsItem* item = graphicsItemList[i];
+        QGraphicsItem* item = graphicsItemList.at(i);
         item->setSelected(false);
     }
-}
-
-void GraphicsScene::handleItemSelection()
-{
-    QList<QGraphicsItem*> itemlist = graphicsScene->selectedItems();
-    QString resultstring = QString();
-    for(int i = 0; i < itemlist.count(); i++)
-    {
-        resultstring.append(itemlist[i]->data(GRAPHICSITEM_INFOTEXT).toString());
-        resultstring.append("<br>");
-    }
-
-    emit sendObjectInfo(resultstring);
 }

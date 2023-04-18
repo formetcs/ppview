@@ -43,9 +43,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    graphicsscenebuilder.cpp \
         main.cpp \
         mainwindow.cpp \
-    parser.cpp \
+    objectinfowidget.cpp \
+    objectlistmodel.cpp \
     filterwidget.cpp \
     planprodocument.cpp \
     planpromodel.cpp \
@@ -57,8 +59,10 @@ SOURCES += \
     punktobjekt.cpp
 
 HEADERS += \
+    graphicsscenebuilder.h \
         mainwindow.h \
-    parser.h \
+    objectinfowidget.h \
+    objectlistmodel.h \
     filterwidget.h \
     planprodocument.h \
     planpromodel.h \

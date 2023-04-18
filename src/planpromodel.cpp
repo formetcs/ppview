@@ -431,6 +431,7 @@ double PlanProModel::calculateDistance(PunktObjekt startpos, PunktObjekt endpos,
 
 QVariant PlanProModel::data(const QModelIndex& index, int role) const
 {
+    //qDebug("Tree:data");
     if (!index.isValid())
         return QVariant();
 
@@ -463,6 +464,7 @@ QVariant PlanProModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
 {
+    //qDebug("Tree:flags");
     if (!index.isValid())
         return Qt::NoItemFlags;
 
@@ -471,6 +473,7 @@ Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
 
 QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    //qDebug("Tree:headerData");
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
@@ -491,6 +494,7 @@ QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int 
 
 QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) const
 {
+    //qDebug("Tree:index");
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
@@ -510,6 +514,7 @@ QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) 
 
 QModelIndex PlanProModel::parent(const QModelIndex& child) const
 {
+    //qDebug("Tree:parent");
     if (!child.isValid())
         return QModelIndex();
 
@@ -524,6 +529,7 @@ QModelIndex PlanProModel::parent(const QModelIndex& child) const
 
 int PlanProModel::rowCount(const QModelIndex& parent) const
 {
+    //qDebug("Tree:rowCount");
     if (parent.column() > 0)
         return 0;
 
@@ -544,5 +550,6 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
 
 int PlanProModel::columnCount(const QModelIndex& /*parent*/) const
 {
+    //qDebug("Tree:columnCount");
     return 3;
 }

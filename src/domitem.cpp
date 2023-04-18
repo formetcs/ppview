@@ -16,8 +16,8 @@ DomItem::DomItem(const QString& name, DomItem* parent)
 
 DomItem::~DomItem()
 {
-    for(int i = 0; i < childItems.count(); i++)
-        delete childItems[i];
+    for(int i = 0; i < childItems.count(); ++i)
+        delete childItems.at(i);
 }
 
 QString DomItem::getName() const
@@ -41,14 +41,14 @@ DomItem* DomItem::getChild(int i)
     {
         return NULL;
     }
-    return childItems[i];
+    return childItems.at(i);
 }
 
 DomItem* DomItem::getFirstChildItem(const QString& c)
 {
-    for(int i = 0; i < childItems.count(); i++)
+    for(int i = 0; i < childItems.count(); ++i)
     {
-        DomItem* temp = childItems[i];
+        DomItem* temp = childItems.at(i);
         if(temp->getName() == c)
         {
             return temp;
@@ -60,15 +60,14 @@ DomItem* DomItem::getFirstChildItem(const QString& c)
 QList<DomItem*> DomItem::getChildItems(const QString& c)
 {
     QList<DomItem*> returnlist;
-    for(int i = 0; i < childItems.count(); i++)
+    for(int i = 0; i < childItems.count(); ++i)
     {
-        DomItem* temp = childItems[i];
+        DomItem* temp = childItems.at(i);
         if(temp->getName() == c)
         {
             returnlist.append(temp);
         }
     }
-
     return returnlist;
 }
 
@@ -88,9 +87,9 @@ DomItem* DomItem::getFirstItemAtPath(const QString& p)
         last = p.last(p.length() - pos - 1);
     }
 
-    for(int i = 0; i < childItems.count(); i++)
+    for(int i = 0; i < childItems.count(); ++i)
     {
-        DomItem* temp = childItems[i];
+        DomItem* temp = childItems.at(i);
         if(temp->getName() == first)
         {
             return temp->getFirstItemAtPath(last);
@@ -125,7 +124,7 @@ int DomItem::getOwnPosition() const
     {
         return 0;
     }
-    for(int i = 0; i < parentItem->childCount(); i++)
+    for(int i = 0; i < parentItem->childCount(); ++i)
     {
         if(parentItem->getChild(i) == this)
         {

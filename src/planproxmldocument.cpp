@@ -26,6 +26,7 @@ bool PlanProXmlDocument::loadFile(const QString& filename)
         setupDomTree(domDocument);
     }
     dataFile.close();
+    documentChanged();
     return true;
 }
 

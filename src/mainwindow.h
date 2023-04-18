@@ -1,9 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "objectlistmodel.h"
+
 #include <QMainWindow>
 #include <QItemSelection>
 
+class ObjectInfoWidget;
 class QAction;
 class QSpinBox;
 class QMenu;
@@ -31,7 +34,7 @@ enum SelectionSource
 };
 
 
-class Parser;
+class GraphicsSceneBuilder;
 
 class MainWindow : public QMainWindow
 {
@@ -48,7 +51,6 @@ protected:
 
 private slots:
     void openFile();
-    //void addFile();
     void saveFile();
     void exportToPicture();
     void exportToPdf();
@@ -56,7 +58,7 @@ private slots:
     void transformGraphicsView(int);
     void showHelp();
     void about();
-    void setTelegramInfo(const QString& text);
+    //void setTelegramInfo(const QString& text);
     void handleObjectSearchFromSearchWindow();
     void handleObjectSearchFromMenu();
     void handleObjectSearch(QString id);
@@ -93,7 +95,6 @@ private:
     QMenu* helpMenu;
     QToolBar* toolBar;
     QAction* openFileAct;
-    QAction* addFileAct;
     QAction* saveFileAct;
     QAction* exportToPictureAct;
     QAction* exportToPdfAct;
@@ -116,11 +117,13 @@ private:
     QSpinBox* rotateSpinBox;
 
     PlanProModel* model;
+    ObjectListModel* objectlistmodel;
     GraphicsScene* scene;
     QGraphicsView* view;
-    QTextEdit* objectInfo;
+    ObjectInfoWidget* objectInfo;
     FilterWidget* filterWidget;
     QTreeView* objectTreeView;
+    QTreeView* objectListView;
     QListWidget* favoriteList;
     QListWidget* referenceList;
     QLineEdit* searchEdit;

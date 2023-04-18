@@ -13,7 +13,8 @@ public:
     {
         Invalid = 0,
         State = 1,
-        Planning = 2
+        Planning = 2,
+        Unknown = 99
     };
 
     enum PlanningState
@@ -44,10 +45,18 @@ public:
     QList<ObjectListItem> getCombinedObjectList(const QString& category = QString());
     DomItem* getObjectById(const QString& id, PlanningState state = End);
 
+public slots:
+    void documentChanged();
+
 signals:
+    void dataChanged();
 
 protected:
     DomItem* rootItem;
+    mutable DocumentType cachedDocumentType;
+    QHash<QString, QList<DomItem*>> cachedStartObjectList;
+    QHash<QString, QList<DomItem*>> cachedEndObjectList;
+    QHash<QString, QList<ObjectListItem>> cachedCombinedObjectList;
 
 };
 
