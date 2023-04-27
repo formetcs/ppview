@@ -9,25 +9,46 @@ PlanProXmlDocument::PlanProXmlDocument(QObject *parent)
 
 bool PlanProXmlDocument::loadFile(const QString& filename)
 {
+    bool returnval = false;
     QFile dataFile(filename);
     if (!dataFile.open(QIODevice::ReadOnly|QIODevice::Text))
     {
-        return false;
+        returnval = false;
+        fileName = QString();
     }
     else
     {
         QDomDocument domDocument = QDomDocument("objectlist");
-
         if(!domDocument.setContent(&dataFile))
         {
-            dataFile.close();
-            return false;
+            returnval = false;
+            fileName = QString();
         }
-        setupDomTree(domDocument);
+        else
+        {
+            setupDomTree(domDocument);
+            clearCache();
+            if(getDocumentType() == Invalid)
+            {
+                returnval = false;
+                fileName = QString();
+            }
+            else
+            {
+                returnval = true;
+                fileName = filename;
+            }
+
+        }
+        dataFile.close();
     }
-    dataFile.close();
+    if(rootItem && !returnval)
+    {
+        delete rootItem;
+        rootItem = NULL;
+    }
     documentChanged();
-    return true;
+    return returnval;
 }
 
 
@@ -42,15 +63,17 @@ bool PlanProXmlDocument::saveFile(const QString& filename)
     {
       return false;
     }
-    else
-    {
-      QTextStream ts(&file);
-      ts << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << Qt::endl;
-      ts << generateXml();
-      file.close();
-    }
-
+    QTextStream ts(&file);
+    ts << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << Qt::endl;
+    ts << generateXml();
+    file.close();
+    fileName = filename;
     return true;
+}
+
+QString PlanProXmlDocument::getFileName() const
+{
+    return fileName;
 }
 
 void PlanProXmlDocument::setupDomTree(const QDomDocument& doc)

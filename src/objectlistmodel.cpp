@@ -79,7 +79,7 @@ QVariant ObjectListModel::data(const QModelIndex& index, int role) const
         }
         if(role == Qt::DisplayRole)
         {
-            return createSectionText(item.item, index.column());
+            return createSectionText(item.itemEnd, index.column());
         }
         return QVariant();
     }

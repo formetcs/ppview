@@ -26,7 +26,8 @@ public:
 
     struct ObjectListItem
     {
-        DomItem* item;
+        DomItem* itemStart;
+        DomItem* itemEnd;
         PlanningState state;
     };
 
@@ -44,6 +45,7 @@ public:
     QList<DomItem*> getObjectList(PlanningState state, const QString& category = QString());
     QList<ObjectListItem> getCombinedObjectList(const QString& category = QString());
     DomItem* getObjectById(const QString& id, PlanningState state = End);
+    void clearCache();
 
 public slots:
     void documentChanged();

@@ -1,6 +1,10 @@
 #ifndef GRAPHICSSCENEBUILDER_H
 #define GRAPHICSSCENEBUILDER_H
 
+#include <QLineF>
+#include <QPointF>
+
+
 class QPen;
 class DomItem;
 class PlanProDocument;
@@ -15,8 +19,8 @@ public:
     void createGraphicsScene();
 
 private:
-    QGraphicsItem* placePunktObjekt(DomItem* o);
-    QGraphicsItem* placeBereichObjekt(DomItem* o, const QPen &pen);
+    QPointF calculatePunktObjekt(DomItem* o);
+    QList<QLineF> calculateBereichObjekt(DomItem* o);
 
     PlanProDocument* document;
     GraphicsScene* graphicsScene;

@@ -12,15 +12,17 @@ class ObjectListModel : public QAbstractTableModel
 public:
     explicit ObjectListModel(QObject *parent = nullptr);
     void setDocument(PlanProDocument* d);
-    void changePlanningState(PlanProDocument::PlanningState st);
-    void changeCategory(const QString& cat);
-    void modelChanged();
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
+
+public slots:
+    void changePlanningState(PlanProDocument::PlanningState st);
+    void changeCategory(const QString& cat);
+    void modelChanged();
 
 private:
     QString createSectionText(DomItem* item, int section) const;

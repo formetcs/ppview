@@ -56,7 +56,8 @@ SOURCES += \
     nexttopkanteresult.cpp \
     planproxmldocument.cpp \
     preferences.cpp \
-    punktobjekt.cpp
+    punktobjekt.cpp \
+    selectionmanager.cpp
 
 HEADERS += \
     graphicsscenebuilder.h \
@@ -72,6 +73,7 @@ HEADERS += \
     planproxmldocument.h \
     preferences.h \
     punktobjekt.h \
+    selectionmanager.h \
     version.h \
     makro.h
 

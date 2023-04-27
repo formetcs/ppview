@@ -14,8 +14,9 @@
 #include "preferences.h"
 #include "version.h"
 #include "objectinfowidget.h"
+#include "selectionmanager.h"
 
-MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
+MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("PlanPro Viewer"));
@@ -23,37 +24,52 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
 
     readSettings();
 
-    scene = new GraphicsScene();
-    model = new PlanProModel();
     document = new PlanProXmlDocument();
+
+    model = new PlanProModel();
     model->setDocument(document);
 
     objectlistmodel = new ObjectListModel();
     objectlistmodel->setDocument(document);
-    objectlistmodel->changeCategory("");
-    objectlistmodel->changePlanningState(PlanProDocument::Both);
+    objectlistmodel->changeCategory(QString());
+    objectlistmodel->changePlanningState(PlanProDocument::End);
 
-    objectInfo = new ObjectInfoWidget();
-    filterWidget = new FilterWidget();
-    searchEdit = new QLineEdit();
-    searchEdit->setPlaceholderText(tr("Object GUID"));
-    searchButton = new QPushButton(tr("Search"));
     objectTreeView = new QTreeView();
     objectTreeView->setModel(model);
     objectTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     objectTreeView->setSelectionBehavior(QAbstractItemView::SelectItems);
+
+    categoryComboBox = new QComboBox();
+    objectListView = new QTreeView();
+    objectListView->setModel(objectlistmodel);
+
+    objectInfo = new ObjectInfoWidget();
+
+    searchEdit = new QLineEdit();
+    searchEdit->setPlaceholderText(tr("Object GUID"));
+    searchButton = new QPushButton(tr("Search"));
+
     favoriteList = new QListWidget();
     favoriteList->setSelectionMode(QAbstractItemView::ExtendedSelection);
     referenceList = new QListWidget();
     referenceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    objectListView = new QTreeView();
-    objectListView->setModel(objectlistmodel);
-
+    filterWidget = new FilterWidget();
     filterWidget->readSettings();
 
+    scene = new GraphicsScene();
+    scene->changePlanningState(PlanProDocument::End);
+
     view = new QGraphicsView(scene, this);
-    //view = new QGraphicsView(this); //TODO: only to be compile-clean
+    view->setAcceptDrops(false);
+
+    selectionManager = new SelectionManager();
+    selectionManager->setDocument(document);
+    selectionManager->setScene(scene);
+    selectionManager->setDocumentTreeView(objectTreeView);
+    selectionManager->setObjectListView(objectListView);
+    selectionManager->setFavoriteListWidget(favoriteList);
+    selectionManager->setReferenceListWidget(referenceList);
 
     setCentralWidget(view);
 
@@ -65,16 +81,12 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
 
     setAcceptDrops(true);
 
-    fileName = QString();
-    selectionSource = SelectionSourceNotSelected;
-
-    //connect(scene, SIGNAL(sendObjectInfo(QString)), this, SLOT(setTelegramInfo(QString)));
-    //connect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
-    //connect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
+    connect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
     connect(searchButton, SIGNAL(clicked()), this, SLOT(handleObjectSearchFromSearchWindow()));
-    connect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
-    connect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
-    connect(referenceList, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
+    connect(categoryComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCategory()));
+    connect(selectionManager, SIGNAL(selectionChanged(QList<DomItem*>)), objectInfo, SLOT(setInfoText(QList<DomItem*>)));
+    connect(document, SIGNAL(dataChanged()), model, SLOT(modelChanged()));
+    connect(document, SIGNAL(dataChanged()), objectlistmodel, SLOT(modelChanged()));
 
     saveFileAct->setEnabled(false);
     exportToPictureAct->setEnabled(false);
@@ -86,26 +98,24 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
 }
 
-void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+void MainWindow::dragEnterEvent(QDragEnterEvent* ev)
 {
-    if (event->mimeData()->hasUrls())
-        event->acceptProposedAction();
+    if (ev->mimeData()->hasUrls())
+        ev->acceptProposedAction();
 }
 
-void MainWindow::dropEvent(QDropEvent *event)
+void MainWindow::dropEvent(QDropEvent* ev)
 {
-    QList<QUrl> urllist(event->mimeData()->urls());
+    QList<QUrl> urllist(ev->mimeData()->urls());
     if(urllist.count() > 0)
     {
         QUrl url = urllist.at(0); // only first entry
         QString s = url.toLocalFile();
         openNamedFile(s);
     }
-
-    event->acceptProposedAction();
+    ev->acceptProposedAction();
 }
 
 void MainWindow::closeEvent(QCloseEvent* ev)
@@ -121,7 +131,6 @@ void MainWindow::readSettings()
     resize(prefs->getSize());
     move(prefs->getPos());
     restoreState(prefs->getWindowState());
-    language = prefs->getLanguage();
 }
 
 
@@ -131,7 +140,6 @@ void MainWindow::writeSettings()
     prefs->setSize(size());
     prefs->setPos(pos());
     prefs->setWindowState(saveState());
-    prefs->setLanguage(language);
 
     prefs->writeSettings();
 }
@@ -139,7 +147,7 @@ void MainWindow::writeSettings()
 void MainWindow::openFile()
 {
     QString s = QFileDialog::getOpenFileName(
-        this, tr("Open file"), QString(),
+        this, tr("Open file"), QDir::homePath(),
         tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
 
     openNamedFile(s);
@@ -147,7 +155,7 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-    QString defaultFileName = fileName;
+    QString defaultFileName = document->getFileName();
     int index = defaultFileName.lastIndexOf(".");
     defaultFileName = defaultFileName.left(index);
     defaultFileName += ".ppxml";
@@ -158,8 +166,8 @@ void MainWindow::saveFile()
     if (!s.isEmpty())
     {
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      document->setRemark("Saved with PlanPro Viewer");
       document->updateHeader("PlanPro Viewer", QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+      model->modelChanged(); // because of updated header
       bool success = document->saveFile(s);
       QApplication::restoreOverrideCursor();
       if(!success)
@@ -176,55 +184,34 @@ void MainWindow::openNamedFile(const QString& filename)
     if (!filename.isEmpty())
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-        selectionSource = SelectionSourceNotSelected;
-
-        //disconnect(scene, SIGNAL(sendObjectInfo(QString)), this, SLOT(setTelegramInfo(QString)));
-        //disconnect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
-        //disconnect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
-        //disconnect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
-        //disconnect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
-        //disconnect(referenceList, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
-
-
-
-
-        //delete model;
-        //delete document;
-
-        //model = new PlanProModel();
-        //document = new PlanProXmlDocument();
-        //model->setDocument(document);
-
         bool success = document->loadFile(filename);
-        //objectTreeView->setModel(model);
         if(!success)
         {
+            scene->clear();
+            categoryComboBox->clear();
+            setWindowTitle(tr("PlanPro Viewer"));
+            saveFileAct->setEnabled(false);
+            exportToPictureAct->setEnabled(false);
+            exportToPdfAct->setEnabled(false);
+            printFileAct->setEnabled(false);
+
             QApplication::restoreOverrideCursor();
             QMessageBox::critical(0, tr("File Reading Error"),
                             tr("File\n%1\ncould not be opened")
                             .arg(filename));
-
-            //setWindowTitle(tr("PlanPro Viewer"));
-            //addFileAct->setEnabled(false);
-            //saveFileAct->setEnabled(false);
-            //exportToPictureAct->setEnabled(false);
-            //exportToPdfAct->setEnabled(false);
-            //printFileAct->setEnabled(false);
-            //fileName = QString();
         }
         else
         {
-            model->modelChanged();
-            objectlistmodel->modelChanged();
-            //delete scene;
-            //scene = new GraphicsScene();
             GraphicsSceneBuilder builder(document, scene);
             builder.createGraphicsScene();
             scene->changeFilterSettings(filterWidget->getFilterState());
-
-            favoriteList->clear();
-            referenceList->clear();
+            categoryComboBox->clear();
+            QStringList categoryList = document->getCategoryList();
+            if(!categoryList.isEmpty())
+            {
+                categoryComboBox->addItem(tr("(all)"));
+                categoryComboBox->addItems(categoryList);
+            }
 
             QFileInfo fi(filename);
             setWindowTitle(fi.fileName() + tr(" - PlanPro Viewer"));
@@ -232,27 +219,19 @@ void MainWindow::openNamedFile(const QString& filename)
             exportToPictureAct->setEnabled(true);
             exportToPdfAct->setEnabled(true);
             printFileAct->setEnabled(true);
-            fileName = fi.fileName();
 
-            //objectTreeView->setModel(model);
-            //view->setScene(scene);
-            view->show();
-
-            connect(scene, SIGNAL(sendObjectInfo(QString)), this, SLOT(setTelegramInfo(QString)));
-            //connect(scene->getGraphicsScene(), SIGNAL(selectionChanged()), this, SLOT(handleGraphicsSceneSelection()));
-            connect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
-            connect(objectTreeView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(handleObjectListSelection(const QItemSelection &, const QItemSelection &)));
-            //connect(favoriteList, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
-            //connect(referenceList, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
+            //view->show();
 
             QApplication::restoreOverrideCursor();
         }
+        favoriteList->clear();
+        referenceList->clear();
     }
 }
 
 void MainWindow::exportToPicture()
 {
-    QString defaultFileName = fileName;
+    QString defaultFileName = document->getFileName();
     int index = defaultFileName.lastIndexOf(".");
     defaultFileName = defaultFileName.left(index);
     defaultFileName += ".png";
@@ -274,7 +253,7 @@ void MainWindow::exportToPicture()
 
 void MainWindow::exportToPdf()
 {
-    QString defaultPdfFileName = fileName;
+    QString defaultPdfFileName = document->getFileName();
     int index = defaultPdfFileName.lastIndexOf(".");
     defaultPdfFileName = defaultPdfFileName.left(index);
     defaultPdfFileName += ".pdf";
@@ -287,7 +266,8 @@ void MainWindow::exportToPdf()
       QPrinter printer;
       printer.setOutputFormat(QPrinter::PdfFormat);
       printer.setOutputFileName(s);
-      printer.setDocName(fileName);
+      QFileInfo fi(document->getFileName());
+      printer.setDocName(fi.fileName());
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
       QPainter painter(&printer);
       view->render(&painter);
@@ -306,7 +286,8 @@ void MainWindow::transformGraphicsView(int)
 void MainWindow::printFile()
 {
     QPrinter printer;
-    printer.setDocName(fileName);
+    QFileInfo fi(document->getFileName());
+    printer.setDocName(fi.fileName());
     QPrintDialog dialog(&printer, this);
     if(dialog.exec() != QDialog::Accepted)
       return;
@@ -404,14 +385,14 @@ void MainWindow::addToFavorites()
 
 void MainWindow::removeFromFavorites()
 {
-//    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
-//    for(int i = 0; i < selectedList.size(); i++)
-//    {
-//        QListWidgetItem* item = selectedList.at(i);
-//        int row = favoriteList->row(item);
-//        favoriteList->takeItem(row);
-//        delete item;
-//    }
+    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
+    for(int i = 0; i < selectedList.size(); ++i)
+    {
+        QListWidgetItem* item = selectedList.at(i);
+        int row = favoriteList->row(item);
+        favoriteList->takeItem(row);
+        delete item;
+    }
 }
 
 void MainWindow::findReferencingObjects()
@@ -437,6 +418,7 @@ void MainWindow::setLanguage()
     QStringList items = dir.entryList(filters, QDir::Files);
     items.replaceInStrings("ppview_", "");
     items.replaceInStrings(".qm", "");
+    QString language = Preferences::getInstance()->getLanguage();
     int index = items.indexOf(language);
 
     bool ok;
@@ -444,41 +426,25 @@ void MainWindow::setLanguage()
                                          tr("Set Language (will be effective after restart):"),
                                          items, index, false, &ok);
     if (ok && !item.isEmpty())
-      language = item;
+    {
+        Preferences::getInstance()->setLanguage(item);
+    }
+}
+
+void MainWindow::showDocumentInfo()
+{
+    QString text = "No file loaded";
+    QString timestamp = document->getTimestamp().toString();
+    QString toolname = document->getToolName();
+    QString toolversion = document->getToolVersion();
+    QString remark = document->getRemark();
+    text = "Timestamp: " + timestamp + "\nTool: " + toolname + ", Version " + toolversion + "\nRemark: " + remark;
+    QMessageBox::information(this, "Info", text);
 }
 
 void MainWindow::showHelp()
 {
-    QList<PlanProDocument::ObjectListItem> domlist = document->getCombinedObjectList("ESTW");
-    for(int i = 0; i < domlist.count(); i++)
-    {
-        PlanProDocument::ObjectListItem oli = domlist.at(i);
-        if(oli.state == PlanProDocument::Start)
-        {
-            qDebug("Start: " + oli.item->getName().toLatin1());
-        }
-        if(oli.state == PlanProDocument::End)
-        {
-            qDebug("End:   " + oli.item->getName().toLatin1());
-        }
-        if(oli.state == PlanProDocument::Both)
-        {
-            qDebug("Both:  " + oli.item->getName().toLatin1());
-        }
-
-    }
-
-    //DomItem* root = document->getRootItem();
-    QString text = "No file loaded";
-    //if(root)
-    //{
-        QString timestamp = document->getTimestamp().toString();
-        QString toolname = document->getToolName();
-        QString toolversion = document->getToolVersion();
-        QString remark = document->getRemark();
-        text = "Timestamp: " + timestamp + "\nTool: " + toolname + ", Version " + toolversion + "\nRemark: " + remark;
-    //}
-    QMessageBox::information(this, "Info", text);
+    QMessageBox::information(this, "Info", "TODO");
 }
 
 void MainWindow::about()
@@ -495,15 +461,10 @@ void MainWindow::about()
            "Project FormETCS</b>").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
 }
 
-//void MainWindow::setTelegramInfo(const QString& text)
-//{
-//    objectInfo->setHtml(text);
-//}
-
 void MainWindow::handleObjectSearchFromSearchWindow()
 {
     QString searchedId = searchEdit->text();
-    handleObjectSearch(searchedId);
+    selectionManager->selectItem(searchedId);
 }
 
 void MainWindow::handleObjectSearchFromMenu()
@@ -513,356 +474,49 @@ void MainWindow::handleObjectSearchFromMenu()
                                          tr("Enter the GUID of the searched object:"), QLineEdit::Normal,
                                          QString(), &ok);
     if (ok && !text.isEmpty())
-        handleObjectSearch(text);
+        selectionManager->selectItem(text);
 }
 
 void MainWindow::centerObject()
 {
     QList<QGraphicsItem*> itemlist = scene->selectedItems();
-    for(int i = 0; i < itemlist.count(); i++)
+    for(int i = 0; i < itemlist.count(); ++i)
     {
-        QGraphicsItem* item = itemlist[i];
+        QGraphicsItem* item = itemlist.at(i);
         view->centerOn(item);
     }
 }
 
-void MainWindow::handleObjectSearch(QString id)
+void MainWindow::switchPlanningState()
 {
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceExternal;
-//    }
-
-//    QModelIndex index = model->getModelIndexById(id);
-//    if(!index.isValid())
-//    {
-//        QMessageBox::critical(0, tr("Search Error"),
-//                        tr("Object with GUID\n%1\ncould not be found")
-//                        .arg(id));
-
-//        selectionSource = SelectionSourceNotSelected;
-//        return;
-//    }
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    selectionModel->select(index, QItemSelectionModel::ClearAndSelect);
-//    objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-
-//    QList<QGraphicsItem*> graphicsItemList = scene->getGraphicsScene()->items();
-//    for(int i = 0; i < graphicsItemList.count(); i++)
-//    {
-//        QGraphicsItem* item = graphicsItemList[i];
-//        if((item->data(GRAPHICSITEM_ID)).toString() == id)
-//        {
-//            item->setSelected(true);
-//            view->ensureVisible(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    for(int i = 0; i < favoriteList->count(); i++)
-//    {
-//        QListWidgetItem* item = favoriteList->item(i);
-//        if(item->text().contains(id))
-//        {
-//            item->setSelected(true);
-//            favoriteList->scrollToItem(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    for(int i = 0; i < referenceList->count(); i++)
-//    {
-//        QListWidgetItem* item = referenceList->item(i);
-//        if(item->text().contains(id))
-//        {
-//            item->setSelected(true);
-//            referenceList->scrollToItem(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    if(selectionSource == SelectionSourceExternal)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
+    PlanProDocument::PlanningState state = PlanProDocument::End;
+    if(startStateAct->isChecked())
+    {
+        state = PlanProDocument::Start;
+        qDebug("start state switch");
+    }
+    else if(endStateAct->isChecked())
+    {
+        state = PlanProDocument::End;
+        qDebug("end state switch");
+    }
+    else if(combinedStateAct->isChecked())
+    {
+        state = PlanProDocument::Both;
+        qDebug("combined state switch");
+    }
+    objectlistmodel->changePlanningState(state);
+    scene->changePlanningState(state);
 }
 
-void MainWindow::handleGraphicsSceneSelection()
+void MainWindow::changeCategory()
 {
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceGraphicsView;
-//    }
-
-//    QList<QGraphicsItem*> itemlist = scene->getGraphicsScene()->selectedItems();
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    favoriteList->clearSelection();
-//    referenceList->clearSelection();
-//    for(int i = 0; i < itemlist.count(); i++)
-//    {
-//        QString id = itemlist[i]->data(GRAPHICSITEM_ID).toString();
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-//        //std::cout << "handleGraphicsSceneSelection: " << qPrintable(id) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceGraphicsView)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
-}
-
-void MainWindow::handleFavoriteListSelection()
-{
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceFavoriteList;
-//    }
-
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    referenceList->clearSelection();
-//    scene->getGraphicsScene()->clearSelection();
-
-//    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
-//    for(int i = 0; i < selectedList.count(); i++)
-//    {
-//        QString itemtext = selectedList.at(i)->text();
-//        int charindex = itemtext.indexOf("[");
-//        QString id = itemtext.mid(charindex + 1, 36);
-
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-
-//        for(int j = 0; j < referenceList->count(); j++)
-//        {
-//            QListWidgetItem* item = referenceList->item(j);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceFavoriteList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
-}
-
-void MainWindow::handleReferenceListSelection()
-{
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceReferenceList;
-//    }
-
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    favoriteList->clearSelection();
-//    scene->getGraphicsScene()->clearSelection();
-
-//    QList<QListWidgetItem*> selectedList = referenceList->selectedItems();
-//    for(int i = 0; i < selectedList.count(); i++)
-//    {
-//        QString itemtext = selectedList.at(i)->text();
-//        int charindex = itemtext.indexOf("[");
-//        QString id = itemtext.mid(charindex + 1, 36);
-
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-
-//        for(int j = 0; j < favoriteList->count(); j++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(j);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceReferenceList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
-}
-
-void MainWindow::handleObjectListSelection(const QItemSelection &selected, const QItemSelection &deselected)
-{
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceObjectList;
-//    }
-
-//    QModelIndex index;
-//    QModelIndexList items = selected.indexes();
-
-//    foreach (index, items)
-//    {
-//        QModelIndex parentIndex = model->parent(index);
-//        while(parentIndex.isValid())
-//        {
-//            index = parentIndex;
-//            parentIndex = model->parent(index);
-//        }
-//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-//        //QString text = QString("Selected: (%1,%2)").arg(index.row()).arg(index.column());
-//        //std::cout << qPrintable(text) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-
-//    items = deselected.indexes();
-
-//    foreach (index, items)
-//    {
-//        QModelIndex parentIndex = model->parent(index);
-//        while(parentIndex.isValid())
-//        {
-//            index = parentIndex;
-//            parentIndex = model->parent(index);
-//        }
-//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(false);
-//        }
-
-//        //QString text = QString("Deselected: (%1,%2)").arg(index.row()).arg(index.column());
-//        //std::cout << qPrintable(text) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(false);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(false);
-//            }
-//        }
-//    }
-
-//    if(selectionSource == SelectionSourceObjectList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
+    QString category = QString();
+    if(categoryComboBox->currentIndex() > 0)
+    {
+        category = categoryComboBox->currentText();
+    }
+    objectlistmodel->changeCategory(category);
 }
 
 void MainWindow::createActions()
@@ -904,6 +558,32 @@ void MainWindow::createActions()
     centerAct->setShortcut(tr("Alt+C"));
     centerAct->setStatusTip(tr("Center the selected object in the graphics view"));
     connect(centerAct, SIGNAL(triggered()), this, SLOT(centerObject()));
+
+    startStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Start State"), this);
+    startStateAct->setShortcut(tr("F5"));
+    startStateAct->setStatusTip(tr("Show the start state of the planning"));
+    startStateAct->setCheckable(true);
+    startStateAct->setChecked(false);
+    connect(startStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+
+    endStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&End State"), this);
+    endStateAct->setShortcut(tr("F6"));
+    endStateAct->setStatusTip(tr("Show the end state of the planning"));
+    endStateAct->setCheckable(true);
+    endStateAct->setChecked(true);
+    connect(endStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+
+    combinedStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Combined State"), this);
+    combinedStateAct->setShortcut(tr("F7"));
+    combinedStateAct->setStatusTip(tr("Show the combined start/end state of the planning"));
+    combinedStateAct->setCheckable(true);
+    combinedStateAct->setChecked(false);
+    connect(combinedStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+
+    planningStateActGroup = new QActionGroup(this);
+    planningStateActGroup->addAction(startStateAct);
+    planningStateActGroup->addAction(endStateAct);
+    planningStateActGroup->addAction(combinedStateAct);
 
     selectAllFiltersAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Select all filter settings"), this);
     selectAllFiltersAct->setShortcut(tr("Shift+Alt+S"));
@@ -980,6 +660,10 @@ void MainWindow::createMenus()
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewDockSubmenu = viewMenu->addMenu(tr("Show &Dock Windows"));
+    viewMenu->addSeparator();
+    viewMenu->addAction(startStateAct);
+    viewMenu->addAction(endStateAct);
+    viewMenu->addAction(combinedStateAct);
     viewMenu->addSeparator();
     viewMenu->addAction(centerAct);
     viewMenu->addSeparator();
@@ -1093,7 +777,12 @@ void MainWindow::createDockWindows()
     QDockWidget *dock7 = new QDockWidget(tr("Object List"), this);
     dock7->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dock7->setObjectName("Object List");
-    dock7->setWidget(objectListView);
+    QWidget* objectListWidget = new QWidget();
+    QVBoxLayout* layout2 = new QVBoxLayout;
+    layout2->addWidget(categoryComboBox);
+    layout2->addWidget(objectListView);
+    objectListWidget->setLayout(layout2);
+    dock7->setWidget(objectListWidget);
     addDockWidget(Qt::LeftDockWidgetArea, dock7);
     viewDockSubmenu->addAction(dock7->toggleViewAction());
 }

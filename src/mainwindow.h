@@ -6,6 +6,9 @@
 #include <QMainWindow>
 #include <QItemSelection>
 
+class QActionGroup;
+class QComboBox;
+class SelectionManager;
 class ObjectInfoWidget;
 class QAction;
 class QSpinBox;
@@ -22,18 +25,6 @@ class FilterWidget;
 class PlanProModel;
 class GraphicsScene;
 class PlanProXmlDocument;
-
-enum SelectionSource
-{
-    SelectionSourceNotSelected = 0,
-    SelectionSourceExternal = 1,
-    SelectionSourceGraphicsView = 2,
-    SelectionSourceObjectList = 3,
-    SelectionSourceFavoriteList = 4,
-    SelectionSourceReferenceList = 5
-};
-
-
 class GraphicsSceneBuilder;
 
 class MainWindow : public QMainWindow
@@ -41,13 +32,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(const QString& dataFileName, QWidget *parent = 0);
+    MainWindow(const QString& dataFileName, QWidget* parent = nullptr);
     ~MainWindow();
 
 protected:
     void closeEvent(QCloseEvent* ev);
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dropEvent(QDropEvent *event);
+    void dragEnterEvent(QDragEnterEvent* ev);
+    void dropEvent(QDropEvent* ev);
 
 private slots:
     void openFile();
@@ -57,23 +48,19 @@ private slots:
     void printFile();
     void transformGraphicsView(int);
     void showHelp();
+    void showDocumentInfo();
     void about();
-    //void setTelegramInfo(const QString& text);
     void handleObjectSearchFromSearchWindow();
     void handleObjectSearchFromMenu();
-    void handleObjectSearch(QString id);
     void centerObject();
+    void switchPlanningState();
+    void changeCategory();
     void extractFile();
     void measureDistance();
-    void handleGraphicsSceneSelection();
-    void handleFavoriteListSelection();
-    void handleReferenceListSelection();
-    void handleObjectListSelection(const QItemSelection &selected, const QItemSelection &deselected);
     void addToFavorites();
     void removeFromFavorites();
     void findReferencingObjects();
     void setLanguage();
-
 
 private:
     void createActions();
@@ -102,6 +89,10 @@ private:
     QAction* exitAct;
     QAction* searchAct;
     QAction* centerAct;
+    QActionGroup* planningStateActGroup;
+    QAction* startStateAct;
+    QAction* endStateAct;
+    QAction* combinedStateAct;
     QAction* selectAllFiltersAct;
     QAction* deselectAllFiltersAct;
     QAction* extractFileAct;
@@ -120,6 +111,7 @@ private:
     ObjectListModel* objectlistmodel;
     GraphicsScene* scene;
     QGraphicsView* view;
+    SelectionManager* selectionManager;
     ObjectInfoWidget* objectInfo;
     FilterWidget* filterWidget;
     QTreeView* objectTreeView;
@@ -128,13 +120,9 @@ private:
     QListWidget* referenceList;
     QLineEdit* searchEdit;
     QPushButton* searchButton;
+    QComboBox* categoryComboBox;
 
-    QString fileName;
-    QString language;
     PlanProXmlDocument* document;
-
-    SelectionSource selectionSource;
-
 };
 
 #endif // MAINWINDOW_H

@@ -2,25 +2,49 @@
 #include <QtWidgets>
 #include "graphicsscene.h"
 
-GraphicsScene::GraphicsScene(QObject *parent) : QGraphicsScene(parent)
+GraphicsScene::GraphicsScene(QObject* parent) : QGraphicsScene(parent)
 {
+    planningState = PlanProDocument::End;
 }
 
 GraphicsScene::~GraphicsScene()
 {
 }
 
-void GraphicsScene::changeFilterSettings(const QString& key, bool state)
+void GraphicsScene::changePlanningState(PlanProDocument::PlanningState state)
 {
-    QString mod_key(key);
-    mod_key.remove(QChar('&'));
+    planningState = state;
     QList<QGraphicsItem*> graphicsItemList = items();
     for(int i = 0; i < graphicsItemList.count(); ++i)
     {
         QGraphicsItem* item = graphicsItemList.at(i);
-        if((item->data(GRAPHICSITEM_TYPE)).toString() == mod_key)
+        QString itemType = item->data(GRAPHICSITEM_TYPE).toString();
+        PlanProDocument::PlanningState itemPlState = item->data(GRAPHICSITEM_STATE).value<PlanProDocument::PlanningState>();
+        if(itemPlState == state)
         {
-            item->setVisible(state);
+            item->setVisible(filterSettings.value(itemType,true));
+        }
+        else
+        {
+            item->setVisible(false);
+        }
+    }
+}
+
+void GraphicsScene::changeFilterSettings(const QString& key, bool state)
+{
+    QString mod_key(key);
+    mod_key.remove(QChar('&'));
+    filterSettings.insert(mod_key, state);
+    QList<QGraphicsItem*> graphicsItemList = items();
+    for(int i = 0; i < graphicsItemList.count(); ++i)
+    {
+        QGraphicsItem* item = graphicsItemList.at(i);
+        QString itemType = item->data(GRAPHICSITEM_TYPE).toString();
+        PlanProDocument::PlanningState itemPlState = item->data(GRAPHICSITEM_STATE).value<PlanProDocument::PlanningState>();
+        if(itemType == mod_key)
+        {
+            item->setVisible(state && (planningState == itemPlState));
         }
     }
 }
@@ -34,13 +58,13 @@ void GraphicsScene::changeFilterSettings(const QList<FilterState>& statelist)
     }
 }
 
-QGraphicsItem* GraphicsScene::getItemById(const QString& id)
+QGraphicsItem* GraphicsScene::getItemById(const QString& id, PlanProDocument::PlanningState state)
 {
     QList<QGraphicsItem*> graphicsItemList = items();
     for(int i = 0; i < graphicsItemList.count(); ++i)
     {
         QGraphicsItem* item = graphicsItemList.at(i);
-        if((item->data(GRAPHICSITEM_ID)).toString() == id)
+        if((item->data(GRAPHICSITEM_ID)).toString() == id && item->data(GRAPHICSITEM_STATE) == state)
         {
             return item;
         }

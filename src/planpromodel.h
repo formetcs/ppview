@@ -18,7 +18,6 @@ public:
     PlanProModel(QObject* parent = 0);
     ~PlanProModel();
     void setDocument(PlanProDocument* d);
-    void modelChanged();
 
     QDomElement getContainerElement();
     QDomElement getObjectById(QString id);
@@ -38,6 +37,8 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
+public slots:
+    void modelChanged();
 
 private:
     QStringList findReferencingObjectsRec(QDomNode node, QString searchId, QString objectName, QString objectId);

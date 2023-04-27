@@ -26,10 +26,29 @@ void GraphicsSceneBuilder::createGraphicsScene()
     }
 
     graphicsScene->clear();
-    QList<DomItem*> objectlist = document->getObjectList(PlanProDocument::End);
+    QList<PlanProDocument::ObjectListItem> objectlist = document->getCombinedObjectList();
     for (int i = 0; i < objectlist.count(); ++i)
     {
-        DomItem* item = objectlist.at(i);
+        PlanProDocument::ObjectListItem oli = objectlist.at(i);
+        PlanProDocument::PlanningState state = oli.state;
+        DomItem* item = (state == PlanProDocument::Start) ? oli.itemStart : oli.itemEnd;
+        QPen combinedPen;
+        QBrush combinedBrush;
+        if(state == PlanProDocument::Start)
+        {
+            combinedPen = QPen(Qt::yellow);
+            combinedBrush = QBrush(Qt::yellow);
+        }
+        else if(state == PlanProDocument::End)
+        {
+            combinedPen = QPen(Qt::red);
+            combinedBrush = QBrush(Qt::red);
+        }
+        else
+        {
+            combinedPen = QPen(Qt::black);
+            combinedBrush = QBrush(Qt::black);
+        }
         QString name = item->getName();
         QString id = item->getFirstValueAtPath("Identitaet/Wert");
         if(name == "GEO_Punkt")
@@ -38,12 +57,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id;
             double x = item->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
             double y = item->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
-            QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, QPen(Qt::black), QBrush(Qt::white));
-            item->setToolTip(tooltip);
-            item->setData(GRAPHICSITEM_TYPE, "GEO_Punkt");
-            item->setData(GRAPHICSITEM_ID, id);
-            item->setFlag(QGraphicsItem::ItemIsSelectable);
-            item->setZValue(-3);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+            {
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, QPen(Qt::black), QBrush(Qt::white));
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setZValue(-3);
+            }
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
+            {
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, QPen(Qt::black), QBrush(Qt::white));
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setZValue(-3);
+            }
+            QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, combinedPen, combinedBrush);
+            gitem->setToolTip(tooltip);
+            gitem->setData(GRAPHICSITEM_TYPE, name);
+            gitem->setData(GRAPHICSITEM_ID, id);
+            gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            gitem->setZValue(-3);
         }
         else if(name == "GEO_Knoten")
         {
@@ -51,17 +91,40 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id;
             for (int j = 0; j < objectlist.count(); ++j)
             {
-                DomItem* item2 = objectlist.at(j);
+                PlanProDocument::ObjectListItem oli2 = objectlist.at(j);
+                PlanProDocument::PlanningState state2 = oli2.state;
+                DomItem* item2 = (state2 == PlanProDocument::Start) ? oli2.itemStart : oli2.itemEnd;
                 if(item2->getName() == "GEO_Punkt" && item2->getFirstValueAtPath("ID_GEO_Knoten/Wert") == id)
                 {
                     double px = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
                     double py = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
-                    QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::black), QBrush(Qt::black));
-                    item->setToolTip(tooltip);
-                    item->setData(GRAPHICSITEM_TYPE, "GEO_Knoten");
-                    item->setData(GRAPHICSITEM_ID, id);
-                    item->setFlag(QGraphicsItem::ItemIsSelectable);
-                    item->setZValue(-2);
+                    if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                    {
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::black), QBrush(Qt::black));
+                        gitem->setToolTip(tooltip);
+                        gitem->setData(GRAPHICSITEM_TYPE, name);
+                        gitem->setData(GRAPHICSITEM_ID, id);
+                        gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                        gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                        gitem->setZValue(-2);
+                    }
+                    if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                    {
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::black), QBrush(Qt::black));
+                        gitem->setToolTip(tooltip);
+                        gitem->setData(GRAPHICSITEM_TYPE, name);
+                        gitem->setData(GRAPHICSITEM_ID, id);
+                        gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                        gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                        gitem->setZValue(-2);
+                    }
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, combinedPen, combinedBrush);
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setZValue(-2);
                     break;
                 }
             }
@@ -76,7 +139,9 @@ void GraphicsSceneBuilder::createGraphicsScene()
             DomItem* punktB = NULL;
             for (int j = 0; j < objectlist.count() && (!punktA || !punktB); ++j)
             {
-                DomItem* item2 = objectlist.at(j);
+                PlanProDocument::ObjectListItem oli2 = objectlist.at(j);
+                PlanProDocument::PlanningState state2 = oli2.state;
+                DomItem* item2 = (state2 == PlanProDocument::Start) ? oli2.itemStart : oli2.itemEnd;
                 if(item2->getName() == "GEO_Punkt")
                 {
                     if(item2->getFirstValueAtPath("ID_GEO_Knoten/Wert") == idknotena)
@@ -95,12 +160,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
                 double ay = punktA->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
                 double bx = punktB->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
                 double by = punktB->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
-                QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by);
-                item->setToolTip(tooltip);
-                item->setData(GRAPHICSITEM_TYPE, "GEO_Kante");
-                item->setData(GRAPHICSITEM_ID, id);
-                item->setFlag(QGraphicsItem::ItemIsSelectable);
-                item->setZValue(-20);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, QPen(Qt::black));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setZValue(-20);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, QPen(Qt::black));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setZValue(-20);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, combinedPen);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setZValue(-20);
             }
         }
         else if(name == "TOP_Knoten")
@@ -110,17 +196,40 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString idknoten = item->getFirstValueAtPath("ID_GEO_Knoten/Wert");
             for (int j = 0; j < objectlist.count(); ++j)
             {
-                DomItem* item2 = objectlist.at(j);
+                PlanProDocument::ObjectListItem oli2 = objectlist.at(j);
+                PlanProDocument::PlanningState state2 = oli2.state;
+                DomItem* item2 = (state2 == PlanProDocument::Start) ? oli2.itemStart : oli2.itemEnd;
                 if(item2->getName() == "GEO_Punkt" && item2->getFirstValueAtPath("ID_GEO_Knoten/Wert") == idknoten)
                 {
                     double px = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
                     double py = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
-                    QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::red), QBrush(Qt::red));
-                    item->setToolTip(tooltip);
-                    item->setData(GRAPHICSITEM_TYPE, "TOP_Knoten");
-                    item->setData(GRAPHICSITEM_ID, id);
-                    item->setFlag(QGraphicsItem::ItemIsSelectable);
-                    item->setZValue(-1);
+                    if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                    {
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::red), QBrush(Qt::red));
+                        gitem->setToolTip(tooltip);
+                        gitem->setData(GRAPHICSITEM_TYPE, name);
+                        gitem->setData(GRAPHICSITEM_ID, id);
+                        gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                        gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                        gitem->setZValue(-1);
+                    }
+                    if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                    {
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::red), QBrush(Qt::red));
+                        gitem->setToolTip(tooltip);
+                        gitem->setData(GRAPHICSITEM_TYPE, name);
+                        gitem->setData(GRAPHICSITEM_ID, id);
+                        gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                        gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                        gitem->setZValue(-1);
+                    }
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, combinedPen, combinedBrush);
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setZValue(-1);
                     break;
                 }
             }
@@ -129,10 +238,12 @@ void GraphicsSceneBuilder::createGraphicsScene()
         {
             QString tooltip = "TOP_Kante\n";
             tooltip += id;
-            QList<QGraphicsItem*> graphicsitemlist;
+            QList<QLineF> linelist;
             for (int j = 0; j < objectlist.count(); ++j)
             {
-                DomItem* item2 = objectlist.at(j);
+                PlanProDocument::ObjectListItem oli2 = objectlist.at(j);
+                PlanProDocument::PlanningState state2 = oli2.state;
+                DomItem* item2 = (state2 == PlanProDocument::Start) ? oli2.itemStart : oli2.itemEnd;
                 if(item2->getName() == "GEO_Kante" && item2->getFirstValueAtPath("ID_GEO_Art/Wert") == id)
                 {
                     QString idknotena = item2->getFirstValueAtPath("ID_GEO_Knoten_A/Wert");
@@ -141,7 +252,9 @@ void GraphicsSceneBuilder::createGraphicsScene()
                     DomItem* punktB = NULL;
                     for (int k = 0; k < objectlist.count() && (!punktA || !punktB); ++k)
                     {
-                        DomItem* item3 = objectlist.at(k);
+                        PlanProDocument::ObjectListItem oli3 = objectlist.at(k);
+                        PlanProDocument::PlanningState state3 = oli3.state;
+                        DomItem* item3 = (state3 == PlanProDocument::Start) ? oli3.itemStart : oli3.itemEnd;
                         if(item3->getName() == "GEO_Punkt")
                         {
                             if(item3->getFirstValueAtPath("ID_GEO_Knoten/Wert") == idknotena)
@@ -160,15 +273,66 @@ void GraphicsSceneBuilder::createGraphicsScene()
                         double ay = punktA->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
                         double bx = punktB->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
                         double by = punktB->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
-                        QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, QPen(Qt::red));
-                        graphicsitemlist.append(item);
+                        QLineF segment(ax, -ay, bx, -by);
+                        linelist.append(segment);
                     }
                 }
             }
-            QGraphicsItem* groupitem = graphicsScene->createItemGroup(graphicsitemlist);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+            {
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-10);
+            }
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
+            {
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-10);
+            }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
             groupitem->setToolTip(tooltip);
-            groupitem->setData(GRAPHICSITEM_TYPE, "TOP_Kante");
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-10);
         }
@@ -180,19 +344,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id + "\n";
             tooltip += datenpunktbeschreibungtext;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Datenpunkt not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush(Qt::yellow));
-                retval->setData(GRAPHICSITEM_TYPE, "Datenpunkt");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::yellow));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::yellow));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "ZUB_Bereichsgrenze")
@@ -201,19 +379,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "ZUB_Bereichsgrenze (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "ZUB_Bereichsgrenze not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::red));
-                retval->setBrush(QBrush(Qt::yellow));
-                retval->setData(GRAPHICSITEM_TYPE, "ZUB_Bereichsgrenze");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::red), QBrush(Qt::yellow));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::red), QBrush(Qt::yellow));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Bahnsteig_Zugang")
@@ -222,19 +414,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Bahnsteig_Zugang (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Bahnsteig_Zugang not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::cyan));
-                retval->setBrush(QBrush(Qt::cyan));
-                retval->setData(GRAPHICSITEM_TYPE, "Bahnsteig_Zugang");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::cyan), QBrush(Qt::cyan));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::cyan), QBrush(Qt::cyan));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "BUE_Anlage")
@@ -245,19 +451,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id + "\n";
             tooltip += bezeichnunglageplankurztext;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "BUE_Anlage not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::blue));
-                retval->setBrush(QBrush(Qt::blue));
-                retval->setData(GRAPHICSITEM_TYPE, "BUE_Anlage");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Sonstiger_Punkt")
@@ -266,19 +486,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Sonstiger_Punkt (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Sonstiger_Punkt not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::magenta));
-                retval->setBrush(QBrush(Qt::magenta));
-                retval->setData(GRAPHICSITEM_TYPE, "Sonstiger_Punkt");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::magenta), QBrush(Qt::magenta));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::magenta), QBrush(Qt::magenta));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Hoehenpunkt")
@@ -287,19 +521,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Hoehenpunkt (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Hoehenpunkt not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush(Qt::red));
-                retval->setData(GRAPHICSITEM_TYPE, "Hoehenpunkt");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Technischer_Punkt")
@@ -308,19 +556,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Technischer_Punkt (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Technischer_Punkt not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush(Qt::red));
-                retval->setData(GRAPHICSITEM_TYPE, "Technischer_Punkt");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Ueberhoehung")
@@ -329,19 +591,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Ueberhoehung (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Ueberhoehung not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush(Qt::red));
-                retval->setData(GRAPHICSITEM_TYPE, "Ueberhoehung");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Gleis_Abschluss")
@@ -350,19 +626,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Gleis_Abschluss (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Gleis_Abschluss not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush("olive"));
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Abschluss");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("olive"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("olive"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "NB_Zone_Grenze")
@@ -371,19 +661,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "NB_Zone_Grenze (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "NB_Zone_Grenze not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush("lightsteelblue"));
-                retval->setData(GRAPHICSITEM_TYPE, "NB_Zone_Grenze");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("lightsteelblue"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("lightsteelblue"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "FMA_Element")
@@ -392,19 +696,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "FMA_Element (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "FMA_Element not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen("brown"));
-                retval->setBrush(QBrush("brown"));
-                retval->setData(GRAPHICSITEM_TYPE, "FMA_Element");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "FMA_Komponente")
@@ -415,19 +733,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id + "\n";
             tooltip += bezeichnunglageplankurztext;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "FMA_Komponente not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen("brown"));
-                retval->setBrush(QBrush("brown"));
-                retval->setData(GRAPHICSITEM_TYPE, "FMA_Komponente");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Zugeinwirkung")
@@ -438,19 +770,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id + "\n";
             tooltip += bezeichnunglageplankurztext;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Zugeinwirkung not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen("brown"));
-                retval->setBrush(QBrush("brown"));
-                retval->setData(GRAPHICSITEM_TYPE, "Zugeinwirkung");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "PZB_Element")
@@ -459,19 +805,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "PZB_Element (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "PZB_Element not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::gray));
-                retval->setBrush(QBrush(Qt::gray));
-                retval->setData(GRAPHICSITEM_TYPE, "PZB_Element");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::gray), QBrush(Qt::gray));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::gray), QBrush(Qt::gray));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Signal")
@@ -482,20 +842,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             tooltip += id + "\n";
             tooltip += bezeichnunglageplankurztext;
 
-
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Signal not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::green));
-                retval->setBrush(QBrush(Qt::green));
-                retval->setData(GRAPHICSITEM_TYPE, "Signal");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::green), QBrush(Qt::green));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::green), QBrush(Qt::green));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "Signal_Befestigung")
@@ -504,19 +877,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "Signal_Befestigung (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "Signal_Befestigung not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen(Qt::black));
-                retval->setBrush(QBrush("greenyellow"));
-                retval->setData(GRAPHICSITEM_TYPE, "Signal_Befestigung");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("greenyellow"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("greenyellow"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "W_Kr_Gsp_Komponente")
@@ -525,19 +912,33 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "W_Kr_Gsp_Komponente (Km: " + km + ")\n";
             tooltip += id;
 
-            QGraphicsEllipseItem* retval = (QGraphicsEllipseItem*) placePunktObjekt(item);
-            if(retval == NULL)
+            QPointF point = calculatePunktObjekt(item);
+            if(!point.isNull())
             {
-                std::cout << "W_Kr_Gsp_Komponente not placeable" << std::endl;
-            }
-            else
-            {
-                retval->setToolTip(tooltip);
-                retval->setPen(QPen("coral"));
-                retval->setBrush(QBrush("coral"));
-                retval->setData(GRAPHICSITEM_TYPE, "W_Kr_Gsp_Komponente");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
+                if(state == PlanProDocument::Start || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                if(state == PlanProDocument::End || state == PlanProDocument::Both)
+                {
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    gitem->setToolTip(tooltip);
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                }
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
+                gitem->setToolTip(tooltip);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             }
         }
         else if(name == "ZUB_Streckeneigenschaft")
@@ -545,285 +946,960 @@ void GraphicsSceneBuilder::createGraphicsScene()
             QString tooltip = "ZUB_Streckeneigenschaft\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::yellow));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "ZUB_Streckeneigenschaft not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::yellow));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "ZUB_Streckeneigenschaft");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::yellow));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Stell_Bereich")
         {
             QString tooltip = "Stell_Bereich\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("orange"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Stell_Bereich not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("orange"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Stell_Bereich");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("orange"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Bahnsteig_Kante")
         {
             QString tooltip = "Bahnsteig_Kante\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::cyan));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Bahnsteig_Kante not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Bahnsteig_Kante");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "BUE_Gleisbezogener_Gefahrraum")
         {
             QString tooltip = "BUE_Gleisbezogener_Gefahrraum\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::blue));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "BUE_Gleisbezogener_Gefahrraum not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::blue));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "BUE_Gleisbezogener_Gefahrraum");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::blue));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Fstr_Fahrweg")
         {
             QString tooltip = "Fstr_Fahrweg\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::magenta));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Fstr_Fahrweg not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::magenta));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Fstr_Fahrweg");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::magenta));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Geschwindigkeitsprofil")
         {
             QString tooltip = "Geschwindigkeitsprofil\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::red));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Geschwindigkeitsprofil not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Geschwindigkeitsprofil");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Strecke")
         {
             QString tooltip = "Strecke\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::red));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Strecke not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Strecke");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Technischer_Bereich")
         {
             QString tooltip = "Technischer_Bereich\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen(Qt::red));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Technischer_Bereich not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Technischer_Bereich");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Abschnitt")
         {
             QString tooltip = "Gleis_Abschnitt\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Abschnitt not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Abschnitt");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Art")
         {
             QString tooltip = "Gleis_Art\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Art not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Art");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Baubereich")
         {
             QString tooltip = "Gleis_Baubereich\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Baubereich not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Baubereich");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Bezeichnung")
         {
             QString tooltip = "Gleis_Bezeichnung\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Bezeichnung not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Bezeichnung");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Fahrbahn")
         {
             QString tooltip = "Gleis_Fahrbahn\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Fahrbahn not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Fahrbahn");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Lichtraum")
         {
             QString tooltip = "Gleis_Lichtraum\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Lichtraum not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Lichtraum");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else if(name == "Gleis_Schaltgruppe")
         {
             QString tooltip = "Gleis_Schaltgruppe\n";
             tooltip += id;
 
-            QGraphicsItem* retval = placeBereichObjekt(item, QPen("olive"));
-            if(retval == NULL)
+            QList<QLineF> linelist = calculateBereichObjekt(item);
+            if(state == PlanProDocument::Start || state == PlanProDocument::Both)
             {
-                std::cout << "Gleis_Schaltgruppe not placeable" << std::endl;
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Start);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
-            else
+            if(state == PlanProDocument::End || state == PlanProDocument::Both)
             {
-                retval->setToolTip(tooltip);
-                retval->setData(GRAPHICSITEM_TYPE, "Gleis_Schaltgruppe");
-                retval->setData(GRAPHICSITEM_ID, id);
-                retval->setFlag(QGraphicsItem::ItemIsSelectable);
-                retval->setZValue(-5);
+                QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+                graphicsScene->addItem(groupitem);
+                for (int j = 0; j < linelist.count(); ++j)
+                {
+                    QLineF segment = linelist.at(j);
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    gitem->setData(GRAPHICSITEM_TYPE, name);
+                    gitem->setData(GRAPHICSITEM_ID, id);
+                    gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                    groupitem->addToGroup(gitem);
+                }
+                groupitem->setToolTip(tooltip);
+                groupitem->setData(GRAPHICSITEM_TYPE, name);
+                groupitem->setData(GRAPHICSITEM_ID, id);
+                groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::End);
+                groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                groupitem->setZValue(-5);
             }
+            QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
+            graphicsScene->addItem(groupitem);
+            for (int j = 0; j < linelist.count(); ++j)
+            {
+                QLineF segment = linelist.at(j);
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, combinedPen);
+                gitem->setData(GRAPHICSITEM_TYPE, name);
+                gitem->setData(GRAPHICSITEM_ID, id);
+                gitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+                groupitem->addToGroup(gitem);
+            }
+            groupitem->setToolTip(tooltip);
+            groupitem->setData(GRAPHICSITEM_TYPE, name);
+            groupitem->setData(GRAPHICSITEM_ID, id);
+            groupitem->setData(GRAPHICSITEM_STATE, PlanProDocument::Both);
+            groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
+            groupitem->setZValue(-5);
         }
         else
         {
@@ -833,11 +1909,19 @@ void GraphicsSceneBuilder::createGraphicsScene()
 }
 
 
-QGraphicsItem* GraphicsSceneBuilder::placePunktObjekt(DomItem* o)
+QPointF GraphicsSceneBuilder::calculatePunktObjekt(DomItem* o)
 {
     if(!document || !graphicsScene)
     {
-        return NULL;
+        return QPointF();
+    }
+
+    DomItem* lstZustandItem = o->parent()->parent();
+    QString lstZustandItemName = lstZustandItem->getName();
+    PlanProDocument::PlanningState currentItemState = PlanProDocument::End;
+    if(lstZustandItemName == "LST_Zustand_Start")
+    {
+        currentItemState = PlanProDocument::Start;
     }
 
     // if the Punkt_Objekt has more than one referencing TOP_Kante, we take only the first
@@ -845,16 +1929,16 @@ QGraphicsItem* GraphicsSceneBuilder::placePunktObjekt(DomItem* o)
     DomItem* punktObjektTopKante = o->getFirstChildItem("Punkt_Objekt_TOP_Kante");
     double remainingDistance = punktObjektTopKante->getFirstValueAtPath("Abstand/Wert").toDouble();
 
-    DomItem* topKante = document->getObjectById(punktObjektTopKante->getFirstValueAtPath("ID_TOP_Kante/Wert"), PlanProDocument::End);
+    DomItem* topKante = document->getObjectById(punktObjektTopKante->getFirstValueAtPath("ID_TOP_Kante/Wert"), currentItemState);
     QString idTopKante = topKante->getFirstValueAtPath("Identitaet/Wert");
-    DomItem* topKnotenA = document->getObjectById(topKante->getFirstValueAtPath("ID_TOP_Knoten_A/Wert"), PlanProDocument::End);
+    DomItem* topKnotenA = document->getObjectById(topKante->getFirstValueAtPath("ID_TOP_Knoten_A/Wert"), currentItemState);
     QString idGeoKnoten = topKnotenA->getFirstValueAtPath("ID_GEO_Knoten/Wert");
 
     DomItem* currentGeoKante = NULL;
     bool traverseForward = true;
 
     // find the starting GEO_Kante
-    QList<DomItem*> objectlist = document->getObjectList(PlanProDocument::End);
+    QList<DomItem*> objectlist = document->getObjectList(currentItemState);
     for (int i = 0; i < objectlist.count(); ++i)
     {
         DomItem* item = objectlist.at(i);
@@ -880,7 +1964,7 @@ QGraphicsItem* GraphicsSceneBuilder::placePunktObjekt(DomItem* o)
 
     if(!currentGeoKante)
     {
-        return NULL;
+        return QPointF();
     }
 
     // traverse along the GEO_Kante chain until the remaining distance has reached zero (with delta value due to double precision)
@@ -1002,22 +2086,31 @@ QGraphicsItem* GraphicsSceneBuilder::placePunktObjekt(DomItem* o)
             py = ay + yAdd + xSide;
         }
 
-        QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4);
-        return item;
+        return QPointF(px, py);
+
+        //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4);
+        //return item;
     }
 
-    return NULL;
+    return QPointF();
 }
 
 
-QGraphicsItem* GraphicsSceneBuilder::placeBereichObjekt(DomItem* o, const QPen& pen)
+QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
 {
+    QList<QLineF> returnlist;
     if(!document || !graphicsScene)
     {
-        return NULL;
+        return returnlist;
     }
 
-    QList<QGraphicsItem*> graphicsitemlist;
+    DomItem* lstZustandItem = o->parent()->parent();
+    QString lstZustandItemName = lstZustandItem->getName();
+    PlanProDocument::PlanningState currentItemState = PlanProDocument::End;
+    if(lstZustandItemName == "LST_Zustand_Start")
+    {
+        currentItemState = PlanProDocument::Start;
+    }
 
     QList<DomItem*> teilbereichList = o->getChildItems("Bereich_Objekt_Teilbereich");
 
@@ -1028,15 +2121,15 @@ QGraphicsItem* GraphicsSceneBuilder::placeBereichObjekt(DomItem* o, const QPen& 
         double begrenzungA = teilbereichElement->getFirstValueAtPath("Begrenzung_A/Wert").toDouble();
         double begrenzungB = teilbereichElement->getFirstValueAtPath("Begrenzung_B/Wert").toDouble();
 
-        DomItem* topKante = document->getObjectById(idTopKante, PlanProDocument::End);
-        DomItem* topKnotenA = document->getObjectById(topKante->getFirstValueAtPath("ID_TOP_Knoten_A/Wert"), PlanProDocument::End);
+        DomItem* topKante = document->getObjectById(idTopKante, currentItemState);
+        DomItem* topKnotenA = document->getObjectById(topKante->getFirstValueAtPath("ID_TOP_Knoten_A/Wert"), currentItemState);
         QString idGeoKnoten = topKnotenA->getFirstValueAtPath("ID_GEO_Knoten/Wert");
 
         DomItem* currentGeoKante = NULL;
         bool traverseForward = true;
 
         // find the starting GEO_Kante
-        QList<DomItem*> objectlist = document->getObjectList(PlanProDocument::End);
+        QList<DomItem*> objectlist = document->getObjectList(currentItemState);
         for (int j = 0; j < objectlist.count(); ++j)
         {
             DomItem* item = objectlist.at(j);
@@ -1062,7 +2155,7 @@ QGraphicsItem* GraphicsSceneBuilder::placeBereichObjekt(DomItem* o, const QPen& 
 
         if(!currentGeoKante)
         {
-            return NULL;
+            return returnlist;
         }
 
         // traverse along the GEO_Kante chain until the value of begrenzungA has reached zero
@@ -1259,14 +2352,17 @@ QGraphicsItem* GraphicsSceneBuilder::placeBereichObjekt(DomItem* o, const QPen& 
                 }
             }
 
-            // Retrieve the coordinates of the GEO_Punkt objects and draw the intermediate lines of the Bereich_Objekt
+            // Retrieve the coordinates of the GEO_Punkt objects and collect the intermediate lines of the Bereich_Objekt
             if(punktA && punktB)
             {
                 double ax = punktA->getFirstValueAtPath("GEO_Punkt_Allg/GK_X/Wert").toDouble();
                 double ay = punktA->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
 
-                QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, ax, -ay, pen);
-                graphicsitemlist.append(item);
+                QLineF segment(px, -py, ax, -ay);
+                returnlist.append(segment);
+
+                //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, ax, -ay, pen);
+                //graphicsitemlist.append(item);
                 px = ax;
                 py = ay;
             }
@@ -1346,11 +2442,13 @@ QGraphicsItem* GraphicsSceneBuilder::placeBereichObjekt(DomItem* o, const QPen& 
                 endy = ay + yAdd;
             }
 
-            QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, endx, -endy, pen);
-            graphicsitemlist.append(item);
+            QLineF segment(px, -py, endx, -endy);
+            returnlist.append(segment);
+
+            //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, endx, -endy, pen);
+            //graphicsitemlist.append(item);
         }
     }
 
-    QGraphicsItem* groupitem = graphicsScene->createItemGroup(graphicsitemlist);
-    return groupitem;
+    return returnlist;
 }
