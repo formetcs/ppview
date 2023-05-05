@@ -3,7 +3,7 @@
 #include "makro.h"
 #include "version.h"
 #include <QApplication>
-#include <QSettings>
+//#include <QSettings>
 #include <QTranslator>
 
 int main(int argc, char *argv[])

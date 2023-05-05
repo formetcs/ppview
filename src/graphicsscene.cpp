@@ -4,23 +4,23 @@
 
 GraphicsScene::GraphicsScene(QObject* parent) : QGraphicsScene(parent)
 {
-    planningState = PlanProDocument::End;
+    viewMode = MainWindow::ViewModeStateEnd;
 }
 
 GraphicsScene::~GraphicsScene()
 {
 }
 
-void GraphicsScene::changePlanningState(PlanProDocument::PlanningState state)
+void GraphicsScene::changeViewMode(MainWindow::ViewMode mode)
 {
-    planningState = state;
+    viewMode = mode;
     QList<QGraphicsItem*> graphicsItemList = items();
     for(int i = 0; i < graphicsItemList.count(); ++i)
     {
         QGraphicsItem* item = graphicsItemList.at(i);
         QString itemType = item->data(GRAPHICSITEM_TYPE).toString();
-        PlanProDocument::PlanningState itemPlState = item->data(GRAPHICSITEM_STATE).value<PlanProDocument::PlanningState>();
-        if(itemPlState == state)
+        MainWindow::ViewMode itemviewMode = item->data(GRAPHICSITEM_VIEWMODE).value<MainWindow::ViewMode>();
+        if(itemviewMode == viewMode)
         {
             item->setVisible(filterSettings.value(itemType,true));
         }
@@ -41,10 +41,10 @@ void GraphicsScene::changeFilterSettings(const QString& key, bool state)
     {
         QGraphicsItem* item = graphicsItemList.at(i);
         QString itemType = item->data(GRAPHICSITEM_TYPE).toString();
-        PlanProDocument::PlanningState itemPlState = item->data(GRAPHICSITEM_STATE).value<PlanProDocument::PlanningState>();
+        MainWindow::ViewMode itemviewMode = item->data(GRAPHICSITEM_VIEWMODE).value<MainWindow::ViewMode>();
         if(itemType == mod_key)
         {
-            item->setVisible(state && (planningState == itemPlState));
+            item->setVisible(state && (itemviewMode == viewMode));
         }
     }
 }
@@ -58,13 +58,13 @@ void GraphicsScene::changeFilterSettings(const QList<FilterState>& statelist)
     }
 }
 
-QGraphicsItem* GraphicsScene::getItemById(const QString& id, PlanProDocument::PlanningState state)
+QGraphicsItem* GraphicsScene::getItemById(const QString& id)
 {
     QList<QGraphicsItem*> graphicsItemList = items();
     for(int i = 0; i < graphicsItemList.count(); ++i)
     {
         QGraphicsItem* item = graphicsItemList.at(i);
-        if((item->data(GRAPHICSITEM_ID)).toString() == id && item->data(GRAPHICSITEM_STATE) == state)
+        if((item->data(GRAPHICSITEM_ID)).toString() == id && item->data(GRAPHICSITEM_VIEWMODE) == viewMode)
         {
             return item;
         }

@@ -2,6 +2,7 @@
 #define SELECTIONMANAGER_H
 
 #include "domitem.h"
+#include "mainwindow.h"
 
 #include <QObject>
 
@@ -15,15 +16,15 @@ class SelectionManager : public QObject
     Q_OBJECT
 public:
 
-    enum SelectionSource
-    {
-        SelectionSourceNotSelected = 0,
-        SelectionSourceExternal = 1,
-        SelectionSourceGraphicsView = 2,
-        SelectionSourceObjectList = 3,
-        SelectionSourceFavoriteList = 4,
-        SelectionSourceReferenceList = 5
-    };
+//    enum SelectionSource
+//    {
+//        SelectionSourceNotSelected = 0,
+//        SelectionSourceExternal = 1,
+//        SelectionSourceGraphicsView = 2,
+//        SelectionSourceObjectList = 3,
+//        SelectionSourceFavoriteList = 4,
+//        SelectionSourceReferenceList = 5
+//    };
 
     explicit SelectionManager(QObject* parent = nullptr);
     void setDocument(PlanProDocument* doc);
@@ -38,6 +39,7 @@ public:
 public slots:
     void selectItems(const QStringList& ids);
     void selectItem(const QString& id);
+    void changeViewMode(MainWindow::ViewMode mode);
 
 signals:
     void selectionChanged(QList<DomItem*> objectlist);
@@ -52,6 +54,12 @@ private slots:
 
 
 private:
+    void updateGraphicsSceneSelection();
+    void updateFavoriteListSelection();
+    void updateReferenceListSelection();
+    void updateDocumentTreeSelection();
+    void updateObjectListSelection();
+
     QList<DomItem*> selectedItemList;
     PlanProDocument* document;
     GraphicsScene* graphicsScene;
@@ -60,8 +68,11 @@ private:
     QTreeView* documentTreeView;
     QTreeView* objectListView;
 
+    MainWindow::ViewMode viewMode;
+    bool selectionChangeInProgress;
 
-    SelectionSource selectionSource;
+
+    //SelectionSource selectionSource;
 
 };
 

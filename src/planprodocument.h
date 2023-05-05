@@ -11,24 +11,38 @@ class PlanProDocument : public QObject
 public:
     enum DocumentType
     {
-        Invalid = 0,
-        State = 1,
-        Planning = 2,
-        Unknown = 99
+        DocumentTypeInvalid = 0,
+        DocumentTypeState = 1,
+        DocumentTypePlanning = 2,
+        DocumentTypeUnknown = 99
     };
 
     enum PlanningState
     {
-        Start = 0,
-        End = 1,
-        Both = 2
+        PlanningStateStart = 0,
+        PlanningStateEnd = 1,
+        PlanningStateBoth = 2
     };
 
     struct ObjectListItem
     {
         DomItem* itemStart;
         DomItem* itemEnd;
+        QString id;
         PlanningState state;
+
+        ObjectListItem()
+        {
+            itemStart = NULL;
+            itemEnd = NULL;
+            id = "00000000-0000-0000-0000-000000000000";
+            state = PlanningStateBoth;
+        }
+
+        bool isValid()
+        {
+            return (itemStart || itemEnd);
+        }
     };
 
     explicit PlanProDocument(QObject *parent = nullptr);
@@ -44,7 +58,8 @@ public:
     QStringList getCategoryList() const;
     QList<DomItem*> getObjectList(PlanningState state, const QString& category = QString());
     QList<ObjectListItem> getCombinedObjectList(const QString& category = QString());
-    DomItem* getObjectById(const QString& id, PlanningState state = End);
+    DomItem* getObjectById(const QString& id, PlanningState state = PlanningStateEnd);
+    ObjectListItem getObjectListItemById(const QString& id);
     void clearCache();
 
 public slots:

@@ -1,10 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "objectlistmodel.h"
-
 #include <QMainWindow>
-#include <QItemSelection>
+//#include <QItemSelection>
 
 class QActionGroup;
 class QComboBox;
@@ -26,12 +24,22 @@ class PlanProModel;
 class GraphicsScene;
 class PlanProXmlDocument;
 class GraphicsSceneBuilder;
+class ObjectListModel;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+
+    enum ViewMode
+    {
+        ViewModeStateStart = 0,
+        ViewModeStateEnd = 1,
+        ViewModeStateComparison = 2
+    };
+
+
     MainWindow(const QString& dataFileName, QWidget* parent = nullptr);
     ~MainWindow();
 
@@ -53,7 +61,7 @@ private slots:
     void handleObjectSearchFromSearchWindow();
     void handleObjectSearchFromMenu();
     void centerObject();
-    void switchPlanningState();
+    void switchViewMode();
     void changeCategory();
     void extractFile();
     void measureDistance();
@@ -89,10 +97,10 @@ private:
     QAction* exitAct;
     QAction* searchAct;
     QAction* centerAct;
-    QActionGroup* planningStateActGroup;
-    QAction* startStateAct;
-    QAction* endStateAct;
-    QAction* combinedStateAct;
+    QActionGroup* viewModeActGroup;
+    QAction* startViewModeAct;
+    QAction* endViewModeAct;
+    QAction* comparisonViewModeAct;
     QAction* selectAllFiltersAct;
     QAction* deselectAllFiltersAct;
     QAction* extractFileAct;

@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QObject>
 
+#include "mainwindow.h"
 #include "planprodocument.h"
 
 class ObjectListModel : public QAbstractTableModel
@@ -12,6 +13,8 @@ class ObjectListModel : public QAbstractTableModel
 public:
     explicit ObjectListModel(QObject *parent = nullptr);
     void setDocument(PlanProDocument* d);
+    DomItem* getItem(const QModelIndex& index) const;
+    QModelIndex getModelIndexById(QString id) const;
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -20,7 +23,7 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
 public slots:
-    void changePlanningState(PlanProDocument::PlanningState st);
+    void changeViewMode(MainWindow::ViewMode mode);
     void changeCategory(const QString& cat);
     void modelChanged();
 
@@ -29,7 +32,7 @@ private:
 
     PlanProDocument* doc;
     QString category;
-    PlanProDocument::PlanningState state;
+    MainWindow::ViewMode viewMode;
 };
 
 #endif // OBJECTLISTMODEL_H

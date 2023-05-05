@@ -1,17 +1,20 @@
 #include "objectinfowidget.h"
 
 
+
 ObjectInfoWidget::ObjectInfoWidget(QWidget* parent)
     : QTextBrowser(parent)
 {
-
+    setOpenLinks(false);
+    connect(this, SIGNAL(anchorClicked(QUrl)), this, SLOT(handleHyperlinkSelection(QUrl)));
+    uuidRegExp = QRegularExpression("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 }
 
 void ObjectInfoWidget::setInfoText(QList<DomItem*> objectlist)
 {
     clear();
     QString htmlstring;
-    for(int i = 0; i < objectlist.count(); i++)
+    for(int i = 0; i < objectlist.count(); ++i)
     {
         DomItem* temp = objectlist.at(i);
         htmlstring += generateInfoText(temp);
@@ -20,22 +23,25 @@ void ObjectInfoWidget::setInfoText(QList<DomItem*> objectlist)
     setHtml(htmlstring);
 }
 
+void ObjectInfoWidget::handleHyperlinkSelection(const QUrl& link)
+{
+    QString linkstring = link.toString();
+    linkstring = linkstring.remove("ppview://");
+    linkstring = linkstring.toUpper();
+    emit uuidClicked(linkstring);
+}
+
 int ObjectInfoWidget::getMaxDomDepth(DomItem* o)
 {
-    if(o->childCount() == 0)
-    {
-        return 0;
-    }
-
-    int maxdepth = 0;
-    for(int i = 0; i < o->childCount(); i++)
+    int maxchilddepth = 0;
+    for(int i = 0; i < o->childCount(); ++i)
     {
         int tempdepth = getMaxDomDepth(o->getChild(i));
-        if(tempdepth > maxdepth)
-            maxdepth = tempdepth;
+        if(tempdepth > maxchilddepth)
+            maxchilddepth = tempdepth;
     }
 
-    return maxdepth + 1;
+    return maxchilddepth + 1;
 }
 
 int ObjectInfoWidget::getLeafCount(DomItem* o)
@@ -46,7 +52,7 @@ int ObjectInfoWidget::getLeafCount(DomItem* o)
     }
 
     int tempcount = 0;
-    for(int i = 0; i < o->childCount(); i++)
+    for(int i = 0; i < o->childCount(); ++i)
     {
         tempcount += getLeafCount(o->getChild(i));
     }
@@ -58,9 +64,9 @@ QString ObjectInfoWidget::generateInfoText(DomItem* o)
 {
     int maxdepth = getMaxDomDepth(o);
     QString returnval = QString("<table border='1' cellpadding='2'>\n");
-    returnval += QString("<tr><th bgcolor='deepskyblue' colspan ='%1'>%2</th></tr>\n<tr>").arg(maxdepth - 1) .arg(o->getName());
+    returnval += QString("<tr><th bgcolor='deepskyblue' colspan ='%1'>%2</th></tr>\n<tr>").arg(maxdepth) .arg(o->getName());
     returnval += generateInfoTextRec(o, 1, maxdepth);
-    returnval = returnval.left(returnval.size() - 4);
+    returnval = returnval.left(returnval.size() - 4); // remove the ending "<tr>"
     returnval += QString("</table>\n");
     return returnval;
 }
@@ -70,27 +76,27 @@ QString ObjectInfoWidget::generateInfoTextRec(DomItem* o, int currentDepth, int 
     QString returnval = QString();
     if(o->childCount() == 0)
     {
-        returnval += QString("<td colspan ='%1'></td></tr>\n<tr>") .arg(maxDepth - currentDepth);
+        QString valuestring = o->getValue();
+        QString finalvalue = valuestring;
+        QRegularExpressionMatch match = uuidRegExp.match(valuestring);
+        if(match.hasMatch())
+        {
+            finalvalue = QString("<a href='ppview://%1'>%2</a>").arg(valuestring).arg(valuestring);
+        }
+        returnval += QString("<td>%1</td></tr>\n<tr>").arg(finalvalue);
         return returnval;
     }
-    DomItem* wertelement = o->getFirstChildItem("Wert");
-    if(wertelement)
-    {
-        returnval += QString("<td>%1</td></tr>\n<tr>").arg(wertelement->getValue());
-        return returnval;
-    }
-    for(int i = 0; i < o->childCount(); i++)
+    for(int i = 0; i < o->childCount(); ++i)
     {
         DomItem* childnode = o->getChild(i);
         int leafcount = getLeafCount(childnode);
         int colspan = 1;
-        if(childnode->getFirstChildItem("Wert"))
+        if(childnode->childCount() == 0)
         {
-            colspan = maxDepth - currentDepth - 1;
+            colspan = maxDepth - currentDepth;
         }
         returnval += QString("<td bgcolor='lightskyblue' rowspan ='%1' colspan ='%2'><b>%3</b></td>").arg(leafcount) .arg(colspan) .arg(childnode->getName());
         returnval += generateInfoTextRec(childnode, currentDepth + 1, maxDepth);
     }
-
     return returnval;
 }

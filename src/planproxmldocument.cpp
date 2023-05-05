@@ -28,7 +28,7 @@ bool PlanProXmlDocument::loadFile(const QString& filename)
         {
             setupDomTree(domDocument);
             clearCache();
-            if(getDocumentType() == Invalid)
+            if(getDocumentType() == DocumentTypeInvalid)
             {
                 returnval = false;
                 fileName = QString();

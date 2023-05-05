@@ -7,7 +7,7 @@ PlanProDocument::PlanProDocument(QObject *parent)
     : QObject{parent}
 {
     rootItem = NULL;
-    cachedDocumentType = Unknown;
+    cachedDocumentType = DocumentTypeUnknown;
 }
 
 PlanProDocument::~PlanProDocument()
@@ -26,7 +26,7 @@ void PlanProDocument::documentChanged()
 
 void PlanProDocument::clearCache()
 {
-    cachedDocumentType = Unknown;
+    cachedDocumentType = DocumentTypeUnknown;
     cachedStartObjectList.clear();
     cachedEndObjectList.clear();
     cachedCombinedObjectList.clear();
@@ -115,26 +115,26 @@ void PlanProDocument::updateHeader(const QString& toolname, const QString& toolv
 
 PlanProDocument::DocumentType PlanProDocument::getDocumentType() const
 {
-    if(cachedDocumentType != Unknown)
+    if(cachedDocumentType != DocumentTypeUnknown)
     {
         return cachedDocumentType;
     }
 
     if(rootItem == NULL)
     {
-        cachedDocumentType = Invalid;
+        cachedDocumentType = DocumentTypeInvalid;
     }
     else if(rootItem->getFirstItemAtPath("LST_Zustand") != NULL)
     {
-        cachedDocumentType = State;
+        cachedDocumentType = DocumentTypeState;
     }
     else if(rootItem->getFirstItemAtPath("LST_Planung") != NULL)
     {
-        cachedDocumentType = Planning;
+        cachedDocumentType = DocumentTypePlanning;
     }
     else
     {
-        cachedDocumentType = Invalid;
+        cachedDocumentType = DocumentTypeInvalid;
     }
     return cachedDocumentType;
 }
@@ -142,7 +142,7 @@ PlanProDocument::DocumentType PlanProDocument::getDocumentType() const
 QStringList PlanProDocument::getCategoryList() const
 {
     QStringList returnlist;
-    if(rootItem == NULL || getDocumentType() != Planning)
+    if(rootItem == NULL || getDocumentType() != DocumentTypePlanning)
     {
         return returnlist;
     }
@@ -157,23 +157,23 @@ QStringList PlanProDocument::getCategoryList() const
 
 QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState state, const QString& category)
 {
-    QString actualCategory = getDocumentType() == State ? QString() : category;
-    if(state == Start && cachedStartObjectList.contains(actualCategory))
+    QString actualCategory = getDocumentType() == DocumentTypeState ? QString() : category;
+    if(state == PlanningStateStart && cachedStartObjectList.contains(actualCategory))
     {
         return cachedStartObjectList.value(actualCategory);
     }
-    if(state != Start && cachedEndObjectList.contains(actualCategory))
+    if(state != PlanningStateStart && cachedEndObjectList.contains(actualCategory))
     {
         return cachedEndObjectList.value(actualCategory);
     }
 
     QList<DomItem*> returnlist;
-    if(rootItem == NULL || getDocumentType() == Invalid)
+    if(rootItem == NULL || getDocumentType() == DocumentTypeInvalid)
     {
         return returnlist;
     }
 
-    if(getDocumentType() == State)
+    if(getDocumentType() == DocumentTypeState)
     {
         DomItem* containerItem = rootItem->getFirstItemAtPath("LST_Zustand/Container");
         for(int i = 0; i < containerItem->childCount(); ++i)
@@ -183,11 +183,11 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
         cachedStartObjectList.insert(QString(), returnlist);
         cachedEndObjectList.insert(QString(), returnlist);
     }
-    else if(getDocumentType() == Planning)
+    else if(getDocumentType() == DocumentTypePlanning)
     {
         DomItem* fachdatenItem = rootItem->getFirstItemAtPath("LST_Planung/Fachdaten");
         QString statestring = "LST_Zustand_Ziel";
-        if(state == Start)
+        if(state == PlanningStateStart)
         {
             statestring = "LST_Zustand_Start";
         }
@@ -204,7 +204,7 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
                 }
             }
         }
-        if(state == Start)
+        if(state == PlanningStateStart)
         {
             cachedStartObjectList.insert(category, returnlist);
         }
@@ -219,32 +219,34 @@ QList<DomItem*> PlanProDocument::getObjectList(PlanProDocument::PlanningState st
 
 QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(const QString& category)
 {
-    QString actualCategory = getDocumentType() == State ? QString() : category;
+    QString actualCategory = getDocumentType() == DocumentTypeState ? QString() : category;
     if(cachedCombinedObjectList.contains(actualCategory))
     {
         return cachedCombinedObjectList.value(actualCategory);
     }
 
     QList<ObjectListItem> returnlist;
-    if(rootItem == NULL || getDocumentType() == Invalid)
+    if(rootItem == NULL || getDocumentType() == DocumentTypeInvalid)
     {
         return returnlist;
     }
 
-    if(getDocumentType() == State)
+    if(getDocumentType() == DocumentTypeState)
     {
         DomItem* containerItem = rootItem->getFirstItemAtPath("LST_Zustand/Container");
         for(int i = 0; i < containerItem->childCount(); ++i)
         {
+            DomItem* currentItem = containerItem->getChild(i);
             ObjectListItem oli;
-            oli.itemStart = containerItem->getChild(i);
-            oli.itemEnd = oli.itemStart;
-            oli.state = Both;
+            oli.itemStart = currentItem;
+            oli.itemEnd = currentItem;
+            oli.id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+            oli.state = PlanningStateBoth;
             returnlist.append(oli);
         }
         cachedCombinedObjectList.insert(QString(), returnlist);
     }
-    else if(getDocumentType() == Planning)
+    else if(getDocumentType() == DocumentTypePlanning)
     {
         DomItem* fachdatenItem = rootItem->getFirstItemAtPath("LST_Planung/Fachdaten");
         QList<DomItem*> ausgabeFachdatenList = fachdatenItem->getChildItems("Ausgabe_Fachdaten");
@@ -268,7 +270,8 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
                             ObjectListItem oli;
                             oli.itemStart = currentItem;
                             oli.itemEnd = compareItem;
-                            oli.state = Both;
+                            oli.id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+                            oli.state = PlanningStateBoth;
                             returnlist.append(oli);
                             break;
                         }
@@ -277,8 +280,9 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
                     {
                         ObjectListItem oli;
                         oli.itemStart = currentItem;
-                        oli.itemEnd = currentItem;
-                        oli.state = Start;
+                        oli.itemEnd = NULL;
+                        oli.id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+                        oli.state = PlanningStateStart;
                         returnlist.append(oli);
                     }
                 }
@@ -300,9 +304,10 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
                     if(!found)
                     {
                         ObjectListItem oli;
-                        oli.itemStart = currentItem;
+                        oli.itemStart = NULL;
                         oli.itemEnd = currentItem;
-                        oli.state = End;
+                        oli.id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+                        oli.state = PlanningStateEnd;
                         returnlist.append(oli);
                     }
                 }
@@ -315,7 +320,7 @@ QList<PlanProDocument::ObjectListItem> PlanProDocument::getCombinedObjectList(co
 
 DomItem* PlanProDocument::getObjectById(const QString& id, PlanningState state)
 {
-    if(rootItem == NULL || getDocumentType() == Invalid)
+    if(rootItem == NULL || getDocumentType() == DocumentTypeInvalid)
     {
         return NULL;
     }
@@ -330,4 +335,23 @@ DomItem* PlanProDocument::getObjectById(const QString& id, PlanningState state)
         }
     }
     return NULL;
+}
+
+PlanProDocument::ObjectListItem PlanProDocument::getObjectListItemById(const QString& id)
+{
+    ObjectListItem returnval = ObjectListItem();
+    if(rootItem == NULL || getDocumentType() == DocumentTypeInvalid)
+    {
+        return returnval;
+    }
+    QList<ObjectListItem> objectlist = getCombinedObjectList(QString());
+    for(int i = 0; i < objectlist.count(); ++i)
+    {
+        ObjectListItem currentItem = objectlist.at(i);
+        if(currentItem.id == id)
+        {
+            return currentItem;
+        }
+    }
+    return returnval;
 }

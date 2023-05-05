@@ -5,7 +5,7 @@ ObjectListModel::ObjectListModel(QObject *parent)
     : QAbstractTableModel{parent}
 {
     doc = NULL;
-    state = PlanProDocument::End;
+    viewMode = MainWindow::ViewModeStateEnd;
     category = QString();
 }
 
@@ -15,9 +15,9 @@ void ObjectListModel::setDocument(PlanProDocument* d)
     emit layoutChanged();
 }
 
-void ObjectListModel::changePlanningState(PlanProDocument::PlanningState st)
+void ObjectListModel::changeViewMode(MainWindow::ViewMode mode)
 {
-    state = st;
+    viewMode = mode;
     emit layoutChanged();
 }
 
@@ -30,6 +30,77 @@ void ObjectListModel::changeCategory(const QString& cat)
 void ObjectListModel::modelChanged()
 {
     emit layoutChanged();
+}
+
+DomItem* ObjectListModel::getItem(const QModelIndex& index) const
+{
+    int row = index.row();
+    if(viewMode == MainWindow::ViewModeStateComparison)
+    {
+        QList<PlanProDocument::ObjectListItem> objectlist = doc->getCombinedObjectList(category);
+        if (row >= objectlist.count())
+        {
+            return NULL;
+        }
+        PlanProDocument::ObjectListItem item = objectlist.at(row);
+        DomItem* returnitem = (item.itemEnd) ? item.itemEnd : item.itemStart;
+        return returnitem;
+    }
+
+    QList<DomItem*> objectlist;
+    if(viewMode == MainWindow::ViewModeStateStart)
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateStart, category);
+    }
+    else
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateEnd, category);
+    }
+
+    if (row >= objectlist.count())
+    {
+        return NULL;
+    }
+    return objectlist.at(row);
+}
+
+QModelIndex ObjectListModel::getModelIndexById(QString id) const
+{
+    if(viewMode == MainWindow::ViewModeStateComparison)
+    {
+        QList<PlanProDocument::ObjectListItem> objectlist = doc->getCombinedObjectList(category);
+        for(int i = 0; i < objectlist.count(); ++i)
+        {
+            PlanProDocument::ObjectListItem item = objectlist.at(i);
+            if(item.id == id)
+            {
+                return index(i, 0, QModelIndex());
+            }
+        }
+        return QModelIndex();
+    }
+
+    QList<DomItem*> objectlist;
+    if(viewMode == MainWindow::ViewModeStateStart)
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateStart, category);
+    }
+    else
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateEnd, category);
+    }
+
+    for(int i = 0; i < objectlist.count(); ++i)
+    {
+        DomItem* item = objectlist.at(i);
+        QString itemId = item->getFirstValueAtPath("Identitaet/Wert");
+        if(itemId == id)
+        {
+            return index(i, 0, QModelIndex());
+        }
+    }
+
+    return QModelIndex();
 }
 
 QString ObjectListModel::createSectionText(DomItem* item, int section) const
@@ -55,8 +126,8 @@ QVariant ObjectListModel::data(const QModelIndex& index, int role) const
     //qDebug("List:data");
     if (!index.isValid())
         return QVariant();
-
-    if(state == PlanProDocument::Both)
+    
+    if(viewMode == MainWindow::ViewModeStateComparison)
     {
         QList<PlanProDocument::ObjectListItem> objectlist = doc->getCombinedObjectList(category);
 
@@ -64,27 +135,36 @@ QVariant ObjectListModel::data(const QModelIndex& index, int role) const
             return QVariant();
 
         PlanProDocument::ObjectListItem item = objectlist.at(index.row());
-
-        if(role == Qt::BackgroundRole && item.state == PlanProDocument::Both)
+        
+        if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateBoth)
         {
             return QBrush(Qt::white);
         }
-        if(role == Qt::BackgroundRole && item.state == PlanProDocument::Start)
+        if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateStart)
         {
             return QBrush(Qt::yellow);
         }
-        if(role == Qt::BackgroundRole && item.state == PlanProDocument::End)
+        if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateEnd)
         {
             return QBrush(Qt::red);
         }
         if(role == Qt::DisplayRole)
         {
-            return createSectionText(item.itemEnd, index.column());
+            DomItem* resultitem = (item.itemEnd) ? item.itemEnd : item.itemStart;
+            return createSectionText(resultitem, index.column());
         }
         return QVariant();
     }
 
-    QList<DomItem*> objectlist = doc->getObjectList(state, category);
+    QList<DomItem*> objectlist;
+    if(viewMode == MainWindow::ViewModeStateStart)
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateStart, category);
+    }
+    else
+    {
+        objectlist = doc->getObjectList(PlanProDocument::PlanningStateEnd, category);
+    }
 
     if (index.row() >= objectlist.count())
         return QVariant();
@@ -135,13 +215,17 @@ int ObjectListModel::rowCount(const QModelIndex& parent) const
 {
     //qDebug("List:rowCount");
     Q_UNUSED(parent);
-
-    if(state == PlanProDocument::Both)
+    
+    if(viewMode == MainWindow::ViewModeStateComparison)
     {
         return doc->getCombinedObjectList(category).count();
     }
+    else if(viewMode == MainWindow::ViewModeStateStart)
+    {
+        return doc->getObjectList(PlanProDocument::PlanningStateStart, category).count();
+    }
 
-    return doc->getObjectList(state, category).count();
+    return doc->getObjectList(PlanProDocument::PlanningStateEnd, category).count();
 }
 
 int ObjectListModel::columnCount(const QModelIndex& parent) const

@@ -25,10 +25,22 @@ void PlanProModel::modelChanged()
     emit layoutChanged();
 }
 
-
-
-QDomElement PlanProModel::getContainerElement()
+QModelIndex PlanProModel::getModelIndex(DomItem* item)
 {
+    if(!item)
+    {
+        return QModelIndex();
+    }
+
+    DomItem* parentItem = item->parent();
+    QModelIndex parentIndex = getModelIndex(parentItem);
+    int row = item->getOwnPosition();
+
+    return index(row, 0, parentIndex);
+}
+
+//QDomElement PlanProModel::getContainerElement()
+//{
 //    QDomElement docElem = domDocument.documentElement();
 //    QDomElement childElement = docElem.firstChildElement("LST_Planung_Projekt");
 //    childElement = childElement.firstChildElement("LST_Planung_Gruppe");
@@ -51,52 +63,52 @@ QDomElement PlanProModel::getContainerElement()
 //    }
 //    return containerElement;
 
-    return QDomElement();
-}
+//    return QDomElement();
+//}
 
-QDomElement PlanProModel::getObjectById(QString id)
-{
-    QDomNode n = getContainerElement().firstChild();
-    while (!n.isNull())
-    {
-        if (n.isElement())
-        {
-            QDomElement e = n.toElement();
-            QDomElement identitaetElement = e.firstChildElement("Identitaet");
-            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
-            if(identitaetWertElement.text() == id)
-            {
-                return e;
-            }
-        }
-        n = n.nextSibling();
-    }
-    return QDomElement();
-}
+//QDomElement PlanProModel::getObjectById(QString id)
+//{
+//    QDomNode n = getContainerElement().firstChild();
+//    while (!n.isNull())
+//    {
+//        if (n.isElement())
+//        {
+//            QDomElement e = n.toElement();
+//            QDomElement identitaetElement = e.firstChildElement("Identitaet");
+//            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
+//            if(identitaetWertElement.text() == id)
+//            {
+//                return e;
+//            }
+//        }
+//        n = n.nextSibling();
+//    }
+//    return QDomElement();
+//}
 
-QModelIndex PlanProModel::getModelIndexById(QString id)
-{
-    QDomNodeList nodelist = getContainerElement().childNodes();
-    for(int i = 0; i < nodelist.count(); i++)
-    {
-        QDomNode n = nodelist.at(i);
-        if (n.isElement())
-        {
-            QDomElement e = n.toElement();
-            QDomElement identitaetElement = e.firstChildElement("Identitaet");
-            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
-            if(identitaetWertElement.text() == id)
-            {
-                return index(i, 0, QModelIndex());
-            }
-        }
+//QModelIndex PlanProModel::getModelIndexById(QString id)
+//{
+//    QDomNodeList nodelist = getContainerElement().childNodes();
+//    for(int i = 0; i < nodelist.count(); i++)
+//    {
+//        QDomNode n = nodelist.at(i);
+//        if (n.isElement())
+//        {
+//            QDomElement e = n.toElement();
+//            QDomElement identitaetElement = e.firstChildElement("Identitaet");
+//            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
+//            if(identitaetWertElement.text() == id)
+//            {
+//                return index(i, 0, QModelIndex());
+//            }
+//        }
 
-    }
-    return QModelIndex();
-}
+//    }
+//    return QModelIndex();
+//}
 
-QString PlanProModel::getBinaryFileName(QModelIndex index)
-{
+//QString PlanProModel::getBinaryFileName(QModelIndex index)
+//{
 //    if (!index.isValid())
 //        return QString();
 
@@ -114,11 +126,11 @@ QString PlanProModel::getBinaryFileName(QModelIndex index)
 //        QString fileextension = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateityp_Binaerdatei").firstChildElement("Wert").text();
 //        return filename + "." + fileextension;
 //    }
-    return QString();
-}
+//    return QString();
+//}
 
-QByteArray PlanProModel::extractBinaryFile(QModelIndex index)
-{
+//QByteArray PlanProModel::extractBinaryFile(QModelIndex index)
+//{
 //    if (!index.isValid())
 //        return QByteArray();
 
@@ -136,12 +148,12 @@ QByteArray PlanProModel::extractBinaryFile(QModelIndex index)
 //        QByteArray finalData = QByteArray::fromBase64(encodedData);
 //        return finalData;
 //    }
-    return QByteArray();
-}
+//    return QByteArray();
+//}
 
-QStringList PlanProModel::findReferencingObjects(QModelIndex index)
-{
-    QStringList returnlist;
+//QStringList PlanProModel::findReferencingObjects(QModelIndex index)
+//{
+//    QStringList returnlist;
 
 //    if (!index.isValid())
 //        return returnlist;
@@ -167,151 +179,151 @@ QStringList PlanProModel::findReferencingObjects(QModelIndex index)
 //        }
 //    }
 
-    return returnlist;
-}
+//    return returnlist;
+//}
 
-QStringList PlanProModel::findReferencingObjectsRec(QDomNode node, QString searchId, QString objectName, QString objectId)
-{
-    QStringList returnlist;
+//QStringList PlanProModel::findReferencingObjectsRec(QDomNode node, QString searchId, QString objectName, QString objectId)
+//{
+//    QStringList returnlist;
 
-    if(node.isText() && node.nodeValue() == searchId && node.nodeValue() != objectId)
-    {
-        QString attributeName = node.parentNode().parentNode().nodeName();
-        QString resultstring = objectName + " - " + attributeName + " [" + objectId + "]";
-        returnlist.append(resultstring);
-    }
-    else if(node.isElement())
-    {
-        QDomNodeList nodelist = node.childNodes();
-        for(int i = 0; i < nodelist.count(); i++)
-        {
-            QDomNode n = nodelist.at(i);
-            QStringList partlist = findReferencingObjectsRec(n, searchId, objectName, objectId);
-            returnlist.append(partlist);
-        }
-    }
+//    if(node.isText() && node.nodeValue() == searchId && node.nodeValue() != objectId)
+//    {
+//        QString attributeName = node.parentNode().parentNode().nodeName();
+//        QString resultstring = objectName + " - " + attributeName + " [" + objectId + "]";
+//        returnlist.append(resultstring);
+//    }
+//    else if(node.isElement())
+//    {
+//        QDomNodeList nodelist = node.childNodes();
+//        for(int i = 0; i < nodelist.count(); i++)
+//        {
+//            QDomNode n = nodelist.at(i);
+//            QStringList partlist = findReferencingObjectsRec(n, searchId, objectName, objectId);
+//            returnlist.append(partlist);
+//        }
+//    }
 
-    return returnlist;
-}
+//    return returnlist;
+//}
 
-QList<NextTopKanteResult> PlanProModel::getNextTopKante(QDomNode topKante, bool forward)
-{
-    QList<NextTopKanteResult> returnval;
-    QString srcIdTopKnotenA = topKante.firstChildElement("ID_TOP_Knoten_A").firstChildElement("Wert").text();
-    QString srcIdTopKnotenB = topKante.firstChildElement("ID_TOP_Knoten_B").firstChildElement("Wert").text();
-    QString srcTopAnschlussA = topKante.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_A").firstChildElement("Wert").text();
-    QString srcTopAnschlussB = topKante.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_B").firstChildElement("Wert").text();
-    //QDomElement containerElement = getContainerElement();
-    QDomNodeList nodelist = getContainerElement().childNodes();
-    for(int i = 0; i < nodelist.count(); i++)
-    {
-        QDomNode n = nodelist.at(i);
-        if (n.isElement())
-        {
-            //QDomElement e = n.toElement();
-            QString name = n.nodeName();
-            if (name == "TOP_Kante" && n != topKante)
-            {
-                QString dstIdTopKnotenA = n.firstChildElement("ID_TOP_Knoten_A").firstChildElement("Wert").text();
-                QString dstIdTopKnotenB = n.firstChildElement("ID_TOP_Knoten_B").firstChildElement("Wert").text();
-                QString dstTopAnschlussA = n.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_A").firstChildElement("Wert").text();
-                QString dstTopAnschlussB = n.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_B").firstChildElement("Wert").text();
+//QList<NextTopKanteResult> PlanProModel::getNextTopKante(QDomNode topKante, bool forward)
+//{
+//    QList<NextTopKanteResult> returnval;
+//    QString srcIdTopKnotenA = topKante.firstChildElement("ID_TOP_Knoten_A").firstChildElement("Wert").text();
+//    QString srcIdTopKnotenB = topKante.firstChildElement("ID_TOP_Knoten_B").firstChildElement("Wert").text();
+//    QString srcTopAnschlussA = topKante.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_A").firstChildElement("Wert").text();
+//    QString srcTopAnschlussB = topKante.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_B").firstChildElement("Wert").text();
+//    //QDomElement containerElement = getContainerElement();
+//    QDomNodeList nodelist = getContainerElement().childNodes();
+//    for(int i = 0; i < nodelist.count(); i++)
+//    {
+//        QDomNode n = nodelist.at(i);
+//        if (n.isElement())
+//        {
+//            //QDomElement e = n.toElement();
+//            QString name = n.nodeName();
+//            if (name == "TOP_Kante" && n != topKante)
+//            {
+//                QString dstIdTopKnotenA = n.firstChildElement("ID_TOP_Knoten_A").firstChildElement("Wert").text();
+//                QString dstIdTopKnotenB = n.firstChildElement("ID_TOP_Knoten_B").firstChildElement("Wert").text();
+//                QString dstTopAnschlussA = n.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_A").firstChildElement("Wert").text();
+//                QString dstTopAnschlussB = n.firstChildElement("TOP_Kante_Allg").firstChildElement("TOP_Anschluss_B").firstChildElement("Wert").text();
 
-                if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Verbindung"
-                        && dstTopAnschlussA == "Verbindung") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Links"
-                           && dstTopAnschlussA == "Spitze") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Rechts"
-                           && dstTopAnschlussA == "Spitze") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Spitze"
-                           && dstTopAnschlussA == "Links") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Spitze"
-                           && dstTopAnschlussA == "Rechts") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                }
+//                if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Verbindung"
+//                        && dstTopAnschlussA == "Verbindung") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Links"
+//                           && dstTopAnschlussA == "Spitze") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Rechts"
+//                           && dstTopAnschlussA == "Spitze") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Spitze"
+//                           && dstTopAnschlussA == "Links") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenA) && srcTopAnschlussB == "Spitze"
+//                           && dstTopAnschlussA == "Rechts") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                }
 
-                else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Verbindung"
-                         && dstTopAnschlussB == "Verbindung") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Links"
-                           && dstTopAnschlussB == "Spitze") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Rechts"
-                           && dstTopAnschlussB == "Spitze") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Spitze"
-                           && dstTopAnschlussB == "Links") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Spitze"
-                           && dstTopAnschlussB == "Rechts") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                }
+//                else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Verbindung"
+//                         && dstTopAnschlussB == "Verbindung") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Links"
+//                           && dstTopAnschlussB == "Spitze") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Rechts"
+//                           && dstTopAnschlussB == "Spitze") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Spitze"
+//                           && dstTopAnschlussB == "Links") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (forward && (srcIdTopKnotenB == dstIdTopKnotenB) && srcTopAnschlussB == "Spitze"
+//                           && dstTopAnschlussB == "Rechts") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                }
 
-                else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Verbindung"
-                         && dstTopAnschlussB == "Verbindung") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Links"
-                           && dstTopAnschlussB == "Spitze") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Rechts"
-                           && dstTopAnschlussB == "Spitze") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Spitze"
-                           && dstTopAnschlussB == "Links") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Spitze"
-                           && dstTopAnschlussB == "Rechts") {
-                    NextTopKanteResult res(n, false);
-                    returnval.append(res);
-                }
+//                else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Verbindung"
+//                         && dstTopAnschlussB == "Verbindung") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Links"
+//                           && dstTopAnschlussB == "Spitze") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Rechts"
+//                           && dstTopAnschlussB == "Spitze") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Spitze"
+//                           && dstTopAnschlussB == "Links") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenB) && srcTopAnschlussA == "Spitze"
+//                           && dstTopAnschlussB == "Rechts") {
+//                    NextTopKanteResult res(n, false);
+//                    returnval.append(res);
+//                }
 
-                else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Verbindung"
-                         && dstTopAnschlussA == "Verbindung") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Links"
-                           && dstTopAnschlussA == "Spitze") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Rechts"
-                           && dstTopAnschlussA == "Spitze") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Spitze"
-                           && dstTopAnschlussA == "Links") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Spitze"
-                           && dstTopAnschlussA == "Rechts") {
-                    NextTopKanteResult res(n, true);
-                    returnval.append(res);
-                }
-            }
-        }
-    }
-    return returnval;
-}
+//                else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Verbindung"
+//                         && dstTopAnschlussA == "Verbindung") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Links"
+//                           && dstTopAnschlussA == "Spitze") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Rechts"
+//                           && dstTopAnschlussA == "Spitze") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Spitze"
+//                           && dstTopAnschlussA == "Links") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                } else if (!forward && (srcIdTopKnotenA == dstIdTopKnotenA) && srcTopAnschlussA == "Spitze"
+//                           && dstTopAnschlussA == "Rechts") {
+//                    NextTopKanteResult res(n, true);
+//                    returnval.append(res);
+//                }
+//            }
+//        }
+//    }
+//    return returnval;
+//}
 
-double PlanProModel::calculateDistance(QModelIndexList selectedIndexes)
-{
+//double PlanProModel::calculateDistance(QModelIndexList selectedIndexes)
+//{
 //    QModelIndex index1 = selectedIndexes.at(0);
 //    QModelIndex index2 = selectedIndexes.at(1);
 //    DomItem* item1 = static_cast<DomItem*>(index1.internalPointer());
@@ -356,12 +368,12 @@ double PlanProModel::calculateDistance(QModelIndexList selectedIndexes)
 //        }
 //        punktObjektTopKanteElement1 = punktObjektTopKanteElement1.nextSiblingElement("Punkt_Objekt_TOP_Kante");
 //    }
-    return -1;
-}
+//    return -1;
+//}
 
-double PlanProModel::calculateDistance(PunktObjekt startpos, PunktObjekt endpos, bool forward)
-{
-    double returnval = -1;
+//double PlanProModel::calculateDistance(PunktObjekt startpos, PunktObjekt endpos, bool forward)
+//{
+//    double returnval = -1;
 //    QString startGuid = startpos.getIdTopKante();
 //    double startAbstand = startpos.getAbstand();
 //    QString startWirkrichtung = startpos.getWirkrichtung();
@@ -426,8 +438,8 @@ double PlanProModel::calculateDistance(PunktObjekt startpos, PunktObjekt endpos,
 //        }
 //    }
 
-    return returnval;
-}
+//    return returnval;
+//}
 
 QVariant PlanProModel::data(const QModelIndex& index, int role) const
 {
@@ -498,18 +510,41 @@ QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) 
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    DomItem *parentItem;
+    DomItem* childItem;
 
     if (!parent.isValid())
-        parentItem = doc->getRootItem();
+    {
+        childItem = doc->getRootItem();
+    }
     else
-        parentItem = static_cast<DomItem*>(parent.internalPointer());
+    {
+        DomItem* parentItem = static_cast<DomItem*>(parent.internalPointer());
+        childItem = parentItem->getChild(row);
+    }
 
-    DomItem* childItem = parentItem->getChild(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
+
+
+
+//    DomItem *parentItem;
+
+//    if (!parent.isValid())
+//    {
+//        parentItem = doc->getRootItem();
+//    }
+//    else
+//    {
+//        parentItem = static_cast<DomItem*>(parent.internalPointer());
+//    }
+
+//    DomItem* childItem = parentItem->getChild(row);
+//    if (childItem)
+//        return createIndex(row, column, childItem);
+//    else
+//        return QModelIndex();
 }
 
 QModelIndex PlanProModel::parent(const QModelIndex& child) const
@@ -521,7 +556,7 @@ QModelIndex PlanProModel::parent(const QModelIndex& child) const
     DomItem* childItem = static_cast<DomItem*>(child.internalPointer());
     DomItem* parentItem = childItem->parent();
 
-    if (!parentItem || parentItem == doc->getRootItem())
+    if (!parentItem /*|| parentItem == doc->getRootItem()*/)
         return QModelIndex();
 
     return createIndex(parentItem->getOwnPosition(), 0, parentItem);
@@ -536,13 +571,19 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
     DomItem* parentItem;
 
     if (!parent.isValid())
-        parentItem = doc->getRootItem();
+    {
+        //parentItem = doc->getRootItem();
+        parentItem = NULL;
+    }
     else
+    {
         parentItem = static_cast<DomItem*>(parent.internalPointer());
+    }
 
     if(!parentItem)
     {
-        return 0;
+        //return 0;
+        return 1;
     }
 
     return parentItem->childCount();

@@ -2,7 +2,7 @@
 #include <QtWidgets>
 #include <QtPrintSupport>
 
-#include <iostream>
+//#include <iostream>
 
 #include "mainwindow.h"
 //#include "makro.h"
@@ -15,6 +15,7 @@
 #include "version.h"
 #include "objectinfowidget.h"
 #include "selectionmanager.h"
+#include "objectlistmodel.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -32,7 +33,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     objectlistmodel = new ObjectListModel();
     objectlistmodel->setDocument(document);
     objectlistmodel->changeCategory(QString());
-    objectlistmodel->changePlanningState(PlanProDocument::End);
+    objectlistmodel->changeViewMode(ViewModeStateEnd);
 
     objectTreeView = new QTreeView();
     objectTreeView->setModel(model);
@@ -58,7 +59,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     filterWidget->readSettings();
 
     scene = new GraphicsScene();
-    scene->changePlanningState(PlanProDocument::End);
+    scene->changeViewMode(ViewModeStateEnd);
 
     view = new QGraphicsView(scene, this);
     view->setAcceptDrops(false);
@@ -87,6 +88,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     connect(selectionManager, SIGNAL(selectionChanged(QList<DomItem*>)), objectInfo, SLOT(setInfoText(QList<DomItem*>)));
     connect(document, SIGNAL(dataChanged()), model, SLOT(modelChanged()));
     connect(document, SIGNAL(dataChanged()), objectlistmodel, SLOT(modelChanged()));
+    connect(objectInfo, SIGNAL(uuidClicked(QString)), selectionManager, SLOT(selectItem(QString)));
 
     saveFileAct->setEnabled(false);
     exportToPictureAct->setEnabled(false);
@@ -362,25 +364,16 @@ void MainWindow::measureDistance()
 
 void MainWindow::addToFavorites()
 {
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QModelIndexList selectedList = selectionModel->selectedIndexes();
-//    QModelIndex index;
-//    foreach (index, selectedList)
-//    {
-//        QModelIndex parentIndex = model->parent(index);
-//        while(parentIndex.isValid())
-//        {
-//            index = parentIndex;
-//            parentIndex = model->parent(index);
-//        }
-//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-//        QString name = domitem->node().nodeName();
-//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-
-//        QListWidgetItem* newItem = new QListWidgetItem;
-//        newItem->setText(name + " [" + id + "]");
-//        favoriteList->addItem(newItem);
-//    }
+    QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
+    for(int i = 0; i < selectedItemList.count(); ++i)
+    {
+      DomItem* item = selectedItemList.at(i);
+      QString name = item->getName();
+      QString id = item->getFirstValueAtPath("Identitaet/Wert");
+      QListWidgetItem* newItem = new QListWidgetItem;
+      newItem->setText(name + " [" + id + "]");
+      favoriteList->addItem(newItem);
+    }
 }
 
 void MainWindow::removeFromFavorites()
@@ -487,26 +480,27 @@ void MainWindow::centerObject()
     }
 }
 
-void MainWindow::switchPlanningState()
+void MainWindow::switchViewMode()
 {
-    PlanProDocument::PlanningState state = PlanProDocument::End;
-    if(startStateAct->isChecked())
+    ViewMode viewMode = ViewModeStateEnd;
+    if(startViewModeAct->isChecked())
     {
-        state = PlanProDocument::Start;
+        viewMode = ViewModeStateStart;
         qDebug("start state switch");
     }
-    else if(endStateAct->isChecked())
+    else if(endViewModeAct->isChecked())
     {
-        state = PlanProDocument::End;
+        viewMode = ViewModeStateEnd;
         qDebug("end state switch");
     }
-    else if(combinedStateAct->isChecked())
+    else if(comparisonViewModeAct->isChecked())
     {
-        state = PlanProDocument::Both;
+        viewMode = ViewModeStateComparison;
         qDebug("combined state switch");
     }
-    objectlistmodel->changePlanningState(state);
-    scene->changePlanningState(state);
+    objectlistmodel->changeViewMode(viewMode);
+    scene->changeViewMode(viewMode);
+    selectionManager->changeViewMode(viewMode);
 }
 
 void MainWindow::changeCategory()
@@ -559,31 +553,31 @@ void MainWindow::createActions()
     centerAct->setStatusTip(tr("Center the selected object in the graphics view"));
     connect(centerAct, SIGNAL(triggered()), this, SLOT(centerObject()));
 
-    startStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Start State"), this);
-    startStateAct->setShortcut(tr("F5"));
-    startStateAct->setStatusTip(tr("Show the start state of the planning"));
-    startStateAct->setCheckable(true);
-    startStateAct->setChecked(false);
-    connect(startStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+    startViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Start State"), this);
+    startViewModeAct->setShortcut(tr("F5"));
+    startViewModeAct->setStatusTip(tr("Show the start state of the planning"));
+    startViewModeAct->setCheckable(true);
+    startViewModeAct->setChecked(false);
+    connect(startViewModeAct, SIGNAL(triggered()), this, SLOT(switchViewMode()));
 
-    endStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&End State"), this);
-    endStateAct->setShortcut(tr("F6"));
-    endStateAct->setStatusTip(tr("Show the end state of the planning"));
-    endStateAct->setCheckable(true);
-    endStateAct->setChecked(true);
-    connect(endStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+    endViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&End State"), this);
+    endViewModeAct->setShortcut(tr("F6"));
+    endViewModeAct->setStatusTip(tr("Show the end state of the planning"));
+    endViewModeAct->setCheckable(true);
+    endViewModeAct->setChecked(true);
+    connect(endViewModeAct, SIGNAL(triggered()), this, SLOT(switchViewMode()));
 
-    combinedStateAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Combined State"), this);
-    combinedStateAct->setShortcut(tr("F7"));
-    combinedStateAct->setStatusTip(tr("Show the combined start/end state of the planning"));
-    combinedStateAct->setCheckable(true);
-    combinedStateAct->setChecked(false);
-    connect(combinedStateAct, SIGNAL(triggered()), this, SLOT(switchPlanningState()));
+    comparisonViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("Start/End &Comparison"), this);
+    comparisonViewModeAct->setShortcut(tr("F7"));
+    comparisonViewModeAct->setStatusTip(tr("Show the comparison of the start and end state of the planning"));
+    comparisonViewModeAct->setCheckable(true);
+    comparisonViewModeAct->setChecked(false);
+    connect(comparisonViewModeAct, SIGNAL(triggered()), this, SLOT(switchViewMode()));
 
-    planningStateActGroup = new QActionGroup(this);
-    planningStateActGroup->addAction(startStateAct);
-    planningStateActGroup->addAction(endStateAct);
-    planningStateActGroup->addAction(combinedStateAct);
+    viewModeActGroup = new QActionGroup(this);
+    viewModeActGroup->addAction(startViewModeAct);
+    viewModeActGroup->addAction(endViewModeAct);
+    viewModeActGroup->addAction(comparisonViewModeAct);
 
     selectAllFiltersAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Select all filter settings"), this);
     selectAllFiltersAct->setShortcut(tr("Shift+Alt+S"));
@@ -661,9 +655,9 @@ void MainWindow::createMenus()
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewDockSubmenu = viewMenu->addMenu(tr("Show &Dock Windows"));
     viewMenu->addSeparator();
-    viewMenu->addAction(startStateAct);
-    viewMenu->addAction(endStateAct);
-    viewMenu->addAction(combinedStateAct);
+    viewMenu->addAction(startViewModeAct);
+    viewMenu->addAction(endViewModeAct);
+    viewMenu->addAction(comparisonViewModeAct);
     viewMenu->addSeparator();
     viewMenu->addAction(centerAct);
     viewMenu->addSeparator();
