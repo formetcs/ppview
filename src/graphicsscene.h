@@ -32,7 +32,7 @@ signals:
 public slots:
     void changeFilterSettings(const QString& key, bool state);
     void changeFilterSettings(const QList<FilterState>& statelist);
-    void unselectAllItems();
+    //void unselectAllItems();
     void changeViewMode(MainWindow::ViewMode mode);
 
 private slots:

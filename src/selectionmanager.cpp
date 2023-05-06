@@ -106,11 +106,9 @@ void SelectionManager::selectItems(const QStringList& ids)
 {
     if(selectionChangeInProgress)
     {
-        qDebug("--selectItems skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("selectItems entered");
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
@@ -136,95 +134,21 @@ void SelectionManager::selectItems(const QStringList& ids)
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("selectItems left");
 }
 
 void SelectionManager::selectItem(const QString& id)
 {
     QStringList list(id);
     selectItems(list);
-
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceExternal;
-//    }
-
-//    QModelIndex index = model->getModelIndexById(id);
-//    if(!index.isValid())
-//    {
-//        QMessageBox::critical(0, tr("Search Error"),
-//                        tr("Object with GUID\n%1\ncould not be found")
-//                        .arg(id));
-
-//        selectionSource = SelectionSourceNotSelected;
-//        return;
-//    }
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    selectionModel->select(index, QItemSelectionModel::ClearAndSelect);
-//    objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-
-//    QList<QGraphicsItem*> graphicsItemList = scene->getGraphicsScene()->items();
-//    for(int i = 0; i < graphicsItemList.count(); i++)
-//    {
-//        QGraphicsItem* item = graphicsItemList[i];
-//        if((item->data(GRAPHICSITEM_ID)).toString() == id)
-//        {
-//            item->setSelected(true);
-//            view->ensureVisible(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    for(int i = 0; i < favoriteList->count(); i++)
-//    {
-//        QListWidgetItem* item = favoriteList->item(i);
-//        if(item->text().contains(id))
-//        {
-//            item->setSelected(true);
-//            favoriteList->scrollToItem(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    for(int i = 0; i < referenceList->count(); i++)
-//    {
-//        QListWidgetItem* item = referenceList->item(i);
-//        if(item->text().contains(id))
-//        {
-//            item->setSelected(true);
-//            referenceList->scrollToItem(item);
-//        }
-//        else
-//        {
-//            item->setSelected(false);
-//        }
-//    }
-
-//    if(selectionSource == SelectionSourceExternal)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
 }
 
 void SelectionManager::handleGraphicsSceneSelection()
 {
     if(selectionChangeInProgress)
     {
-        qDebug("--handleGraphicsSceneSelection skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("handleGraphicsSceneSelection entered");
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
@@ -244,7 +168,6 @@ void SelectionManager::handleGraphicsSceneSelection()
         }
     }
 
-    //updateGraphicsSceneSelection();
     updateFavoriteListSelection();
     updateReferenceListSelection();
     updateDocumentTreeSelection();
@@ -252,70 +175,15 @@ void SelectionManager::handleGraphicsSceneSelection()
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("handleGraphicsSceneSelection left");
-
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceGraphicsView;
-//    }
-
-//    QList<QGraphicsItem*> itemlist = scene->getGraphicsScene()->selectedItems();
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    favoriteList->clearSelection();
-//    referenceList->clearSelection();
-//    for(int i = 0; i < itemlist.count(); i++)
-//    {
-//        QString id = itemlist[i]->data(GRAPHICSITEM_ID).toString();
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-//        //std::cout << "handleGraphicsSceneSelection: " << qPrintable(id) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceGraphicsView)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
 }
 
 void SelectionManager::handleFavoriteListSelection()
 {
     if(selectionChangeInProgress)
     {
-        qDebug("--handleFavoriteListSelection skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("handleFavoriteListSelection entered");
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
@@ -337,77 +205,21 @@ void SelectionManager::handleFavoriteListSelection()
     }
 
     updateGraphicsSceneSelection();
-    //updateFavoriteListSelection();
     updateReferenceListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("handleFavoriteListSelection left");
-
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceFavoriteList;
-//    }
-
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    referenceList->clearSelection();
-//    scene->getGraphicsScene()->clearSelection();
-
-//    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
-//    for(int i = 0; i < selectedList.count(); i++)
-//    {
-//        QString itemtext = selectedList.at(i)->text();
-//        int charindex = itemtext.indexOf("[");
-//        QString id = itemtext.mid(charindex + 1, 36);
-
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-
-//        for(int j = 0; j < referenceList->count(); j++)
-//        {
-//            QListWidgetItem* item = referenceList->item(j);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceFavoriteList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
 }
 
 void SelectionManager::handleReferenceListSelection()
 {
     if(selectionChangeInProgress)
     {
-        qDebug("--handleReferenceListSelection skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("handleReferenceListSelection entered");
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
@@ -430,65 +242,11 @@ void SelectionManager::handleReferenceListSelection()
 
     updateGraphicsSceneSelection();
     updateFavoriteListSelection();
-    //updateReferenceListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("handleReferenceListSelection left");
-
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceReferenceList;
-//    }
-
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QItemSelection selection;
-//    favoriteList->clearSelection();
-//    scene->getGraphicsScene()->clearSelection();
-
-//    QList<QListWidgetItem*> selectedList = referenceList->selectedItems();
-//    for(int i = 0; i < selectedList.count(); i++)
-//    {
-//        QString itemtext = selectedList.at(i)->text();
-//        int charindex = itemtext.indexOf("[");
-//        QString id = itemtext.mid(charindex + 1, 36);
-
-//        QModelIndex index = model->getModelIndexById(id);
-//        if(index.isValid())
-//        {
-//            selection.select(index, index);
-//            objectTreeView->scrollTo(index, QAbstractItemView::EnsureVisible);
-//        }
-
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-
-//        for(int j = 0; j < favoriteList->count(); j++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(j);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-//    }
-//    selectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
-
-//    if(selectionSource == SelectionSourceReferenceList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
 }
 
 void SelectionManager::handleDocumentTreeSelection(const QItemSelection& selected, const QItemSelection& deselected)
@@ -498,17 +256,13 @@ void SelectionManager::handleDocumentTreeSelection(const QItemSelection& selecte
 
     if(selectionChangeInProgress)
     {
-        qDebug("--handleDocumentTreeSelection skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("handleDocumentTreeSelection entered");
 
     selectedItemList.clear();
-    //PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
     QItemSelectionModel* selectionModel = documentTreeView->selectionModel();
     QModelIndexList selectedList = selectionModel->selectedIndexes();
-    //QModelIndexList selectedList = selected.indexes();
     for(int i = 0; i < selectedList.count(); ++i)
     {
         QModelIndex index = selectedList.at(i);
@@ -537,13 +291,10 @@ void SelectionManager::handleDocumentTreeSelection(const QItemSelection& selecte
     updateGraphicsSceneSelection();
     updateFavoriteListSelection();
     updateReferenceListSelection();
-    //updateDocumentTreeSelection();
     updateObjectListSelection();
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("handleDocumentTreeSelection left");
-
 }
 
 void SelectionManager::handleObjectListSelection(const QItemSelection& selected, const QItemSelection& deselected)
@@ -553,18 +304,14 @@ void SelectionManager::handleObjectListSelection(const QItemSelection& selected,
 
     if(selectionChangeInProgress)
     {
-        qDebug("--handleObjectListSelection skipped");
         return;
     }
     selectionChangeInProgress = true;
-    qDebug("handleObjectListSelection entered");
 
     selectedItemList.clear();
-    //PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
     QItemSelectionModel* selectionModel = objectListView->selectionModel();
     ObjectListModel* olModel = static_cast<ObjectListModel*>(objectListView->model());
     QModelIndexList selectedList = selectionModel->selectedIndexes();
-    //QModelIndexList selectedList = selected.indexes();
     for(int i = 0; i < selectedList.count(); ++i)
     {
         QModelIndex index = selectedList.at(i);
@@ -583,108 +330,9 @@ void SelectionManager::handleObjectListSelection(const QItemSelection& selected,
     updateFavoriteListSelection();
     updateReferenceListSelection();
     updateDocumentTreeSelection();
-    //updateObjectListSelection();
 
     emit selectionChanged(selectedItemList);
     selectionChangeInProgress = false;
-    qDebug("handleObjectListSelection left");
-
-//    if(selectionSource != SelectionSourceNotSelected)
-//    {
-//        return;
-//    }
-//    if(selectionSource == SelectionSourceNotSelected)
-//    {
-//        selectionSource = SelectionSourceObjectList;
-//    }
-
-//    QModelIndex index;
-//    QModelIndexList items = selected.indexes();
-
-//    foreach (index, items)
-//    {
-//        QModelIndex parentIndex = model->parent(index);
-//        while(parentIndex.isValid())
-//        {
-//            index = parentIndex;
-//            parentIndex = model->parent(index);
-//        }
-//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(true);
-//            view->ensureVisible(graphicsitem);
-//        }
-//        //QString text = QString("Selected: (%1,%2)").arg(index.row()).arg(index.column());
-//        //std::cout << qPrintable(text) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                favoriteList->scrollToItem(item);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(true);
-//                referenceList->scrollToItem(item);
-//            }
-//        }
-//    }
-
-//    items = deselected.indexes();
-
-//    foreach (index, items)
-//    {
-//        QModelIndex parentIndex = model->parent(index);
-//        while(parentIndex.isValid())
-//        {
-//            index = parentIndex;
-//            parentIndex = model->parent(index);
-//        }
-//        DomItem* domitem = static_cast<DomItem*>(index.internalPointer());
-//        QString id = domitem->node().firstChildElement("Identitaet").firstChildElement("Wert").text();
-//        QGraphicsItem* graphicsitem = scene->getItemById(id);
-//        if(graphicsitem != NULL)
-//        {
-//            graphicsitem->setSelected(false);
-//        }
-
-//        //QString text = QString("Deselected: (%1,%2)").arg(index.row()).arg(index.column());
-//        //std::cout << qPrintable(text) << std::endl;
-
-//        for(int i = 0; i < favoriteList->count(); i++)
-//        {
-//            QListWidgetItem* item = favoriteList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(false);
-//            }
-//        }
-
-//        for(int i = 0; i < referenceList->count(); i++)
-//        {
-//            QListWidgetItem* item = referenceList->item(i);
-//            if(item->text().contains(id))
-//            {
-//                item->setSelected(false);
-//            }
-//        }
-//    }
-
-//    if(selectionSource == SelectionSourceObjectList)
-//    {
-//        selectionSource = SelectionSourceNotSelected;
-//    }
 }
 
 void SelectionManager::updateGraphicsSceneSelection()

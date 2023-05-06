@@ -390,17 +390,24 @@ void MainWindow::removeFromFavorites()
 
 void MainWindow::findReferencingObjects()
 {
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QModelIndexList selectedList = selectionModel->selectedIndexes();
-//    if(selectedList.count() != 1)
-//    {
-//        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
-//        return;
-//    }
-//    QModelIndex index = selectedList.at(0);
-//    QStringList resultlist = model->findReferencingObjects(index);
-//    referenceList->clear();
-//    referenceList->addItems(resultlist);
+    QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
+    if(selectedItemList.count() != 1)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+        return;
+    }
+    referenceList->clear();
+    DomItem* item = selectedItemList.at(0);
+    QList<DomItem*> refList = document->findDependentObjects(item);
+    for(int i = 0; i < refList.count(); ++i)
+    {
+        DomItem* currentItem = refList.at(i);
+        QString name = currentItem->getName();
+        QString id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+        QListWidgetItem* newItem = new QListWidgetItem;
+        newItem->setText(name + " [" + id + "]");
+        referenceList->addItem(newItem);
+    }
 }
 
 void MainWindow::setLanguage()

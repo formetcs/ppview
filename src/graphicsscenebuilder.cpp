@@ -5,7 +5,7 @@
 #include "planprodocument.h"
 #include "graphicsscene.h"
 
-#include <iostream>
+//#include <iostream>
 
 
 const double TRAVERSE_DELTA = 0.1; // to avoid problems with double precision
@@ -1901,10 +1901,6 @@ void GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
         }
-        else
-        {
-            std::cout << "Unknown object type " << qPrintable(name) << std::endl;
-        }
     }
 }
 
@@ -2087,9 +2083,6 @@ QPointF GraphicsSceneBuilder::calculatePunktObjekt(DomItem* o)
         }
 
         return QPointF(px, py);
-
-        //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4);
-        //return item;
     }
 
     return QPointF();
@@ -2361,8 +2354,6 @@ QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
                 QLineF segment(px, -py, ax, -ay);
                 returnlist.append(segment);
 
-                //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, ax, -ay, pen);
-                //graphicsitemlist.append(item);
                 px = ax;
                 py = ay;
             }
@@ -2444,9 +2435,6 @@ QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
 
             QLineF segment(px, -py, endx, -endy);
             returnlist.append(segment);
-
-            //QGraphicsItem* item = (QGraphicsItem*) graphicsScene->addLine(px, -py, endx, -endy, pen);
-            //graphicsitemlist.append(item);
         }
     }
 

@@ -123,7 +123,6 @@ QString ObjectListModel::createSectionText(DomItem* item, int section) const
 
 QVariant ObjectListModel::data(const QModelIndex& index, int role) const
 {
-    //qDebug("List:data");
     if (!index.isValid())
         return QVariant();
     
@@ -181,7 +180,6 @@ QVariant ObjectListModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags ObjectListModel::flags(const QModelIndex& index) const
 {
-    //qDebug("List:flags");
     if (!index.isValid())
         return Qt::NoItemFlags;
 
@@ -190,7 +188,6 @@ Qt::ItemFlags ObjectListModel::flags(const QModelIndex& index) const
 
 QVariant ObjectListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    //qDebug("List:headerData");
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
@@ -213,7 +210,6 @@ QVariant ObjectListModel::headerData(int section, Qt::Orientation orientation, i
 
 int ObjectListModel::rowCount(const QModelIndex& parent) const
 {
-    //qDebug("List:rowCount");
     Q_UNUSED(parent);
     
     if(viewMode == MainWindow::ViewModeStateComparison)
@@ -230,7 +226,6 @@ int ObjectListModel::rowCount(const QModelIndex& parent) const
 
 int ObjectListModel::columnCount(const QModelIndex& parent) const
 {
-    //qDebug("List:columnCount");
     Q_UNUSED(parent);
 
     return 4;

@@ -60,7 +60,10 @@ public:
     QList<ObjectListItem> getCombinedObjectList(const QString& category = QString());
     DomItem* getObjectById(const QString& id, PlanningState state = PlanningStateEnd);
     ObjectListItem getObjectListItemById(const QString& id);
+    QList<DomItem*> findDependentObjects(DomItem* item);
+    bool hasDependency(DomItem* item, const QString& id);
     void clearCache();
+
 
 public slots:
     void documentChanged();

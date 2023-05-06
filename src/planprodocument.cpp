@@ -355,3 +355,47 @@ PlanProDocument::ObjectListItem PlanProDocument::getObjectListItemById(const QSt
     }
     return returnval;
 }
+
+QList<DomItem*> PlanProDocument::findDependentObjects(DomItem* item)
+{
+    QList<DomItem*> returnlist;
+    if(!item)
+    {
+        return returnlist;
+    }
+    DomItem* lstZustandItem = item->parent()->parent();
+    QString lstZustandItemName = lstZustandItem->getName();
+    PlanningState currentItemState = PlanningStateEnd;
+    if(lstZustandItemName == "LST_Zustand_Start")
+    {
+        currentItemState = PlanningStateStart;
+    }
+    QString id = item->getFirstValueAtPath("Identitaet/Wert");
+    QList<DomItem*> objectlist = getObjectList(currentItemState);
+    for(int i = 0; i < objectlist.count(); ++i)
+    {
+        DomItem* currentItem = objectlist.at(i);
+        if(currentItem != item && hasDependency(currentItem, id))
+        {
+            returnlist.append(currentItem);
+        }
+    }
+    return returnlist;
+}
+
+bool PlanProDocument::hasDependency(DomItem* item, const QString& id)
+{
+    if(item->getValue() == id)
+    {
+        return true;
+    }
+    for(int i = 0; i < item->childCount(); ++i)
+    {
+        DomItem* child = item->getChild(i);
+        if(hasDependency(child, id))
+        {
+            return true;
+        }
+    }
+    return false;
+}

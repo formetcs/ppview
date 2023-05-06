@@ -4,14 +4,11 @@
 PlanProModel::PlanProModel(QObject* parent)
     :QAbstractItemModel(parent)
 {
-    //domDocument = QDomDocument("objectlist");
-    //rootItem = new DomItem(domDocument, 0);
     doc = NULL;
 }
 
 PlanProModel::~PlanProModel()
 {
-    //delete rootItem;
 }
 
 void PlanProModel::setDocument(PlanProDocument* d)
@@ -38,74 +35,6 @@ QModelIndex PlanProModel::getModelIndex(DomItem* item)
 
     return index(row, 0, parentIndex);
 }
-
-//QDomElement PlanProModel::getContainerElement()
-//{
-//    QDomElement docElem = domDocument.documentElement();
-//    QDomElement childElement = docElem.firstChildElement("LST_Planung_Projekt");
-//    childElement = childElement.firstChildElement("LST_Planung_Gruppe");
-//    childElement = childElement.firstChildElement("LST_Planung_Einzel");
-//    childElement = childElement.firstChildElement("LST_Zustand_Ziel");
-//    QDomElement containerElement = childElement.firstChildElement("Container");
-
-//    if(containerElement.isNull())
-//    {
-//        childElement = docElem.firstChildElement("LST_Planung");
-//        childElement = childElement.firstChildElement("Fachdaten");
-//        childElement = childElement.firstChildElement("Ausgabe_Fachdaten");
-//        childElement = childElement.firstChildElement("LST_Zustand_Ziel");
-//        containerElement = childElement.firstChildElement("Container");
-//    }
-//    if(containerElement.isNull())
-//    {
-//        childElement = docElem.firstChildElement("LST_Zustand");
-//        containerElement = childElement.firstChildElement("Container");
-//    }
-//    return containerElement;
-
-//    return QDomElement();
-//}
-
-//QDomElement PlanProModel::getObjectById(QString id)
-//{
-//    QDomNode n = getContainerElement().firstChild();
-//    while (!n.isNull())
-//    {
-//        if (n.isElement())
-//        {
-//            QDomElement e = n.toElement();
-//            QDomElement identitaetElement = e.firstChildElement("Identitaet");
-//            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
-//            if(identitaetWertElement.text() == id)
-//            {
-//                return e;
-//            }
-//        }
-//        n = n.nextSibling();
-//    }
-//    return QDomElement();
-//}
-
-//QModelIndex PlanProModel::getModelIndexById(QString id)
-//{
-//    QDomNodeList nodelist = getContainerElement().childNodes();
-//    for(int i = 0; i < nodelist.count(); i++)
-//    {
-//        QDomNode n = nodelist.at(i);
-//        if (n.isElement())
-//        {
-//            QDomElement e = n.toElement();
-//            QDomElement identitaetElement = e.firstChildElement("Identitaet");
-//            QDomElement identitaetWertElement = identitaetElement.firstChildElement("Wert");
-//            if(identitaetWertElement.text() == id)
-//            {
-//                return index(i, 0, QModelIndex());
-//            }
-//        }
-
-//    }
-//    return QModelIndex();
-//}
 
 //QString PlanProModel::getBinaryFileName(QModelIndex index)
 //{
@@ -149,61 +78,6 @@ QModelIndex PlanProModel::getModelIndex(DomItem* item)
 //        return finalData;
 //    }
 //    return QByteArray();
-//}
-
-//QStringList PlanProModel::findReferencingObjects(QModelIndex index)
-//{
-//    QStringList returnlist;
-
-//    if (!index.isValid())
-//        return returnlist;
-
-//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-//    QDomNode node = item->node();
-//    if(node.firstChildElement("Identitaet").isNull())
-//    {
-//        return returnlist;
-//    }
-//    QString identitaet = node.firstChildElement("Identitaet").firstChildElement("Wert").text();
-
-//    QDomNodeList nodelist = getContainerElement().childNodes();
-//    for(int i = 0; i < nodelist.count(); i++)
-//    {
-//        QDomNode n = nodelist.at(i);
-//        if (n.isElement())
-//        {
-//            QString name = n.nodeName();
-//            QString id = n.firstChildElement("Identitaet").firstChildElement("Wert").text();
-//            QStringList partlist = findReferencingObjectsRec(n, identitaet, name, id);
-//            returnlist.append(partlist);
-//        }
-//    }
-
-//    return returnlist;
-//}
-
-//QStringList PlanProModel::findReferencingObjectsRec(QDomNode node, QString searchId, QString objectName, QString objectId)
-//{
-//    QStringList returnlist;
-
-//    if(node.isText() && node.nodeValue() == searchId && node.nodeValue() != objectId)
-//    {
-//        QString attributeName = node.parentNode().parentNode().nodeName();
-//        QString resultstring = objectName + " - " + attributeName + " [" + objectId + "]";
-//        returnlist.append(resultstring);
-//    }
-//    else if(node.isElement())
-//    {
-//        QDomNodeList nodelist = node.childNodes();
-//        for(int i = 0; i < nodelist.count(); i++)
-//        {
-//            QDomNode n = nodelist.at(i);
-//            QStringList partlist = findReferencingObjectsRec(n, searchId, objectName, objectId);
-//            returnlist.append(partlist);
-//        }
-//    }
-
-//    return returnlist;
 //}
 
 //QList<NextTopKanteResult> PlanProModel::getNextTopKante(QDomNode topKante, bool forward)
@@ -443,7 +317,6 @@ QModelIndex PlanProModel::getModelIndex(DomItem* item)
 
 QVariant PlanProModel::data(const QModelIndex& index, int role) const
 {
-    //qDebug("Tree:data");
     if (!index.isValid())
         return QVariant();
 
@@ -476,7 +349,6 @@ QVariant PlanProModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
 {
-    //qDebug("Tree:flags");
     if (!index.isValid())
         return Qt::NoItemFlags;
 
@@ -485,7 +357,6 @@ Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
 
 QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    //qDebug("Tree:headerData");
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
@@ -506,7 +377,6 @@ QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int 
 
 QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) const
 {
-    //qDebug("Tree:index");
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
@@ -526,37 +396,17 @@ QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) 
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
-
-
-
-//    DomItem *parentItem;
-
-//    if (!parent.isValid())
-//    {
-//        parentItem = doc->getRootItem();
-//    }
-//    else
-//    {
-//        parentItem = static_cast<DomItem*>(parent.internalPointer());
-//    }
-
-//    DomItem* childItem = parentItem->getChild(row);
-//    if (childItem)
-//        return createIndex(row, column, childItem);
-//    else
-//        return QModelIndex();
 }
 
 QModelIndex PlanProModel::parent(const QModelIndex& child) const
 {
-    //qDebug("Tree:parent");
     if (!child.isValid())
         return QModelIndex();
 
     DomItem* childItem = static_cast<DomItem*>(child.internalPointer());
     DomItem* parentItem = childItem->parent();
 
-    if (!parentItem /*|| parentItem == doc->getRootItem()*/)
+    if (!parentItem)
         return QModelIndex();
 
     return createIndex(parentItem->getOwnPosition(), 0, parentItem);
@@ -564,7 +414,6 @@ QModelIndex PlanProModel::parent(const QModelIndex& child) const
 
 int PlanProModel::rowCount(const QModelIndex& parent) const
 {
-    //qDebug("Tree:rowCount");
     if (parent.column() > 0)
         return 0;
 
@@ -572,7 +421,6 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
 
     if (!parent.isValid())
     {
-        //parentItem = doc->getRootItem();
         parentItem = NULL;
     }
     else
@@ -582,7 +430,6 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
 
     if(!parentItem)
     {
-        //return 0;
         return 1;
     }
 
@@ -591,6 +438,5 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
 
 int PlanProModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    //qDebug("Tree:columnCount");
     return 3;
 }

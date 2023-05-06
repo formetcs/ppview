@@ -72,12 +72,12 @@ QGraphicsItem* GraphicsScene::getItemById(const QString& id)
     return NULL;
 }
 
-void GraphicsScene::unselectAllItems()
-{
-    QList<QGraphicsItem*> graphicsItemList = items();
-    for(int i = 0; i < graphicsItemList.count(); ++i)
-    {
-        QGraphicsItem* item = graphicsItemList.at(i);
-        item->setSelected(false);
-    }
-}
+//void GraphicsScene::unselectAllItems()
+//{
+//    QList<QGraphicsItem*> graphicsItemList = items();
+//    for(int i = 0; i < graphicsItemList.count(); ++i)
+//    {
+//        QGraphicsItem* item = graphicsItemList.at(i);
+//        item->setSelected(false);
+//    }
+//}

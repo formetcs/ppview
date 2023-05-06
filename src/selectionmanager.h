@@ -15,17 +15,6 @@ class SelectionManager : public QObject
 {
     Q_OBJECT
 public:
-
-//    enum SelectionSource
-//    {
-//        SelectionSourceNotSelected = 0,
-//        SelectionSourceExternal = 1,
-//        SelectionSourceGraphicsView = 2,
-//        SelectionSourceObjectList = 3,
-//        SelectionSourceFavoriteList = 4,
-//        SelectionSourceReferenceList = 5
-//    };
-
     explicit SelectionManager(QObject* parent = nullptr);
     void setDocument(PlanProDocument* doc);
     void setScene(GraphicsScene* scene);
@@ -70,9 +59,6 @@ private:
 
     MainWindow::ViewMode viewMode;
     bool selectionChangeInProgress;
-
-
-    //SelectionSource selectionSource;
 
 };
 
