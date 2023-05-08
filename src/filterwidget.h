@@ -44,12 +44,17 @@ private:
     // Ansteuerung_Element
     QCheckBox* cbStellBereich;
     // Bahnsteige
+    QCheckBox* cbBahnsteigDach;
     QCheckBox* cbBahnsteigKante;
     QCheckBox* cbBahnsteigZugang;
     // Bahnuebergang
     QCheckBox* cbBueAnlage;
+    QCheckBox* cbBueGefahrraumEckpunkt;
     QCheckBox* cbBueGleisbezogenerGefahrraum;
-    // ETCS
+    QCheckBox* cbBueKante;
+    QCheckBox* cbGfrTripelspiegel;
+    QCheckBox* cbSchrankenantrieb;
+    // Balisentechnik_ETCS
     QCheckBox* cbDatenpunkt;
     QCheckBox* cbZubBereichsgrenze;
     QCheckBox* cbZubStreckeneigenschaft;
@@ -69,7 +74,6 @@ private:
     QCheckBox* cbTopKnoten;
     QCheckBox* cbUeberhoehung;
     // Gleis
-    QCheckBox* cbGleisAbschluss;
     QCheckBox* cbGleisAbschnitt;
     QCheckBox* cbGleisArt;
     QCheckBox* cbGleisBaubereich;
@@ -77,8 +81,6 @@ private:
     QCheckBox* cbGleisFahrbahn;
     QCheckBox* cbGleisLichtraum;
     QCheckBox* cbGleisSchaltgruppe;
-    // Nahbedienbereich
-    QCheckBox* cbNbZoneGrenze;
     // Ortung
     QCheckBox* cbFmaElement;
     QCheckBox* cbFmaKomponente;
@@ -89,6 +91,7 @@ private:
     QCheckBox* cbSignal;
     QCheckBox* cbSignalBefestigung;
     // Weichen_und_Gleissperren
+    QCheckBox* cbGleisAbschluss;
     QCheckBox* cbWKrGspKomponente;
 
 

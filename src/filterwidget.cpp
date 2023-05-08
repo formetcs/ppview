@@ -8,11 +8,10 @@ FilterWidget::FilterWidget()
     QGroupBox * gbAnsteuerungElement = new QGroupBox("Ansteuerung_Element");
     QGroupBox * gbBahnsteige = new QGroupBox("Bahnsteige");
     QGroupBox * gbBahnuebergang = new QGroupBox("Bahnuebergang");
-    QGroupBox * gbEtcs = new QGroupBox("ETCS");
+    QGroupBox * gbEtcs = new QGroupBox("Balisentechnik_ETCS");
     QGroupBox * gbFahrstrasse = new QGroupBox("Fahrstrasse");
     QGroupBox * gbGeodaten = new QGroupBox("Geodaten");
     QGroupBox * gbGleis = new QGroupBox("Gleis");
-    QGroupBox * gbNahbedienbereich = new QGroupBox("Nahbedienbereich");
     QGroupBox * gbOrtung = new QGroupBox("Ortung");
     QGroupBox * gbPzb = new QGroupBox("PZB");
     QGroupBox * gbSignale = new QGroupBox("Signale");
@@ -25,7 +24,6 @@ FilterWidget::FilterWidget()
     QVBoxLayout* layoutFahrstrasse = new QVBoxLayout;
     QVBoxLayout* layoutGeodaten = new QVBoxLayout;
     QVBoxLayout* layoutGleis = new QVBoxLayout;
-    QVBoxLayout* layoutNahbedienbereich = new QVBoxLayout;
     QVBoxLayout* layoutOrtung = new QVBoxLayout;
     QVBoxLayout* layoutPzb = new QVBoxLayout;
     QVBoxLayout* layoutSignale = new QVBoxLayout;
@@ -38,12 +36,17 @@ FilterWidget::FilterWidget()
     // Ansteuerung_Element
     addCheckBox("Stell_Bereich", cbStellBereich, layoutAnsteuerungElement);
     // Bahnsteige
+    addCheckBox("Bahnsteig_Dach", cbBahnsteigDach, layoutBahnsteige);
     addCheckBox("Bahnsteig_Kante", cbBahnsteigKante, layoutBahnsteige);
     addCheckBox("Bahnsteig_Zugang", cbBahnsteigZugang, layoutBahnsteige);
     // Bahnuebergang
     addCheckBox("BUE_Anlage", cbBueAnlage, layoutBahnuebergang);
+    addCheckBox("BUE_Gefahrraum_Eckpunkt", cbBueGefahrraumEckpunkt, layoutBahnuebergang);
     addCheckBox("BUE_Gleisbezogener_Gefahrraum", cbBueGleisbezogenerGefahrraum, layoutBahnuebergang);
-    // ETCS
+    addCheckBox("BUE_Kante", cbBueKante, layoutBahnuebergang);
+    addCheckBox("GFR_Tripelspiegel", cbGfrTripelspiegel, layoutBahnuebergang);
+    addCheckBox("Schrankenantrieb", cbSchrankenantrieb, layoutBahnuebergang);
+    // Balisentechnik_ETCS
     addCheckBox("Datenpunkt", cbDatenpunkt, layoutEtcs);
     addCheckBox("ZUB_Bereichsgrenze", cbZubBereichsgrenze, layoutEtcs);
     addCheckBox("ZUB_Streckeneigenschaft", cbZubStreckeneigenschaft, layoutEtcs);
@@ -63,7 +66,6 @@ FilterWidget::FilterWidget()
     addCheckBox("TOP_Knoten", cbTopKnoten, layoutGeodaten);
     addCheckBox("Ueberhoehung", cbUeberhoehung, layoutGeodaten);
     // Gleis
-    addCheckBox("Gleis_Abschluss", cbGleisAbschluss, layoutGleis);
     addCheckBox("Gleis_Abschnitt", cbGleisAbschnitt, layoutGleis);
     addCheckBox("Gleis_Art", cbGleisArt, layoutGleis);
     addCheckBox("Gleis_Baubereich", cbGleisBaubereich, layoutGleis);
@@ -71,8 +73,6 @@ FilterWidget::FilterWidget()
     addCheckBox("Gleis_Fahrbahn", cbGleisFahrbahn, layoutGleis);
     addCheckBox("Gleis_Lichtraum", cbGleisLichtraum, layoutGleis);
     addCheckBox("Gleis_Schaltgruppe", cbGleisSchaltgruppe, layoutGleis);
-    // Nahbedienbereich
-    addCheckBox("NB_Zone_Grenze", cbNbZoneGrenze, layoutNahbedienbereich);
     // Ortung
     addCheckBox("FMA_Element", cbFmaElement, layoutOrtung);
     addCheckBox("FMA_Komponente", cbFmaKomponente, layoutOrtung);
@@ -83,6 +83,7 @@ FilterWidget::FilterWidget()
     addCheckBox("Signal", cbSignal, layoutSignale);
     addCheckBox("Signal_Befestigung", cbSignalBefestigung, layoutSignale);
     // Weichen_und_Gleissperren
+    addCheckBox("Gleis_Abschluss", cbGleisAbschluss, layoutWeichenUndGleissperren);
     addCheckBox("W_Kr_Gsp_Komponente", cbWKrGspKomponente, layoutWeichenUndGleissperren);
 
 
@@ -93,7 +94,6 @@ FilterWidget::FilterWidget()
     gbFahrstrasse->setLayout(layoutFahrstrasse);
     gbGeodaten->setLayout(layoutGeodaten);
     gbGleis->setLayout(layoutGleis);
-    gbNahbedienbereich->setLayout(layoutNahbedienbereich);
     gbOrtung->setLayout(layoutOrtung);
     gbPzb->setLayout(layoutPzb);
     gbSignale->setLayout(layoutSignale);
@@ -106,7 +106,6 @@ FilterWidget::FilterWidget()
     masterlayout->addWidget(gbFahrstrasse);
     masterlayout->addWidget(gbGeodaten);
     masterlayout->addWidget(gbGleis);
-    masterlayout->addWidget(gbNahbedienbereich);
     masterlayout->addWidget(gbOrtung);
     masterlayout->addWidget(gbPzb);
     masterlayout->addWidget(gbSignale);
