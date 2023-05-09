@@ -43,6 +43,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    anhang.cpp \
     graphicsscenebuilder.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -57,9 +58,11 @@ SOURCES += \
     planproxmldocument.cpp \
     preferences.cpp \
     punktobjekt.cpp \
-    selectionmanager.cpp
+    selectionmanager.cpp \
+    urobjekt.cpp
 
 HEADERS += \
+    anhang.h \
     graphicsscenebuilder.h \
         mainwindow.h \
     objectinfowidget.h \
@@ -74,6 +77,7 @@ HEADERS += \
     preferences.h \
     punktobjekt.h \
     selectionmanager.h \
+    urobjekt.h \
     version.h \
     makro.h
 

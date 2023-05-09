@@ -20,8 +20,6 @@ public:
     void setDocument(PlanProDocument* d);
     QModelIndex getModelIndex(DomItem* item);
 
-    //QString getBinaryFileName(QModelIndex index);
-    //QByteArray extractBinaryFile(QModelIndex index);
     //QList<NextTopKanteResult> getNextTopKante(QDomNode topKante, bool forward);
     //double calculateDistance(QModelIndexList selectedIndexes);
     //double calculateDistance(PunktObjekt startpos, PunktObjekt endpos, bool forward);

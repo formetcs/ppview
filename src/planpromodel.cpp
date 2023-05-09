@@ -36,50 +36,6 @@ QModelIndex PlanProModel::getModelIndex(DomItem* item)
     return index(row, 0, parentIndex);
 }
 
-//QString PlanProModel::getBinaryFileName(QModelIndex index)
-//{
-//    if (!index.isValid())
-//        return QString();
-
-//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-//    QDomNode node = item->node();
-//    if(node.nodeName() == "Anhang")
-//    {
-//        QString filename = node.firstChildElement("Anhang_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
-//        QString fileextension = node.firstChildElement("Anhang_Allg").firstChildElement("Dateityp").firstChildElement("Wert").text();
-//        return filename + "." + fileextension;
-//    }
-//    else if(node.nodeName() == "Binaerdatei")
-//    {
-//        QString filename = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateiname").firstChildElement("Wert").text();
-//        QString fileextension = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Dateityp_Binaerdatei").firstChildElement("Wert").text();
-//        return filename + "." + fileextension;
-//    }
-//    return QString();
-//}
-
-//QByteArray PlanProModel::extractBinaryFile(QModelIndex index)
-//{
-//    if (!index.isValid())
-//        return QByteArray();
-
-//    DomItem* item = static_cast<DomItem*>(index.internalPointer());
-//    QDomNode node = item->node();
-//    if(node.nodeName() == "Anhang")
-//    {
-//        QByteArray encodedData = node.firstChildElement("Anhang_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
-//        QByteArray finalData = QByteArray::fromBase64(encodedData);
-//        return finalData;
-//    }
-//    else if(node.nodeName() == "Binaerdatei")
-//    {
-//        QByteArray encodedData = node.firstChildElement("Binaerdatei_Allg").firstChildElement("Daten").firstChildElement("Wert").text().toUtf8();
-//        QByteArray finalData = QByteArray::fromBase64(encodedData);
-//        return finalData;
-//    }
-//    return QByteArray();
-//}
-
 //QList<NextTopKanteResult> PlanProModel::getNextTopKante(QDomNode topKante, bool forward)
 //{
 //    QList<NextTopKanteResult> returnval;

@@ -16,6 +16,7 @@
 #include "objectinfowidget.h"
 #include "selectionmanager.h"
 #include "objectlistmodel.h"
+#include "anhang.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -302,41 +303,47 @@ void MainWindow::printFile()
 
 void MainWindow::extractFile()
 {
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QModelIndexList selectedList = selectionModel->selectedIndexes();
-//    if(selectedList.count() != 1)
-//    {
-//        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
-//        return;
-//    }
-//    QModelIndex index = selectedList.at(0);
-//    QString filename = model->getBinaryFileName(index);
-//    if(filename.isEmpty())
-//    {
-//        QMessageBox::critical(this, tr("Error"), tr("Selected object contains no binary data"));
-//        return;
-//    }
-//    QString selectedFilename = QFileDialog::getSaveFileName(
-//        this, tr("Save file"), filename);
+    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+    QModelIndexList selectedList = selectionModel->selectedIndexes();
+    if(selectedList.count() != 1)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+        return;
+    }
+    QModelIndex index = selectedList.at(0);
+    DomItem* domItem = static_cast<DomItem*>(index.internalPointer());
+    Anhang anhang(domItem);
+    if(!anhang.isAnhang())
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Selected object contains no binary data"));
+        return;
+    }
+    QString filename = anhang.getDateiname() + "." + anhang.getDateityp();
+    QFileInfo fi(document->getFileName());
+    QDir path = fi.dir();
+    QString filePathString = path.filePath(filename);
 
-//    if (!selectedFilename.isEmpty())
-//    {
-//      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-//      QByteArray data = model->extractBinaryFile(index);
-//      QFile file(selectedFilename);
-//      if (!file.open(QIODevice::WriteOnly))
-//      {
-//        QMessageBox::critical(0, tr("File Saving Error"),
-//                                tr("File\n%1\ncould not be written")
-//                                .arg(selectedFilename));
-//        QApplication::restoreOverrideCursor();
-//        return;
-//      }
-//      QDataStream out(&file);
-//      out << data;
-//      file.close();
-//      QApplication::restoreOverrideCursor();
-//    }
+    QString selectedFilename = QFileDialog::getSaveFileName(
+        this, tr("Save file"), filePathString);
+
+    if (!selectedFilename.isEmpty())
+    {
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+      QByteArray data = anhang.getDaten();
+      QFile file(selectedFilename);
+      if (!file.open(QIODevice::WriteOnly))
+      {
+        QMessageBox::critical(0, tr("File Saving Error"),
+                                tr("File\n%1\ncould not be written")
+                                .arg(selectedFilename));
+        QApplication::restoreOverrideCursor();
+        return;
+      }
+      QDataStream out(&file);
+      out << data;
+      file.close();
+      QApplication::restoreOverrideCursor();
+    }
 }
 
 void MainWindow::measureDistance()
