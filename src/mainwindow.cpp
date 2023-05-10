@@ -44,6 +44,8 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     categoryComboBox = new QComboBox();
     objectListView = new QTreeView();
     objectListView->setModel(objectlistmodel);
+    objectListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    objectListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     objectInfo = new ObjectInfoWidget();
 
@@ -53,8 +55,12 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
 
     favoriteList = new QListWidget();
     favoriteList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    referenceList = new QListWidget();
+    referenceList = new QTreeWidget();
     referenceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    referenceList->setColumnCount(2);
+    QStringList headerLabels;
+    headerLabels << tr("Type") << tr("ID");
+    referenceList->setHeaderLabels(headerLabels);
 
     filterWidget = new FilterWidget();
     filterWidget->readSettings();
@@ -229,6 +235,7 @@ void MainWindow::openNamedFile(const QString& filename)
         }
         favoriteList->clear();
         referenceList->clear();
+        selectionManager->clearSelection();
     }
 }
 
@@ -405,15 +412,34 @@ void MainWindow::findReferencingObjects()
     }
     referenceList->clear();
     DomItem* item = selectedItemList.at(0);
+    QString name = item->getName();
+    QString id = item->getFirstValueAtPath("Identitaet/Wert");
+    QTreeWidgetItem* tlItem = new QTreeWidgetItem();
+    tlItem->setText(0, name);
+    tlItem->setText(1, id);
+    referenceList->addTopLevelItem(tlItem);
+    createReferenceListRec(item, tlItem, 1);
+    referenceList->expandItem(tlItem);
+}
+
+void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, int depth)
+{
+    if(depth > 10)
+    {
+        return;
+    }
     QList<DomItem*> refList = document->findDependentObjects(item);
     for(int i = 0; i < refList.count(); ++i)
     {
         DomItem* currentItem = refList.at(i);
         QString name = currentItem->getName();
         QString id = currentItem->getFirstValueAtPath("Identitaet/Wert");
-        QListWidgetItem* newItem = new QListWidgetItem;
-        newItem->setText(name + " [" + id + "]");
-        referenceList->addItem(newItem);
+        QTreeWidgetItem* newItem = new QTreeWidgetItem();
+        newItem->setText(0, name);
+        newItem->setText(1, id);
+        parent->addChild(newItem);
+        createReferenceListRec(currentItem, newItem, depth + 1);
+        referenceList->expandItem(newItem);
     }
 }
 
@@ -525,6 +551,7 @@ void MainWindow::changeCategory()
         category = categoryComboBox->currentText();
     }
     objectlistmodel->changeCategory(category);
+    selectionManager->clearSelection();
 }
 
 void MainWindow::createActions()

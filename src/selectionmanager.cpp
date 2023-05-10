@@ -7,6 +7,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QListWidget>
+#include <QTreeWidget>
 #include <QTreeView>
 
 SelectionManager::SelectionManager(QObject* parent)
@@ -53,7 +54,7 @@ void SelectionManager::setFavoriteListWidget(QListWidget* favList)
     }
 }
 
-void SelectionManager::setReferenceListWidget(QListWidget* refList)
+void SelectionManager::setReferenceListWidget(QTreeWidget* refList)
 {
     if(referenceListWidget)
     {
@@ -100,6 +101,25 @@ QList<DomItem*> SelectionManager::getSelectedItems()
 void SelectionManager::changeViewMode(MainWindow::ViewMode mode)
 {
     viewMode = mode;
+    clearSelection();
+}
+
+void SelectionManager::clearSelection()
+{
+    if(selectionChangeInProgress)
+    {
+        return;
+    }
+    selectionChangeInProgress = true;
+    selectedItemList.clear();
+    updateGraphicsSceneSelection();
+    updateFavoriteListSelection();
+    updateReferenceListSelection();
+    updateDocumentTreeSelection();
+    updateObjectListSelection();
+
+    emit selectionChanged(selectedItemList);
+    selectionChangeInProgress = false;
 }
 
 void SelectionManager::selectItems(const QStringList& ids)
@@ -223,12 +243,10 @@ void SelectionManager::handleReferenceListSelection()
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
-    QList<QListWidgetItem*> selectedList = referenceListWidget->selectedItems();
+    QList<QTreeWidgetItem*> selectedList = referenceListWidget->selectedItems();
     for(int i = 0; i < selectedList.count(); ++i)
     {
-        QString itemtext = selectedList.at(i)->text();
-        int charindex = itemtext.indexOf("[");
-        QString currentId = itemtext.mid(charindex + 1, 36);
+        QString currentId = selectedList.at(i)->text(1);
         DomItem* domItem = document->getObjectById(currentId, state);
         if(!domItem && viewMode == MainWindow::ViewModeStateComparison)
         {
@@ -387,14 +405,29 @@ void SelectionManager::updateReferenceListSelection()
     {
         DomItem* currentItem = selectedItemList.at(i);
         QString currentId = currentItem->getFirstValueAtPath("Identitaet/Wert");
-        for(int j = 0; j < referenceListWidget->count(); ++j)
+        for(int j = 0; j < referenceListWidget->topLevelItemCount(); ++j)
         {
-            QListWidgetItem* item = referenceListWidget->item(j);
-            if(item->text().contains(currentId))
+            QTreeWidgetItem* item = referenceListWidget->topLevelItem(j);
+            updateReferenceListSelectionRec(item, currentId);
+            if(item->text(1) == currentId)
             {
                 item->setSelected(true);
                 referenceListWidget->scrollToItem(item);
             }
+        }
+    }
+}
+
+void SelectionManager::updateReferenceListSelectionRec(QTreeWidgetItem* item, QString id)
+{
+    for(int i = 0; i < item->childCount(); ++i)
+    {
+        QTreeWidgetItem* currentItem = item->child(i);
+        updateReferenceListSelectionRec(currentItem, id);
+        if(currentItem->text(1) == id)
+        {
+            currentItem->setSelected(true);
+            referenceListWidget->scrollToItem(currentItem);
         }
     }
 }

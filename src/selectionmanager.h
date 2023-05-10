@@ -6,8 +6,10 @@
 
 #include <QObject>
 
+class QTreeWidgetItem;
 class QTreeView;
 class QListWidget;
+class QTreeWidget;
 class QItemSelection;
 class GraphicsScene;
 class PlanProDocument;
@@ -19,7 +21,7 @@ public:
     void setDocument(PlanProDocument* doc);
     void setScene(GraphicsScene* scene);
     void setFavoriteListWidget(QListWidget* favList);
-    void setReferenceListWidget(QListWidget* refList);
+    void setReferenceListWidget(QTreeWidget* refList);
     void setDocumentTreeView(QTreeView* docTreeView);
     void setObjectListView(QTreeView* objListView);
     QList<DomItem*> getSelectedItems();
@@ -29,6 +31,7 @@ public slots:
     void selectItems(const QStringList& ids);
     void selectItem(const QString& id);
     void changeViewMode(MainWindow::ViewMode mode);
+    void clearSelection();
 
 signals:
     void selectionChanged(QList<DomItem*> objectlist);
@@ -46,6 +49,7 @@ private:
     void updateGraphicsSceneSelection();
     void updateFavoriteListSelection();
     void updateReferenceListSelection();
+    void updateReferenceListSelectionRec(QTreeWidgetItem* item, QString id);
     void updateDocumentTreeSelection();
     void updateObjectListSelection();
 
@@ -53,7 +57,7 @@ private:
     PlanProDocument* document;
     GraphicsScene* graphicsScene;
     QListWidget* favoriteListWidget;
-    QListWidget* referenceListWidget;
+    QTreeWidget* referenceListWidget;
     QTreeView* documentTreeView;
     QTreeView* objectListView;
 

@@ -2,6 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
+class DomItem;
+class QTreeWidgetItem;
+class QTreeWidget;
 //#include <QItemSelection>
 
 class QActionGroup;
@@ -78,6 +82,7 @@ private:
     void openNamedFile(const QString& filename);
     void readSettings();
     void writeSettings();
+    void createReferenceListRec(DomItem* item, QTreeWidgetItem* parent, int depth);
 
     QMenu* fileMenu;
     QMenu* exportSubmenu;
@@ -125,7 +130,7 @@ private:
     QTreeView* objectTreeView;
     QTreeView* objectListView;
     QListWidget* favoriteList;
-    QListWidget* referenceList;
+    QTreeWidget* referenceList;
     QLineEdit* searchEdit;
     QPushButton* searchButton;
     QComboBox* categoryComboBox;
