@@ -8,11 +8,16 @@ class DomItem;
 class UrObjekt
 {
 public:
-    UrObjekt(DomItem* item = nullptr);
     bool isUrObjekt();
-    QString getIdentitaet();
+    DomItem* getDomItem() const;
+
+    virtual QString getName() const;
+    virtual QString getIdentitaet();
+    static QString getIdentitaet(DomItem* item);
 
 protected:
+    UrObjekt(DomItem* item = nullptr);
+
     DomItem* domItem;
 };
 

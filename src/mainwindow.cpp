@@ -17,6 +17,8 @@
 #include "selectionmanager.h"
 #include "objectlistmodel.h"
 #include "anhang.h"
+#include "planprograph.h"
+#include "punktobjekt.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -355,25 +357,28 @@ void MainWindow::extractFile()
 
 void MainWindow::measureDistance()
 {
-//    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
-//    QModelIndexList selectedList = selectionModel->selectedIndexes();
-//    if(selectedList.count() != 2)
-//    {
-//        QMessageBox::critical(this, tr("Error"), tr("Exactly 2 objects must be selected"));
-//        return;
-//    }
-//    double result = model->calculateDistance(selectedList);
-//    if(result < -2)
-//    {
-//        QMessageBox::critical(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
-//        return;
-//    }
-//    if(result < 0)
-//    {
-//        QMessageBox::information(this, tr("Distance"), tr("The selected objects have no direct connection"));
-//        return;
-//    }
-//    QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(result));
+    QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
+    if(selectedItemList.count() != 2)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Exactly 2 objects must be selected"));
+        return;
+    }
+    PlanProGraph graph(document);
+    DomItem* item1 = selectedItemList.at(0);
+    DomItem* item2 = selectedItemList.at(1);
+    int result = graph.calculateDistance(item1, item2);
+    if(result < -2)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
+        return;
+    }
+    if(result < 0)
+    {
+        QMessageBox::information(this, tr("Distance"), tr("The selected objects have no direct connection"));
+        return;
+    }
+    double doubleDistance = result / 1000.0;
+    QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(doubleDistance, 0, 'f', 3));
 }
 
 void MainWindow::addToFavorites()

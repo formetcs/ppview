@@ -20,10 +20,6 @@ public:
     void setDocument(PlanProDocument* d);
     QModelIndex getModelIndex(DomItem* item);
 
-    //QList<NextTopKanteResult> getNextTopKante(QDomNode topKante, bool forward);
-    //double calculateDistance(QModelIndexList selectedIndexes);
-    //double calculateDistance(PunktObjekt startpos, PunktObjekt endpos, bool forward);
-
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

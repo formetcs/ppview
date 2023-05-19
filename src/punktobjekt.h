@@ -1,30 +1,57 @@
 #ifndef PUNKTOBJEKT_H
 #define PUNKTOBJEKT_H
 
+#include "basisobjekt.h"
+
 #include <QString>
 
-
-class PunktObjekt
+class PunktObjektStrecke
 {
 public:
-    PunktObjekt();
-    PunktObjekt(QString idtk, double abst, QString wirkr);
-    PunktObjekt(QString guid, QString idtk, double abst, QString wirkr);
+    PunktObjektStrecke(DomItem* item = nullptr);
 
-    void setIdentitaet(QString i);
-    QString getIdentitaet();
-    void setIdTopKante(QString i);
-    QString getIdTopKante();
-    void setAbstand(double a);
-    double getAbstand();
-    void setWirkrichtung(QString w);
-    QString getWirkrichtung();
+    virtual QString getIdStrecke();
+    virtual QString getStreckeKm();
 
-private:
-    QString identitaet;
-    QString idTopKante;
-    double abstand;
-    QString wirkrichtung;
+protected:
+    DomItem* domItem;
+};
+
+class PunktObjektTopKante
+{
+public:
+    PunktObjektTopKante(DomItem* item = nullptr);
+
+    virtual QString getIdTopKante();
+    virtual int getAbstand();
+    virtual QString getWirkrichtung();
+    virtual QString getSeitlicheLage();
+    virtual int getSeitlicherAbstand();
+
+protected:
+    DomItem* domItem;
+};
+
+class PunktObjekt : public BasisObjekt
+{
+public:
+    PunktObjekt(DomItem* item = nullptr);
+    bool isPunktObjekt();
+
+    virtual int getPunktObjektStreckeCount();
+    virtual PunktObjektStrecke getPunktObjektStrecke(int i);
+    virtual QString getIdStrecke(int i);
+    virtual QString getStreckeKm(int i);
+    virtual int getPunktObjektTopKanteCount();
+    virtual PunktObjektTopKante getPunktObjektTopKante(int i);
+    virtual QString getIdTopKante(int i);
+    virtual int getAbstand(int i);
+    virtual QString getWirkrichtung(int i);
+    virtual QString getSeitlicheLage(int i);
+    virtual int getSeitlicherAbstand(int i);
+
+protected:
+
 };
 
 #endif // PUNKTOBJEKT_H

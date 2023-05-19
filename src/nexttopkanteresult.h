@@ -1,23 +1,23 @@
 #ifndef NEXTTOPKANTERESULT_H
 #define NEXTTOPKANTERESULT_H
 
-#include <QDomNode>
+//#include <QDomNode>
 
 
-class NextTopKanteResult
-{
-public:
-    NextTopKanteResult();
-    NextTopKanteResult(QDomNode tke, bool dir);
+//class NextTopKanteResult
+//{
+//public:
+//    NextTopKanteResult();
+//    NextTopKanteResult(DomItem* topKante, bool dir);
 
-    void setTopKanteElement(QDomNode tke);
-    QDomNode getTopKanteElement();
-    void setDirection(bool dir);
-    bool getDirection();
+//    void setTopKanteElement(DomItem* tke);
+//    DomItem* getTopKanteElement();
+//    void setDirection(bool dir);
+//    bool getDirection();
 
-private:
-    QDomNode topKanteElement;
-    bool direction;
-};
+//private:
+//    DomItem* topKanteElement;
+//    bool direction;
+//};
 
 #endif // NEXTTOPKANTERESULT_H

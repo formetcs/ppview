@@ -15,11 +15,30 @@ bool UrObjekt::isUrObjekt()
     return (domItem->getFirstItemAtPath("Identitaet/Wert") != NULL);
 }
 
-QString UrObjekt::getIdentitaet()
+DomItem* UrObjekt::getDomItem() const
+{
+    return domItem;
+}
+
+QString UrObjekt::getName() const
 {
     if(!domItem)
     {
         return QString();
     }
-    return domItem->getFirstValueAtPath("Identitaet/Wert");
+    return domItem->getName();
+}
+
+QString UrObjekt::getIdentitaet()
+{
+    return getIdentitaet(domItem);
+}
+
+QString UrObjekt::getIdentitaet(DomItem* item)
+{
+    if(!item)
+    {
+        return QString();
+    }
+    return item->getFirstValueAtPath("Identitaet/Wert");
 }
