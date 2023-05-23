@@ -19,8 +19,8 @@ public:
     void createGraphicsScene();
 
 private:
-    QPointF calculatePunktObjekt(DomItem* o);
-    QList<QLineF> calculateBereichObjekt(DomItem* o);
+    QPointF calculatePunktObjekt(const DomItem* o);
+    QList<QLineF> calculateBereichObjekt(const DomItem* o);
 
     PlanProDocument* document;
     GraphicsScene* graphicsScene;

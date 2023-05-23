@@ -16,17 +16,22 @@ public:
     QString getValue() const;
     void setValue(const QString& v);
     DomItem* getChild(int i);
+    const DomItem* getChild(int i) const;
     DomItem* getFirstChildItem(const QString& c);
+    const DomItem* getFirstChildItem(const QString& c) const;
     QList<DomItem*> getChildItems(const QString& c);
+    QList<const DomItem*> getChildItems(const QString& c) const;
     DomItem* getFirstItemAtPath(const QString& p);
-    QString getFirstValueAtPath(const QString& p);
+    const DomItem* getFirstItemAtPath(const QString& p) const;
+    QString getFirstValueAtPath(const QString& p) const;
     void addChild(DomItem* c);
     int childCount() const;
     int getOwnPosition() const;
     QString getAttribute(const QString& name) const;
     void addAttribute(const QString& name, const QString& value);
-    QHash<QString, QString> getAttributeMap();
+    QHash<QString, QString> getAttributeMap() const;
     DomItem* parent();
+    const DomItem* parent() const;
 
 private:
     QString name;

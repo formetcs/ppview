@@ -18,7 +18,7 @@ private:
     void setupDomTree(const QDomDocument& doc);
     DomItem* createChildItem(const QDomNode& n, DomItem* parent);
     QString generateXml();
-    QDomElement createChildElement(DomItem* item, QDomDocument& doc);
+    QDomElement createChildElement(const DomItem* item, QDomDocument& doc);
     QString fileName;
 };
 

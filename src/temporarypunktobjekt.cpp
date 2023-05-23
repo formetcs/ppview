@@ -8,41 +8,55 @@ TemporaryPunktObjekt::TemporaryPunktObjekt(QString id, QString idtk, int abst, Q
     wirkrichtung = wirkr;
 }
 
-QString TemporaryPunktObjekt::getIdentitaet()
+bool TemporaryPunktObjekt::isPunktObjekt() const
+{
+    return true;
+}
+
+QString TemporaryPunktObjekt::getIdentitaet() const
 {
     return identitaet;
 }
 
-int TemporaryPunktObjekt::getPunktObjektTopKanteCount()
+int TemporaryPunktObjekt::getPunktObjektTopKanteCount() const
 {
     return 1;
 }
 
-QString TemporaryPunktObjekt::getIdTopKante(int i)
+QString TemporaryPunktObjekt::getIdTopKante(int i) const
 {
-    Q_UNUSED(i);
+    if(i != 0)
+    {
+        return QString();
+    }
     return idTopKante;
 }
 
-int TemporaryPunktObjekt::getAbstand(int i)
+int TemporaryPunktObjekt::getAbstand(int i) const
 {
-    Q_UNUSED(i);
+    if(i != 0)
+    {
+        return 0;
+    }
     return abstand;
 }
 
-QString TemporaryPunktObjekt::getWirkrichtung(int i)
+QString TemporaryPunktObjekt::getWirkrichtung(int i) const
 {
-    Q_UNUSED(i);
+    if(i != 0)
+    {
+        return QString();
+    }
     return wirkrichtung;
 }
 
-QString TemporaryPunktObjekt::getSeitlicheLage(int i)
+QString TemporaryPunktObjekt::getSeitlicheLage(int i) const
 {
     Q_UNUSED(i);
     return QString();
 }
 
-int TemporaryPunktObjekt::getSeitlicherAbstand(int i)
+int TemporaryPunktObjekt::getSeitlicherAbstand(int i) const
 {
     Q_UNUSED(i);
     return 0;

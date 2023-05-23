@@ -8,7 +8,7 @@
 //#include "makro.h"
 #include "graphicsscenebuilder.h"
 #include "filterwidget.h"
-#include "planpromodel.h"
+#include "documenttreemodel.h"
 #include "planproxmldocument.h"
 #include "graphicsscene.h"
 #include "preferences.h"
@@ -29,19 +29,19 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     readSettings();
 
     document = new PlanProXmlDocument();
-
-    model = new PlanProModel();
-    model->setDocument(document);
+    
+    doctreemodel = new DocumentTreeModel();
+    doctreemodel->setDocument(document);
 
     objectlistmodel = new ObjectListModel();
     objectlistmodel->setDocument(document);
     objectlistmodel->changeCategory(QString());
     objectlistmodel->changeViewMode(ViewModeStateEnd);
 
-    objectTreeView = new QTreeView();
-    objectTreeView->setModel(model);
-    objectTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    objectTreeView->setSelectionBehavior(QAbstractItemView::SelectItems);
+    documentTreeView = new QTreeView();
+    documentTreeView->setModel(doctreemodel);
+    documentTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    documentTreeView->setSelectionBehavior(QAbstractItemView::SelectItems);
 
     categoryComboBox = new QComboBox();
     objectListView = new QTreeView();
@@ -76,7 +76,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     selectionManager = new SelectionManager();
     selectionManager->setDocument(document);
     selectionManager->setScene(scene);
-    selectionManager->setDocumentTreeView(objectTreeView);
+    selectionManager->setDocumentTreeView(documentTreeView);
     selectionManager->setObjectListView(objectListView);
     selectionManager->setFavoriteListWidget(favoriteList);
     selectionManager->setReferenceListWidget(referenceList);
@@ -95,7 +95,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     connect(searchButton, SIGNAL(clicked()), this, SLOT(handleObjectSearchFromSearchWindow()));
     connect(categoryComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCategory()));
     connect(selectionManager, SIGNAL(selectionChanged(QList<DomItem*>)), objectInfo, SLOT(setInfoText(QList<DomItem*>)));
-    connect(document, SIGNAL(dataChanged()), model, SLOT(modelChanged()));
+    connect(document, SIGNAL(dataChanged()), doctreemodel, SLOT(modelChanged()));
     connect(document, SIGNAL(dataChanged()), objectlistmodel, SLOT(modelChanged()));
     connect(objectInfo, SIGNAL(uuidClicked(QString)), selectionManager, SLOT(selectItem(QString)));
 
@@ -178,7 +178,7 @@ void MainWindow::saveFile()
     {
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
       document->updateHeader("PlanPro Viewer", QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
-      model->modelChanged(); // because of updated header
+      doctreemodel->modelChanged(); // because of updated header
       bool success = document->saveFile(s);
       QApplication::restoreOverrideCursor();
       if(!success)
@@ -312,7 +312,7 @@ void MainWindow::printFile()
 
 void MainWindow::extractFile()
 {
-    QItemSelectionModel* selectionModel = objectTreeView->selectionModel();
+    QItemSelectionModel* selectionModel = documentTreeView->selectionModel();
     QModelIndexList selectedList = selectionModel->selectedIndexes();
     if(selectedList.count() != 1)
     {
@@ -796,7 +796,7 @@ void MainWindow::createDockWindows()
     QDockWidget *dock4 = new QDockWidget(tr("Document Structure"), this);
     dock4->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dock4->setObjectName("Document Structure");
-    dock4->setWidget(objectTreeView);
+    dock4->setWidget(documentTreeView);
     addDockWidget(Qt::LeftDockWidgetArea, dock4);
     viewDockSubmenu->addAction(dock4->toggleViewAction());
 

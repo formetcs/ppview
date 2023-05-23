@@ -6,16 +6,16 @@
 class BasisObjekt : public UrObjekt
 {
 public:
-    bool isBasisObjekt();
+    virtual bool isBasisObjekt() const;
 
-    virtual int getIdBearbeitungsvermerkCount();
-    virtual QString getIdBearbeitungsvermerk(int i);
-    virtual QString getDbGdiReferenz();
-    virtual QString getTechnischerPlatz();
-    virtual QString getObjektzustandBesonders();
-    virtual bool getBestandsschutz();
-    virtual QString getIdAnhangRegelwerkBesonders();
-    virtual QString getDatumRegelwerk();
+    virtual int getIdBearbeitungsvermerkCount() const;
+    virtual QString getIdBearbeitungsvermerk(int i) const;
+    virtual QString getDbGdiReferenz() const;
+    virtual QString getTechnischerPlatz() const;
+    virtual QString getObjektzustandBesonders() const;
+    virtual bool getBestandsschutz() const;
+    virtual QString getIdAnhangRegelwerkBesonders() const;
+    virtual QString getDatumRegelwerk() const;
 
 protected:
     BasisObjekt(DomItem* item = nullptr);

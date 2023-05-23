@@ -132,7 +132,7 @@ QString PlanProXmlDocument::generateXml()
     return domDocument.toString(2);
 }
 
-QDomElement PlanProXmlDocument::createChildElement(DomItem* item, QDomDocument& doc)
+QDomElement PlanProXmlDocument::createChildElement(const DomItem* item, QDomDocument& doc)
 {
     QDomElement elem = doc.createElement(item->getName());
 
@@ -149,7 +149,7 @@ QDomElement PlanProXmlDocument::createChildElement(DomItem* item, QDomDocument& 
 
     for(int i = 0; i < item->childCount(); i++)
     {
-        DomItem* childItem = item->getChild(i);
+        const DomItem* childItem = item->getChild(i);
         QDomElement childElement = createChildElement(childItem, doc);
         elem.appendChild(childElement);
     }

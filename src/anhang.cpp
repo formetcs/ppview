@@ -5,7 +5,7 @@ Anhang::Anhang(DomItem* item) : UrObjekt(item)
 {
 }
 
-bool Anhang::isAnhang()
+bool Anhang::isAnhang() const
 {
     if(!domItem)
     {
@@ -14,7 +14,7 @@ bool Anhang::isAnhang()
     return (isUrObjekt() && (domItem->getFirstItemAtPath("Anhang_Allg/Anhang_Art") != NULL));
 }
 
-QString Anhang::getAnhangArt()
+QString Anhang::getAnhangArt() const
 {
     if(!domItem)
     {
@@ -23,7 +23,7 @@ QString Anhang::getAnhangArt()
     return domItem->getFirstValueAtPath("Anhang_Allg/Anhang_Art/Wert");
 }
 
-QString Anhang::getDateiname()
+QString Anhang::getDateiname() const
 {
     if(!domItem)
     {
@@ -32,7 +32,7 @@ QString Anhang::getDateiname()
     return domItem->getFirstValueAtPath("Anhang_Allg/Dateiname/Wert");
 }
 
-QString Anhang::getDateityp()
+QString Anhang::getDateityp() const
 {
     if(!domItem)
     {
@@ -41,7 +41,7 @@ QString Anhang::getDateityp()
     return domItem->getFirstValueAtPath("Anhang_Allg/Dateityp/Wert");
 }
 
-QByteArray Anhang::getDaten()
+QByteArray Anhang::getDaten() const
 {
     if(!domItem)
     {

@@ -23,10 +23,10 @@ private slots:
     void handleHyperlinkSelection(const QUrl& link);
 
 private:
-    int getMaxDomDepth(DomItem* o);
-    int getLeafCount(DomItem* o);
-    QString generateInfoText(DomItem* o);
-    QString generateInfoTextRec(DomItem* o, int currentDepth, int maxDepth);
+    int getMaxDomDepth(const DomItem* o) const;
+    int getLeafCount(const DomItem* o) const;
+    QString generateInfoText(const DomItem* o) const;
+    QString generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth) const;
 
     QRegularExpression uuidRegExp;
 };

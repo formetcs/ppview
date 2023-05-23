@@ -6,7 +6,7 @@ PunktObjektStrecke::PunktObjektStrecke(DomItem* item)
     domItem = item;
 }
 
-QString PunktObjektStrecke::getIdStrecke()
+QString PunktObjektStrecke::getIdStrecke() const
 {
     if(!domItem)
     {
@@ -15,7 +15,7 @@ QString PunktObjektStrecke::getIdStrecke()
     return domItem->getFirstValueAtPath("ID_Strecke/Wert");
 }
 
-QString PunktObjektStrecke::getStreckeKm()
+QString PunktObjektStrecke::getStreckeKm() const
 {
     if(!domItem)
     {
@@ -32,7 +32,7 @@ PunktObjektTopKante::PunktObjektTopKante(DomItem* item)
     domItem = item;
 }
 
-QString PunktObjektTopKante::getIdTopKante()
+QString PunktObjektTopKante::getIdTopKante() const
 {
     if(!domItem)
     {
@@ -41,7 +41,7 @@ QString PunktObjektTopKante::getIdTopKante()
     return domItem->getFirstValueAtPath("ID_TOP_Kante/Wert");
 }
 
-int PunktObjektTopKante::getAbstand()
+int PunktObjektTopKante::getAbstand() const
 {
     if(!domItem)
     {
@@ -51,7 +51,7 @@ int PunktObjektTopKante::getAbstand()
     return (int) (val * 1000.0 + 0.5);
 }
 
-QString PunktObjektTopKante::getWirkrichtung()
+QString PunktObjektTopKante::getWirkrichtung() const
 {
     if(!domItem)
     {
@@ -60,7 +60,7 @@ QString PunktObjektTopKante::getWirkrichtung()
     return domItem->getFirstValueAtPath("Wirkrichtung/Wert");
 }
 
-QString PunktObjektTopKante::getSeitlicheLage()
+QString PunktObjektTopKante::getSeitlicheLage() const
 {
     if(!domItem)
     {
@@ -69,7 +69,7 @@ QString PunktObjektTopKante::getSeitlicheLage()
     return domItem->getFirstValueAtPath("Seitliche_Lage/Wert");
 }
 
-int PunktObjektTopKante::getSeitlicherAbstand()
+int PunktObjektTopKante::getSeitlicherAbstand() const
 {
     if(!domItem)
     {
@@ -86,7 +86,7 @@ PunktObjekt::PunktObjekt(DomItem* item) : BasisObjekt(item)
 {
 }
 
-bool PunktObjekt::isPunktObjekt()
+bool PunktObjekt::isPunktObjekt() const
 {
     if(!domItem)
     {
@@ -95,7 +95,7 @@ bool PunktObjekt::isPunktObjekt()
     return (isBasisObjekt() && (domItem->getFirstItemAtPath("Punkt_Objekt_TOP_Kante") != NULL));
 }
 
-int PunktObjekt::getPunktObjektStreckeCount()
+int PunktObjekt::getPunktObjektStreckeCount() const
 {
     if(!domItem)
     {
@@ -104,7 +104,7 @@ int PunktObjekt::getPunktObjektStreckeCount()
     return domItem->getChildItems("Punkt_Objekt_Strecke").count();
 }
 
-PunktObjektStrecke PunktObjekt::getPunktObjektStrecke(int i)
+PunktObjektStrecke PunktObjekt::getPunktObjektStrecke(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektStreckeCount())
     {
@@ -114,7 +114,7 @@ PunktObjektStrecke PunktObjekt::getPunktObjektStrecke(int i)
     return PunktObjektStrecke(childlist.at(i));
 }
 
-QString PunktObjekt::getIdStrecke(int i)
+QString PunktObjekt::getIdStrecke(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektStreckeCount())
     {
@@ -124,7 +124,7 @@ QString PunktObjekt::getIdStrecke(int i)
     return childlist.at(i)->getFirstValueAtPath("ID_Strecke/Wert");
 }
 
-QString PunktObjekt::getStreckeKm(int i)
+QString PunktObjekt::getStreckeKm(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektStreckeCount())
     {
@@ -134,7 +134,7 @@ QString PunktObjekt::getStreckeKm(int i)
     return childlist.at(i)->getFirstValueAtPath("Strecke_Km/Wert");
 }
 
-int PunktObjekt::getPunktObjektTopKanteCount()
+int PunktObjekt::getPunktObjektTopKanteCount() const
 {
     if(!domItem)
     {
@@ -143,7 +143,7 @@ int PunktObjekt::getPunktObjektTopKanteCount()
     return domItem->getChildItems("Punkt_Objekt_Strecke").count();
 }
 
-PunktObjektTopKante PunktObjekt::getPunktObjektTopKante(int i)
+PunktObjektTopKante PunktObjekt::getPunktObjektTopKante(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {
@@ -153,7 +153,7 @@ PunktObjektTopKante PunktObjekt::getPunktObjektTopKante(int i)
     return PunktObjektTopKante(childlist.at(i));
 }
 
-QString PunktObjekt::getIdTopKante(int i)
+QString PunktObjekt::getIdTopKante(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {
@@ -163,7 +163,7 @@ QString PunktObjekt::getIdTopKante(int i)
     return childlist.at(i)->getFirstValueAtPath("ID_TOP_Kante/Wert");
 }
 
-int PunktObjekt::getAbstand(int i)
+int PunktObjekt::getAbstand(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {
@@ -174,7 +174,7 @@ int PunktObjekt::getAbstand(int i)
     return (int) (val * 1000.0 + 0.5);
 }
 
-QString PunktObjekt::getWirkrichtung(int i)
+QString PunktObjekt::getWirkrichtung(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {
@@ -184,7 +184,7 @@ QString PunktObjekt::getWirkrichtung(int i)
     return childlist.at(i)->getFirstValueAtPath("Wirkrichtung/Wert");
 }
 
-QString PunktObjekt::getSeitlicheLage(int i)
+QString PunktObjekt::getSeitlicheLage(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {
@@ -194,7 +194,7 @@ QString PunktObjekt::getSeitlicheLage(int i)
     return childlist.at(i)->getFirstValueAtPath("Seitliche_Lage/Wert");
 }
 
-int PunktObjekt::getSeitlicherAbstand(int i)
+int PunktObjekt::getSeitlicherAbstand(int i) const
 {
     if(!domItem || i < 0 || i >= getPunktObjektTopKanteCount())
     {

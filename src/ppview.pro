@@ -45,6 +45,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     anhang.cpp \
     basisobjekt.cpp \
+    documenttreemodel.cpp \
     graphicsscenebuilder.cpp \
         main.cpp \
         mainwindow.cpp \
@@ -53,10 +54,8 @@ SOURCES += \
     filterwidget.cpp \
     planprodocument.cpp \
     planprograph.cpp \
-    planpromodel.cpp \
     graphicsscene.cpp \
     domitem.cpp \
-    nexttopkanteresult.cpp \
     planproxmldocument.cpp \
     preferences.cpp \
     punktobjekt.cpp \
@@ -67,6 +66,7 @@ SOURCES += \
 HEADERS += \
     anhang.h \
     basisobjekt.h \
+    documenttreemodel.h \
     graphicsscenebuilder.h \
         mainwindow.h \
     objectinfowidget.h \
@@ -74,10 +74,8 @@ HEADERS += \
     filterwidget.h \
     planprodocument.h \
     planprograph.h \
-    planpromodel.h \
     graphicsscene.h \
     domitem.h \
-    nexttopkanteresult.h \
     planproxmldocument.h \
     preferences.h \
     punktobjekt.h \

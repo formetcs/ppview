@@ -2074,14 +2074,14 @@ void GraphicsSceneBuilder::createGraphicsScene()
 }
 
 
-QPointF GraphicsSceneBuilder::calculatePunktObjekt(DomItem* o)
+QPointF GraphicsSceneBuilder::calculatePunktObjekt(const DomItem* o)
 {
     if(!document || !graphicsScene)
     {
         return QPointF();
     }
 
-    DomItem* lstZustandItem = o->parent()->parent();
+    const DomItem* lstZustandItem = o->parent()->parent();
     QString lstZustandItemName = lstZustandItem->getName();
     PlanProDocument::PlanningState currentItemState = PlanProDocument::PlanningStateEnd;
     if(lstZustandItemName == "LST_Zustand_Start")
@@ -2091,7 +2091,7 @@ QPointF GraphicsSceneBuilder::calculatePunktObjekt(DomItem* o)
 
     // if the Punkt_Objekt has more than one referencing TOP_Kante, we take only the first
     // (the resulting point must be the same for all edges)
-    DomItem* punktObjektTopKante = o->getFirstChildItem("Punkt_Objekt_TOP_Kante");
+    const DomItem* punktObjektTopKante = o->getFirstChildItem("Punkt_Objekt_TOP_Kante");
     double remainingDistance = punktObjektTopKante->getFirstValueAtPath("Abstand/Wert").toDouble();
 
     DomItem* topKante = document->getObjectById(punktObjektTopKante->getFirstValueAtPath("ID_TOP_Kante/Wert"), currentItemState);
@@ -2258,7 +2258,7 @@ QPointF GraphicsSceneBuilder::calculatePunktObjekt(DomItem* o)
 }
 
 
-QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
+QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(const DomItem* o)
 {
     QList<QLineF> returnlist;
     if(!document || !graphicsScene)
@@ -2266,7 +2266,7 @@ QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
         return returnlist;
     }
 
-    DomItem* lstZustandItem = o->parent()->parent();
+    const DomItem* lstZustandItem = o->parent()->parent();
     QString lstZustandItemName = lstZustandItem->getName();
     PlanProDocument::PlanningState currentItemState = PlanProDocument::PlanningStateEnd;
     if(lstZustandItemName == "LST_Zustand_Start")
@@ -2274,11 +2274,11 @@ QList<QLineF> GraphicsSceneBuilder::calculateBereichObjekt(DomItem* o)
         currentItemState = PlanProDocument::PlanningStateStart;
     }
 
-    QList<DomItem*> teilbereichList = o->getChildItems("Bereich_Objekt_Teilbereich");
+    QList<const DomItem*> teilbereichList = o->getChildItems("Bereich_Objekt_Teilbereich");
 
     for(int i = 0; i < teilbereichList.count(); ++i)
     {
-        DomItem* teilbereichElement = teilbereichList.at(i);
+        const DomItem* teilbereichElement = teilbereichList.at(i);
         QString idTopKante = teilbereichElement->getFirstValueAtPath("ID_TOP_Kante/Wert");
         double begrenzungA = teilbereichElement->getFirstValueAtPath("Begrenzung_A/Wert").toDouble();
         double begrenzungB = teilbereichElement->getFirstValueAtPath("Begrenzung_B/Wert").toDouble();

@@ -31,7 +31,7 @@ void ObjectInfoWidget::handleHyperlinkSelection(const QUrl& link)
     emit uuidClicked(linkstring);
 }
 
-int ObjectInfoWidget::getMaxDomDepth(DomItem* o)
+int ObjectInfoWidget::getMaxDomDepth(const DomItem* o) const
 {
     int maxchilddepth = 0;
     for(int i = 0; i < o->childCount(); ++i)
@@ -44,7 +44,7 @@ int ObjectInfoWidget::getMaxDomDepth(DomItem* o)
     return maxchilddepth + 1;
 }
 
-int ObjectInfoWidget::getLeafCount(DomItem* o)
+int ObjectInfoWidget::getLeafCount(const DomItem* o) const
 {
     if(o->childCount() == 0)
     {
@@ -60,7 +60,7 @@ int ObjectInfoWidget::getLeafCount(DomItem* o)
     return tempcount;
 }
 
-QString ObjectInfoWidget::generateInfoText(DomItem* o)
+QString ObjectInfoWidget::generateInfoText(const DomItem* o) const
 {
     int maxdepth = getMaxDomDepth(o);
     QString returnval = QString("<table border='1' cellpadding='2'>\n");
@@ -71,7 +71,7 @@ QString ObjectInfoWidget::generateInfoText(DomItem* o)
     return returnval;
 }
 
-QString ObjectInfoWidget::generateInfoTextRec(DomItem* o, int currentDepth, int maxDepth)
+QString ObjectInfoWidget::generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth) const
 {
     QString returnval = QString();
     if(o->childCount() == 0)
@@ -88,7 +88,7 @@ QString ObjectInfoWidget::generateInfoTextRec(DomItem* o, int currentDepth, int 
     }
     for(int i = 0; i < o->childCount(); ++i)
     {
-        DomItem* childnode = o->getChild(i);
+        const DomItem* childnode = o->getChild(i);
         int leafcount = getLeafCount(childnode);
         int colspan = 1;
         if(childnode->childCount() == 0)

@@ -24,7 +24,7 @@ class QTreeView;
 class QListView;
 class QListWidget;
 class FilterWidget;
-class PlanProModel;
+class DocumentTreeModel;
 class GraphicsScene;
 class PlanProXmlDocument;
 class GraphicsSceneBuilder;
@@ -119,15 +119,15 @@ private:
     QAction* aboutAct;
     QSpinBox* scaleSpinBox;
     QSpinBox* rotateSpinBox;
-
-    PlanProModel* model;
+    
+    DocumentTreeModel* doctreemodel;
     ObjectListModel* objectlistmodel;
     GraphicsScene* scene;
     QGraphicsView* view;
     SelectionManager* selectionManager;
     ObjectInfoWidget* objectInfo;
     FilterWidget* filterWidget;
-    QTreeView* objectTreeView;
+    QTreeView* documentTreeView;
     QTreeView* objectListView;
     QListWidget* favoriteList;
     QTreeWidget* referenceList;

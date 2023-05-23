@@ -1,7 +1,7 @@
 #include "graphicsscene.h"
 #include "objectlistmodel.h"
 #include "planprodocument.h"
-#include "planpromodel.h"
+#include "documenttreemodel.h"
 #include "selectionmanager.h"
 
 #include <QGraphicsItem>
@@ -435,7 +435,7 @@ void SelectionManager::updateReferenceListSelectionRec(QTreeWidgetItem* item, QS
 void SelectionManager::updateDocumentTreeSelection()
 {
     QItemSelectionModel* selectionModel = documentTreeView->selectionModel();
-    PlanProModel* model = static_cast<PlanProModel*>(documentTreeView->model());
+    DocumentTreeModel* model = static_cast<DocumentTreeModel*>(documentTreeView->model());
     QItemSelection selection;
 
     for(int i = 0; i < selectedItemList.count(); ++i)

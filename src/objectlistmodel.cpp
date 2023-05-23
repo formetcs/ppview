@@ -103,7 +103,7 @@ QModelIndex ObjectListModel::getModelIndexById(QString id) const
     return QModelIndex();
 }
 
-QString ObjectListModel::createSectionText(DomItem* item, int section) const
+QString ObjectListModel::createSectionText(const DomItem* item, int section) const
 {
     if(section == 0)
     {

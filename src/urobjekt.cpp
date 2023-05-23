@@ -6,7 +6,7 @@ UrObjekt::UrObjekt(DomItem* item)
     domItem = item;
 }
 
-bool UrObjekt::isUrObjekt()
+bool UrObjekt::isUrObjekt() const
 {
     if(!domItem)
     {
@@ -15,7 +15,12 @@ bool UrObjekt::isUrObjekt()
     return (domItem->getFirstItemAtPath("Identitaet/Wert") != NULL);
 }
 
-DomItem* UrObjekt::getDomItem() const
+DomItem* UrObjekt::getDomItem()
+{
+    return domItem;
+}
+
+const DomItem* UrObjekt::getDomItem() const
 {
     return domItem;
 }
@@ -29,12 +34,12 @@ QString UrObjekt::getName() const
     return domItem->getName();
 }
 
-QString UrObjekt::getIdentitaet()
+QString UrObjekt::getIdentitaet() const
 {
     return getIdentitaet(domItem);
 }
 
-QString UrObjekt::getIdentitaet(DomItem* item)
+QString UrObjekt::getIdentitaet(const DomItem *item)
 {
     if(!item)
     {

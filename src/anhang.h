@@ -9,12 +9,12 @@ class Anhang : public UrObjekt
 {
 public:
     Anhang(DomItem* item = nullptr);
-    bool isAnhang();
+    virtual bool isAnhang() const;
 
-    virtual QString getAnhangArt();
-    virtual QString getDateiname();
-    virtual QString getDateityp();
-    virtual QByteArray getDaten();
+    virtual QString getAnhangArt() const;
+    virtual QString getDateiname() const;
+    virtual QString getDateityp() const;
+    virtual QByteArray getDaten() const;
 };
 
 #endif // ANHANG_H

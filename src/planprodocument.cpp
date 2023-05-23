@@ -37,6 +37,11 @@ DomItem* PlanProDocument::getRootItem()
     return rootItem;
 }
 
+const DomItem* PlanProDocument::getRootItem() const
+{
+    return rootItem;
+}
+
 QDateTime PlanProDocument::getTimestamp() const
 {
     if(rootItem == NULL)
@@ -383,7 +388,7 @@ QList<DomItem*> PlanProDocument::findDependentObjects(DomItem* item)
     return returnlist;
 }
 
-bool PlanProDocument::hasDependency(DomItem* item, const QString& id)
+bool PlanProDocument::hasDependency(const DomItem *item, const QString& id) const
 {
     if(item->getValue() == id)
     {
@@ -391,7 +396,7 @@ bool PlanProDocument::hasDependency(DomItem* item, const QString& id)
     }
     for(int i = 0; i < item->childCount(); ++i)
     {
-        DomItem* child = item->getChild(i);
+        const DomItem* child = item->getChild(i);
         if(hasDependency(child, id))
         {
             return true;

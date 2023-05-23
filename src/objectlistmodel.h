@@ -28,7 +28,7 @@ public slots:
     void modelChanged();
 
 private:
-    QString createSectionText(DomItem* item, int section) const;
+    QString createSectionText(const DomItem* item, int section) const;
 
     PlanProDocument* doc;
     QString category;

@@ -1,5 +1,5 @@
-#ifndef PLANPROMODEL_H
-#define PLANPROMODEL_H
+#ifndef DOCUMENTTREEMODEL_H
+#define DOCUMENTTREEMODEL_H
 
 #include <QAbstractItemModel>
 #include <QString>
@@ -11,12 +11,12 @@
 //#include "nexttopkanteresult.h"
 //#include "punktobjekt.h"
 
-class PlanProModel : public QAbstractItemModel
+class DocumentTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    PlanProModel(QObject* parent = 0);
-    ~PlanProModel();
+    DocumentTreeModel(QObject* parent = 0);
+    ~DocumentTreeModel();
     void setDocument(PlanProDocument* d);
     QModelIndex getModelIndex(DomItem* item);
 
@@ -35,4 +35,4 @@ private:
     PlanProDocument* doc;
 };
 
-#endif // PLANPROMODEL_H
+#endif // DOCUMENTTREEMODEL_H

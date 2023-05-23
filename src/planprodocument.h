@@ -39,7 +39,7 @@ public:
             state = PlanningStateBoth;
         }
 
-        bool isValid()
+        bool isValid() const
         {
             return (itemStart || itemEnd);
         }
@@ -48,6 +48,7 @@ public:
     explicit PlanProDocument(QObject *parent = nullptr);
     ~PlanProDocument();
     DomItem* getRootItem();
+    const DomItem* getRootItem() const;
     QDateTime getTimestamp() const;
     QString getToolName() const;
     QString getToolVersion() const;
@@ -61,7 +62,7 @@ public:
     DomItem* getObjectById(const QString& id, PlanningState state = PlanningStateEnd);
     ObjectListItem getObjectListItemById(const QString& id);
     QList<DomItem*> findDependentObjects(DomItem* item);
-    bool hasDependency(DomItem* item, const QString& id);
+    bool hasDependency(const DomItem* item, const QString& id) const;
     void clearCache();
 
 

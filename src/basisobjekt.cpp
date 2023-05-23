@@ -5,7 +5,7 @@ BasisObjekt::BasisObjekt(DomItem* item) : UrObjekt(item)
 {
 }
 
-bool BasisObjekt::isBasisObjekt()
+bool BasisObjekt::isBasisObjekt() const
 {
     if(!domItem)
     {
@@ -14,7 +14,7 @@ bool BasisObjekt::isBasisObjekt()
     return (isUrObjekt() && (domItem->getFirstItemAtPath("Basis_Objekt_Allg") != NULL));
 }
 
-int BasisObjekt::getIdBearbeitungsvermerkCount()
+int BasisObjekt::getIdBearbeitungsvermerkCount() const
 {
     if(!domItem)
     {
@@ -23,7 +23,7 @@ int BasisObjekt::getIdBearbeitungsvermerkCount()
     return domItem->getChildItems("ID_Bearbeitungsvermerk").count();
 }
 
-QString BasisObjekt::getIdBearbeitungsvermerk(int i)
+QString BasisObjekt::getIdBearbeitungsvermerk(int i) const
 {
     if(!domItem || i < 0 || i >= getIdBearbeitungsvermerkCount())
     {
@@ -33,7 +33,7 @@ QString BasisObjekt::getIdBearbeitungsvermerk(int i)
     return childlist.at(i)->getFirstValueAtPath("Wert");
 }
 
-QString BasisObjekt::getDbGdiReferenz()
+QString BasisObjekt::getDbGdiReferenz() const
 {
     if(!domItem)
     {
@@ -42,7 +42,7 @@ QString BasisObjekt::getDbGdiReferenz()
     return domItem->getFirstValueAtPath("Objektreferenzen/DB_GDI_Referenz/Wert");
 }
 
-QString BasisObjekt::getTechnischerPlatz()
+QString BasisObjekt::getTechnischerPlatz() const
 {
     if(!domItem)
     {
@@ -51,7 +51,7 @@ QString BasisObjekt::getTechnischerPlatz()
     return domItem->getFirstValueAtPath("Objektreferenzen/Technischer_Platz/Wert");
 }
 
-QString BasisObjekt::getObjektzustandBesonders()
+QString BasisObjekt::getObjektzustandBesonders() const
 {
     if(!domItem)
     {
@@ -60,7 +60,7 @@ QString BasisObjekt::getObjektzustandBesonders()
     return domItem->getFirstValueAtPath("Basis_Objekt_Allg/Objektzustand_Besonders/Wert");
 }
 
-bool BasisObjekt::getBestandsschutz()
+bool BasisObjekt::getBestandsschutz() const
 {
     if(!domItem)
     {
@@ -69,7 +69,7 @@ bool BasisObjekt::getBestandsschutz()
     return (domItem->getFirstValueAtPath("Basis_Objekt_Allg/Bestandsschutz/Wert") == "true");
 }
 
-QString BasisObjekt::getIdAnhangRegelwerkBesonders()
+QString BasisObjekt::getIdAnhangRegelwerkBesonders() const
 {
     if(!domItem)
     {
@@ -78,7 +78,7 @@ QString BasisObjekt::getIdAnhangRegelwerkBesonders()
     return domItem->getFirstValueAtPath("Basis_Objekt_Allg/ID_Anhang_Regelwerk_Besonders/Wert");
 }
 
-QString BasisObjekt::getDatumRegelwerk()
+QString BasisObjekt::getDatumRegelwerk() const
 {
     if(!domItem)
     {

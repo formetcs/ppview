@@ -1,28 +1,28 @@
 #include <QtCore>
-#include "planpromodel.h"
+#include "documenttreemodel.h"
 
-PlanProModel::PlanProModel(QObject* parent)
+DocumentTreeModel::DocumentTreeModel(QObject* parent)
     :QAbstractItemModel(parent)
 {
     doc = NULL;
 }
 
-PlanProModel::~PlanProModel()
+DocumentTreeModel::~DocumentTreeModel()
 {
 }
 
-void PlanProModel::setDocument(PlanProDocument* d)
+void DocumentTreeModel::setDocument(PlanProDocument* d)
 {
     doc = d;
     emit layoutChanged();
 }
 
-void PlanProModel::modelChanged()
+void DocumentTreeModel::modelChanged()
 {
     emit layoutChanged();
 }
 
-QModelIndex PlanProModel::getModelIndex(DomItem* item)
+QModelIndex DocumentTreeModel::getModelIndex(DomItem* item)
 {
     if(!item)
     {
@@ -36,7 +36,7 @@ QModelIndex PlanProModel::getModelIndex(DomItem* item)
     return index(row, 0, parentIndex);
 }
 
-QVariant PlanProModel::data(const QModelIndex& index, int role) const
+QVariant DocumentTreeModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -68,7 +68,7 @@ QVariant PlanProModel::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
+Qt::ItemFlags DocumentTreeModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -76,7 +76,7 @@ Qt::ItemFlags PlanProModel::flags(const QModelIndex& index) const
     return QAbstractItemModel::flags(index);
 }
 
-QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant DocumentTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
@@ -96,7 +96,7 @@ QVariant PlanProModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex DocumentTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -119,7 +119,7 @@ QModelIndex PlanProModel::index(int row, int column, const QModelIndex& parent) 
         return QModelIndex();
 }
 
-QModelIndex PlanProModel::parent(const QModelIndex& child) const
+QModelIndex DocumentTreeModel::parent(const QModelIndex& child) const
 {
     if (!child.isValid())
         return QModelIndex();
@@ -133,7 +133,7 @@ QModelIndex PlanProModel::parent(const QModelIndex& child) const
     return createIndex(parentItem->getOwnPosition(), 0, parentItem);
 }
 
-int PlanProModel::rowCount(const QModelIndex& parent) const
+int DocumentTreeModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.column() > 0)
         return 0;
@@ -157,7 +157,7 @@ int PlanProModel::rowCount(const QModelIndex& parent) const
     return parentItem->childCount();
 }
 
-int PlanProModel::columnCount(const QModelIndex& /*parent*/) const
+int DocumentTreeModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 3;
 }

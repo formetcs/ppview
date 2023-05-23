@@ -7,13 +7,14 @@ class TemporaryPunktObjekt : public PunktObjekt
 {
 public:
     TemporaryPunktObjekt(QString id, QString idtk, int abst, QString wirkr);
-    QString getIdentitaet();
-    int getPunktObjektTopKanteCount();
-    QString getIdTopKante(int i);
-    int getAbstand(int i);
-    QString getWirkrichtung(int i);
-    QString getSeitlicheLage(int i);
-    int getSeitlicherAbstand(int i);
+    bool isPunktObjekt() const;
+    QString getIdentitaet() const;
+    int getPunktObjektTopKanteCount() const;
+    QString getIdTopKante(int i) const;
+    int getAbstand(int i) const;
+    QString getWirkrichtung(int i) const;
+    QString getSeitlicheLage(int i) const;
+    int getSeitlicherAbstand(int i) const;
 
 private:
     QString identitaet;
