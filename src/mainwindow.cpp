@@ -2,10 +2,8 @@
 #include <QtWidgets>
 #include <QtPrintSupport>
 
-//#include <iostream>
-
 #include "mainwindow.h"
-//#include "makro.h"
+#include "global.h"
 #include "graphicsscenebuilder.h"
 #include "filterwidget.h"
 #include "documenttreemodel.h"
@@ -18,7 +16,6 @@
 #include "objectlistmodel.h"
 #include "anhang.h"
 #include "planprograph.h"
-#include "punktobjekt.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -177,7 +174,7 @@ void MainWindow::saveFile()
     if (!s.isEmpty())
     {
       QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      document->updateHeader("PlanPro Viewer", QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+      document->updateHeader(APPLICATION_NAME, QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
       doctreemodel->modelChanged(); // because of updated header
       bool success = document->saveFile(s);
       QApplication::restoreOverrideCursor();
@@ -471,13 +468,22 @@ void MainWindow::setLanguage()
 
 void MainWindow::showDocumentInfo()
 {
-    QString text = "No file loaded";
-    QString timestamp = document->getTimestamp().toString();
-    QString toolname = document->getToolName();
-    QString toolversion = document->getToolVersion();
-    QString remark = document->getRemark();
-    text = "Timestamp: " + timestamp + "\nTool: " + toolname + ", Version " + toolversion + "\nRemark: " + remark;
-    QMessageBox::information(this, "Info", text);
+    QString text = tr("No file loaded");
+    if(document->getDocumentType() != PlanProDocument::DocumentTypeInvalid)
+    {
+        QString doctype = tr("State");
+        if(document->getDocumentType() == PlanProDocument::DocumentTypePlanning)
+        {
+            doctype = tr("Planning");
+        }
+        QString timestamp = document->getTimestamp().toString();
+        QString toolname = document->getToolName();
+        QString toolversion = document->getToolVersion();
+        QString remark = document->getRemark();
+        text = tr("Document Type: %1\n\nTimestamp: %2\nTool: %3, Version %4\n\n%5").arg(doctype).arg(timestamp).arg(toolname).arg(toolversion).arg(remark);
+        //text = doctype + "\n\n" + tr("Timestamp: ") + timestamp + "\n" + tr("Tool: ") + toolname + ", Version " + toolversion + "\n\n" + remark;
+    }
+    QMessageBox::information(this, tr("Document Information"), text);
 }
 
 void MainWindow::showHelp()
@@ -489,14 +495,12 @@ void MainWindow::about()
 {
     QMessageBox::about(
         this, tr("About PlanPro Viewer"),
-        tr("<h2>PlanPro Viewer</h2>"
-           "Version: %1.%2.%3<br><br>"
-           "<b>Copyright &copy; 2017-2021<br>"
-           "Technische Universit&auml;t Darmstadt<br><br>"
+        tr("<h2>PlanPro Viewer %1.%2.%3</h2>"
+           "Supports PlanPro Version %4.%5.%6<br><br>"
+           "Copyright &copy; 2017-2023 The FormETCS Project.<br>All rights reserved.<br><br>"
            "This program is released under the terms of the<br>"
-           "BSD 3-Clause License<br><br></b>"
-           "<b>The work was supported by DB Netz AG in<br>"
-           "Project FormETCS</b>").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+           "GNU General Public License.")
+            .arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH).arg(PLANPRO_MAJOR).arg(PLANPRO_MINOR).arg(PLANPRO_PATCH));
 }
 
 void MainWindow::handleObjectSearchFromSearchWindow()
@@ -531,17 +535,14 @@ void MainWindow::switchViewMode()
     if(startViewModeAct->isChecked())
     {
         viewMode = ViewModeStateStart;
-        qDebug("start state switch");
     }
     else if(endViewModeAct->isChecked())
     {
         viewMode = ViewModeStateEnd;
-        qDebug("end state switch");
     }
     else if(comparisonViewModeAct->isChecked())
     {
         viewMode = ViewModeStateComparison;
-        qDebug("combined state switch");
     }
     objectlistmodel->changeViewMode(viewMode);
     scene->changeViewMode(viewMode);
@@ -561,59 +562,69 @@ void MainWindow::changeCategory()
 
 void MainWindow::createActions()
 {
-    openFileAct = new QAction(QIcon(":/images/fileopen.png"), tr("&Open file..."), this);
+    openFileAct = new QAction(tr("&Open file..."), this);
+    openFileAct->setIcon(QIcon(":/images/fileopen.png"));
     openFileAct->setShortcut(tr("Ctrl+O"));
     openFileAct->setStatusTip(tr("Open a PlanPro XML file"));
     connect(openFileAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    saveFileAct = new QAction(QIcon(":/images/save.png"), tr("&Save file..."), this);
+    saveFileAct = new QAction(tr("&Save file..."), this);
+    saveFileAct->setIcon(QIcon(":/images/save.png"));
     saveFileAct->setShortcut(tr("Ctrl+S"));
     saveFileAct->setStatusTip(tr("Save the current view data to a PlanPro XML file"));
     connect(saveFileAct, SIGNAL(triggered()), this, SLOT(saveFile()));
 
-    exportToPictureAct = new QAction(QIcon(":/images/pdf.png"), tr("P&NG..."), this);
+    exportToPictureAct = new QAction(tr("P&NG..."), this);
+    exportToPictureAct->setIcon(QIcon(":/images/pdf.png"));
     exportToPictureAct->setStatusTip(tr("Export the visible area as PNG picture"));
     connect(exportToPictureAct, SIGNAL(triggered()), this, SLOT(exportToPicture()));
 
-    exportToPdfAct = new QAction(QIcon(":/images/pdf.png"), tr("P&DF..."), this);
+    exportToPdfAct = new QAction(tr("P&DF..."), this);
+    exportToPdfAct->setIcon(QIcon(":/images/pdf.png"));
     exportToPdfAct->setStatusTip(tr("Export the visible area as PDF file"));
     connect(exportToPdfAct, SIGNAL(triggered()), this, SLOT(exportToPdf()));
 
-    printFileAct = new QAction(QIcon(":/images/fileprint.png"), tr("&Print..."), this);
+    docInfoAct = new QAction(tr("&Show document information..."), this);
+    docInfoAct->setShortcut(tr("Ctrl+I"));
+    docInfoAct->setStatusTip(tr("Print the visible area"));
+    connect(docInfoAct, SIGNAL(triggered()), this, SLOT(showDocumentInfo()));
+
+    printFileAct = new QAction(tr("&Print..."), this);
+    printFileAct->setIcon(QIcon(":/images/fileprint.png"));
     printFileAct->setShortcut(tr("Ctrl+P"));
     printFileAct->setStatusTip(tr("Print the visible area"));
     connect(printFileAct, SIGNAL(triggered()), this, SLOT(printFile()));
 
-    exitAct = new QAction(QIcon(":/images/exit.png"), tr("E&xit"), this);
+    exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
     exitAct->setStatusTip(tr("Close the program"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    searchAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Search..."), this);
+    searchAct = new QAction(tr("&Search..."), this);
     searchAct->setShortcut(tr("Ctrl+F"));
     searchAct->setStatusTip(tr("Search an object based on its GUID"));
     connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearchFromMenu()));
 
-    centerAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Center object"), this);
+    centerAct = new QAction(tr("&Center object"), this);
     centerAct->setShortcut(tr("Alt+C"));
     centerAct->setStatusTip(tr("Center the selected object in the graphics view"));
     connect(centerAct, SIGNAL(triggered()), this, SLOT(centerObject()));
 
-    startViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Start State"), this);
+    startViewModeAct = new QAction(tr("&Start State"), this);
     startViewModeAct->setShortcut(tr("F5"));
     startViewModeAct->setStatusTip(tr("Show the start state of the planning"));
     startViewModeAct->setCheckable(true);
     startViewModeAct->setChecked(false);
     connect(startViewModeAct, SIGNAL(triggered()), this, SLOT(switchViewMode()));
 
-    endViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&End State"), this);
+    endViewModeAct = new QAction(tr("&End State"), this);
     endViewModeAct->setShortcut(tr("F6"));
     endViewModeAct->setStatusTip(tr("Show the end state of the planning"));
     endViewModeAct->setCheckable(true);
     endViewModeAct->setChecked(true);
     connect(endViewModeAct, SIGNAL(triggered()), this, SLOT(switchViewMode()));
 
-    comparisonViewModeAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("Start/End &Comparison"), this);
+    comparisonViewModeAct = new QAction(tr("Start/End &Comparison"), this);
     comparisonViewModeAct->setShortcut(tr("F7"));
     comparisonViewModeAct->setStatusTip(tr("Show the comparison of the start and end state of the planning"));
     comparisonViewModeAct->setCheckable(true);
@@ -625,57 +636,58 @@ void MainWindow::createActions()
     viewModeActGroup->addAction(endViewModeAct);
     viewModeActGroup->addAction(comparisonViewModeAct);
 
-    selectAllFiltersAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Select all filter settings"), this);
+    selectAllFiltersAct = new QAction(tr("&Select all filter settings"), this);
     selectAllFiltersAct->setShortcut(tr("Shift+Alt+S"));
     selectAllFiltersAct->setStatusTip(tr("Select all objects in the object filter window"));
     connect(selectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(selectAllFilters()));
 
-    deselectAllFiltersAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("D&eselect all filter settings"), this);
+    deselectAllFiltersAct = new QAction(tr("D&eselect all filter settings"), this);
     deselectAllFiltersAct->setShortcut(tr("Shift+Alt+D"));
     deselectAllFiltersAct->setStatusTip(tr("Deselect all objects in the object filter window"));
     connect(deselectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(deselectAllFilters()));
 
-    extractFileAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Extract file..."), this);
+    extractFileAct = new QAction(tr("&Extract file..."), this);
     extractFileAct->setShortcut(tr("Ctrl+E"));
     extractFileAct->setStatusTip(tr("Extract binary data from the selected object"));
     connect(extractFileAct, SIGNAL(triggered()), this, SLOT(extractFile()));
 
-    measureDistanceAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("Measure &distance..."), this);
+    measureDistanceAct = new QAction(tr("Measure &distance..."), this);
     measureDistanceAct->setShortcut(tr("Ctrl+D"));
     measureDistanceAct->setStatusTip(tr("Calculate the distance between two selected Punkt_Objekt subtypes"));
     connect(measureDistanceAct, SIGNAL(triggered()), this, SLOT(measureDistance()));
 
-    findReferencingObjectsAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("Find &referencing objects"), this);
+    findReferencingObjectsAct = new QAction(tr("Find &referencing objects"), this);
     findReferencingObjectsAct->setShortcut(tr("Ctrl+R"));
     findReferencingObjectsAct->setStatusTip(tr("Find all objects referencing the selected object"));
     connect(findReferencingObjectsAct, SIGNAL(triggered()), this, SLOT(findReferencingObjects()));
 
-    addFavoriteAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Add Favorite"), this);
+    addFavoriteAct = new QAction(tr("&Add Favorite"), this);
     addFavoriteAct->setShortcut(tr("Shift+Alt+A"));
     addFavoriteAct->setStatusTip(tr("Add the selected object to the favorite list"));
     connect(addFavoriteAct, SIGNAL(triggered()), this, SLOT(addToFavorites()));
 
-    removeFavoriteAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Remove Favorite"), this);
+    removeFavoriteAct = new QAction(tr("&Remove Favorite"), this);
     removeFavoriteAct->setShortcut(tr("Shift+Alt+R"));
     removeFavoriteAct->setStatusTip(tr("Remove the selected object from the favorite list"));
     connect(removeFavoriteAct, SIGNAL(triggered()), this, SLOT(removeFromFavorites()));
 
-    clearFavoriteListAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("&Clear Favorite List"), this);
+    clearFavoriteListAct = new QAction(tr("&Clear Favorite List"), this);
     clearFavoriteListAct->setShortcut(tr("Shift+Alt+C"));
     clearFavoriteListAct->setStatusTip(tr("Clear the favorite list"));
     connect(clearFavoriteListAct, SIGNAL(triggered()), favoriteList, SLOT(clear()));
 
-    setLanguageAct = new QAction(/*QIcon(":/images/contents.png"),*/ tr("Set &Language..."), this);
+    setLanguageAct = new QAction(tr("Preferences..."), this);
     setLanguageAct->setShortcut(tr("Ctrl+L"));
     setLanguageAct->setStatusTip(tr("Set the language of the program"));
     connect(setLanguageAct, SIGNAL(triggered()), this, SLOT(setLanguage()));
 
-    helpContentsAct = new QAction(QIcon(":/images/contents.png"), tr("&Help"), this);
+    helpContentsAct = new QAction(tr("&Help"), this);
+    helpContentsAct->setIcon(QIcon(":/images/contents.png"));
     helpContentsAct->setShortcut(tr("F1"));
     helpContentsAct->setStatusTip(tr("Show program help"));
     connect(helpContentsAct, SIGNAL(triggered()), this, SLOT(showHelp()));
 
-    aboutAct = new QAction(tr("&Info..."), this);
+    aboutAct = new QAction(tr("&About..."), this);
     aboutAct->setStatusTip(tr("Show program and version info"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
@@ -693,10 +705,14 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(printFileAct);
     fileMenu->addSeparator();
+    fileMenu->addAction(docInfoAct);
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(searchAct);
+    editMenu->addSeparator();
+    editMenu->addAction(setLanguageAct);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewDockSubmenu = viewMenu->addMenu(tr("Show &Dock Windows"));
@@ -722,9 +738,6 @@ void MainWindow::createMenus()
     favoriteMenu->addSeparator();
     favoriteMenu->addAction(clearFavoriteListAct);
 
-    extrasMenu = menuBar()->addMenu(tr("E&xtras"));
-    extrasMenu->addAction(setLanguageAct);
-
     // Separator before help menu sets it in Motif style
     // at the right border (Convention)
     menuBar()->addSeparator();
@@ -742,8 +755,6 @@ void MainWindow::createToolBars()
     toolBar->addAction(openFileAct);
     toolBar->addAction(saveFileAct);
     toolBar->addSeparator();
-    //toolBar->addAction(exportToPictureAct);
-    //toolBar->addAction(exportToPdfAct);
     toolBar->addAction(printFileAct);
     toolBar->addSeparator();
     QLabel* label1 = new QLabel(tr("Scale [%]"));

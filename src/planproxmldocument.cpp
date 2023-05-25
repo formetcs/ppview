@@ -1,6 +1,7 @@
 #include "planproxmldocument.h"
 
 #include <QtCore>
+#include <QtXml>
 
 PlanProXmlDocument::PlanProXmlDocument(QObject *parent)
     : PlanProDocument{parent}

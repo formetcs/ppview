@@ -2,14 +2,10 @@
 #define DOCUMENTTREEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QString>
-#include <QByteArray>
-#include <QtXml>
 
-//#include "domitem.h"
-#include "planprodocument.h"
-//#include "nexttopkanteresult.h"
-//#include "punktobjekt.h"
+class DomItem;
+class PlanProDocument;
+
 
 class DocumentTreeModel : public QAbstractItemModel
 {

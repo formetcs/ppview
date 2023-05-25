@@ -5,8 +5,6 @@
 #include "planprodocument.h"
 #include "graphicsscene.h"
 
-//#include <iostream>
-
 
 const double TRAVERSE_DELTA = 0.1; // to avoid problems with double precision
 
@@ -2071,6 +2069,7 @@ void GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setZValue(-5);
         }
     }
+    graphicsScene->setSceneRect(graphicsScene->itemsBoundingRect());
 }
 
 

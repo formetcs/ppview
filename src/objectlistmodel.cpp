@@ -1,5 +1,5 @@
 #include "objectlistmodel.h"
-#include "QtGui/qbrush.h"
+#include "planprodocument.h"
 
 ObjectListModel::ObjectListModel(QObject *parent)
     : QAbstractTableModel{parent}

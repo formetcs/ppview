@@ -1,8 +1,12 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-const int VERSION_MAJOR = 0;
-const int VERSION_MINOR = 8;
-const int VERSION_PATCH = 0;
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 8
+#define VERSION_PATCH 0
+
+#define PLANPRO_MAJOR 1
+#define PLANPRO_MINOR 9
+#define PLANPRO_PATCH 0
 
 #endif // VERSION_H

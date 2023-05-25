@@ -6,8 +6,6 @@
 class DomItem;
 class QTreeWidgetItem;
 class QTreeWidget;
-//#include <QItemSelection>
-
 class QActionGroup;
 class QComboBox;
 class SelectionManager;
@@ -91,7 +89,6 @@ private:
     QMenu* viewDockSubmenu;
     QMenu* objectMenu;
     QMenu* favoriteMenu;
-    QMenu* extrasMenu;
     QMenu* helpMenu;
     QToolBar* toolBar;
     QAction* openFileAct;
@@ -99,6 +96,7 @@ private:
     QAction* exportToPictureAct;
     QAction* exportToPdfAct;
     QAction* printFileAct;
+    QAction* docInfoAct;
     QAction* exitAct;
     QAction* searchAct;
     QAction* centerAct;

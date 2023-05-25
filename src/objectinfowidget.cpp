@@ -1,7 +1,5 @@
 #include "objectinfowidget.h"
 
-
-
 ObjectInfoWidget::ObjectInfoWidget(QWidget* parent)
     : QTextBrowser(parent)
 {

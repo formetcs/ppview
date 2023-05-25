@@ -1,7 +1,6 @@
 #ifndef FILTERWIDGET_H
 #define FILTERWIDGET_H
 
-#include <QObject>
 #include <QScrollArea>
 #include <QList>
 
@@ -35,7 +34,7 @@ signals:
     void filterStateChanged(QString key, bool state);
 
 private slots:
-    void changeFilter(QAbstractButton * button);
+    void changeFilter(QAbstractButton* button);
 
 
 private:

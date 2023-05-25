@@ -47,8 +47,8 @@ SOURCES += \
     basisobjekt.cpp \
     documenttreemodel.cpp \
     graphicsscenebuilder.cpp \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     objectinfowidget.cpp \
     objectlistmodel.cpp \
     filterwidget.cpp \
@@ -67,8 +67,9 @@ HEADERS += \
     anhang.h \
     basisobjekt.h \
     documenttreemodel.h \
+    global.h \
     graphicsscenebuilder.h \
-        mainwindow.h \
+    mainwindow.h \
     objectinfowidget.h \
     objectlistmodel.h \
     filterwidget.h \
@@ -82,8 +83,7 @@ HEADERS += \
     selectionmanager.h \
     temporarypunktobjekt.h \
     urobjekt.h \
-    version.h \
-    makro.h
+    version.h
 
 RESOURCES += \
     ppview.qrc

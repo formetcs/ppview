@@ -13,6 +13,7 @@ class QTreeWidget;
 class QItemSelection;
 class GraphicsScene;
 class PlanProDocument;
+
 class SelectionManager : public QObject
 {
     Q_OBJECT

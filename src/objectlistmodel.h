@@ -2,10 +2,10 @@
 #define OBJECTLISTMODEL_H
 
 #include <QAbstractTableModel>
-#include <QObject>
 
 #include "mainwindow.h"
-#include "planprodocument.h"
+
+class PlanProDocument;
 
 class ObjectListModel : public QAbstractTableModel
 {

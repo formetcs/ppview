@@ -1,9 +1,8 @@
 #include "mainwindow.h"
 #include "preferences.h"
-#include "makro.h"
+#include "global.h"
 #include "version.h"
 #include <QApplication>
-//#include <QSettings>
 #include <QTranslator>
 
 int main(int argc, char *argv[])

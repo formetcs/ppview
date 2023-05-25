@@ -3,7 +3,7 @@
 
 #include "planprodocument.h"
 
-#include <QtXml>
+#include <QDomElement>
 
 class PlanProXmlDocument : public PlanProDocument
 {

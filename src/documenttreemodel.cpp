@@ -1,5 +1,6 @@
-#include <QtCore>
 #include "documenttreemodel.h"
+#include "domitem.h"
+#include "planprodocument.h"
 
 DocumentTreeModel::DocumentTreeModel(QObject* parent)
     :QAbstractItemModel(parent)
