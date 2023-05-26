@@ -20,7 +20,7 @@
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
 {
-    setWindowTitle(tr("PlanPro Viewer"));
+    setWindowTitle(APPLICATION_NAME);
     setWindowIcon(QIcon(":/images/ppview.png"));
 
     readSettings();
@@ -96,11 +96,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     connect(document, SIGNAL(dataChanged()), objectlistmodel, SLOT(modelChanged()));
     connect(objectInfo, SIGNAL(uuidClicked(QString)), selectionManager, SLOT(selectItem(QString)));
 
-    saveFileAct->setEnabled(false);
-    exportToPictureAct->setEnabled(false);
-    exportToPdfAct->setEnabled(false);
-    printFileAct->setEnabled(false);
-
+    enableActions();
     openNamedFile(dataFileName);
 }
 
@@ -121,16 +117,26 @@ void MainWindow::dropEvent(QDropEvent* ev)
     {
         QUrl url = urllist.at(0); // only first entry
         QString s = url.toLocalFile();
-        openNamedFile(s);
+        if(okToContinue())
+        {
+            openNamedFile(s);
+        }
     }
     ev->acceptProposedAction();
 }
 
 void MainWindow::closeEvent(QCloseEvent* ev)
 {
-    filterWidget->writeSettings();
-    writeSettings();
-    ev->accept();
+    if(okToContinue())
+    {
+        filterWidget->writeSettings();
+        writeSettings();
+        ev->accept();
+    }
+    else
+    {
+        ev->ignore();
+    }
 }
 
 void MainWindow::readSettings()
@@ -152,38 +158,35 @@ void MainWindow::writeSettings()
     prefs->writeSettings();
 }
 
-void MainWindow::openFile()
+bool MainWindow::okToContinue()
 {
-    QString s = QFileDialog::getOpenFileName(
-        this, tr("Open file"), QDir::homePath(),
-        tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
+    if(isWindowModified())
+    {
+        int r = QMessageBox::warning(this, APPLICATION_NAME,
+                                    tr("The document has been modified.\nDo you want to save your changes?"),
+                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+                                    QMessageBox::Yes);
+        if(r == QMessageBox::Yes)
+        {
+            return saveFile();
+        }
+        else if(r == QMessageBox::Cancel)
+        {
+            return false;
+        }
 
-    openNamedFile(s);
+    }
+    return true;
 }
 
-void MainWindow::saveFile()
+void MainWindow::openFile()
 {
-    QString defaultFileName = document->getFileName();
-    int index = defaultFileName.lastIndexOf(".");
-    defaultFileName = defaultFileName.left(index);
-    defaultFileName += ".ppxml";
-    QString s = QFileDialog::getSaveFileName(
-        this, tr("Save file"), defaultFileName,
-        tr("PlanPro XML files (*.ppxml)"));
-
-    if (!s.isEmpty())
+    if(okToContinue())
     {
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      document->updateHeader(APPLICATION_NAME, QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
-      doctreemodel->modelChanged(); // because of updated header
-      bool success = document->saveFile(s);
-      QApplication::restoreOverrideCursor();
-      if(!success)
-      {
-        QMessageBox::critical(0, tr("File Saving Error"),
-                              tr("File\n%1\ncould not be written")
-                              .arg(s));
-      }
+        QString s = QFileDialog::getOpenFileName(this, tr("Open file"), QDir::homePath(),
+                                                 tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
+
+        openNamedFile(s);
     }
 }
 
@@ -192,28 +195,21 @@ void MainWindow::openNamedFile(const QString& filename)
     if (!filename.isEmpty())
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        scene->clear();
+        categoryComboBox->clear();
         bool success = document->loadFile(filename);
         if(!success)
         {
-            scene->clear();
-            categoryComboBox->clear();
-            setWindowTitle(tr("PlanPro Viewer"));
-            saveFileAct->setEnabled(false);
-            exportToPictureAct->setEnabled(false);
-            exportToPdfAct->setEnabled(false);
-            printFileAct->setEnabled(false);
-
+            setWindowTitle(APPLICATION_NAME);
             QApplication::restoreOverrideCursor();
             QMessageBox::critical(0, tr("File Reading Error"),
-                            tr("File\n%1\ncould not be opened")
-                            .arg(filename));
+                                tr("File\n%1\ncould not be opened").arg(filename));
         }
         else
         {
             GraphicsSceneBuilder builder(document, scene);
             builder.createGraphicsScene();
             scene->changeFilterSettings(filterWidget->getFilterState());
-            categoryComboBox->clear();
             QStringList categoryList = document->getCategoryList();
             if(!categoryList.isEmpty())
             {
@@ -222,20 +218,56 @@ void MainWindow::openNamedFile(const QString& filename)
             }
 
             QFileInfo fi(filename);
-            setWindowTitle(fi.fileName() + tr(" - PlanPro Viewer"));
-            saveFileAct->setEnabled(true);
-            exportToPictureAct->setEnabled(true);
-            exportToPdfAct->setEnabled(true);
-            printFileAct->setEnabled(true);
-
-            //view->show();
-
+            setWindowTitle(QString("%1[*] - %2").arg(fi.fileName()).arg(APPLICATION_NAME));
             QApplication::restoreOverrideCursor();
         }
         favoriteList->clear();
         referenceList->clear();
         selectionManager->clearSelection();
+        setWindowModified(false);
+        enableActions();
     }
+}
+
+bool MainWindow::saveFile()
+{
+    return saveNamedFile(document->getFileName());
+}
+
+bool MainWindow::saveAs()
+{
+    QString defaultFileName = document->getFileName();
+    int index = defaultFileName.lastIndexOf(".");
+    defaultFileName = defaultFileName.left(index);
+    defaultFileName += ".ppxml";
+    QString s = QFileDialog::getSaveFileName(this, tr("Save file"), defaultFileName,
+                                tr("PlanPro XML files (*.ppxml)"));
+
+    return saveNamedFile(s);
+}
+
+bool MainWindow::saveNamedFile(const QString& filename)
+{
+    if (filename.isEmpty())
+    {
+        return false;
+    }
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    document->updateHeader(APPLICATION_NAME, QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH));
+    doctreemodel->modelChanged(); // because of updated header
+    bool success = document->saveFile(filename);
+    QApplication::restoreOverrideCursor();
+    if(!success)
+    {
+        QMessageBox::critical(0, tr("File Saving Error"),
+                              tr("File\n%1\ncould not be written").arg(filename));
+        return false;
+    }
+    QFileInfo fi(filename);
+    setWindowTitle(QString("%1[*] - %2").arg(fi.fileName()).arg(APPLICATION_NAME));
+    setWindowModified(false);
+    enableActions();
+    return true;
 }
 
 void MainWindow::exportToPicture()
@@ -244,19 +276,18 @@ void MainWindow::exportToPicture()
     int index = defaultFileName.lastIndexOf(".");
     defaultFileName = defaultFileName.left(index);
     defaultFileName += ".png";
-    QString s = QFileDialog::getSaveFileName(
-        this, tr("Export to PNG"), defaultFileName,
-        tr("Portable Network Graphics (*.png)"));
+    QString s = QFileDialog::getSaveFileName(this, tr("Export to PNG"), defaultFileName,
+                                tr("Portable Network Graphics (*.png)"));
 
     if (!s.isEmpty())
     {
-      QImage image(view->width(), view->height(), QImage::Format_RGB32);
-      image.fill(QColor(Qt::white));
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      QPainter painter(&image);
-      view->render(&painter);
-      image.save(s, "PNG");
-      QApplication::restoreOverrideCursor();
+        QImage image(view->width(), view->height(), QImage::Format_RGB32);
+        image.fill(QColor(Qt::white));
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        QPainter painter(&image);
+        view->render(&painter);
+        image.save(s, "PNG");
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -266,21 +297,20 @@ void MainWindow::exportToPdf()
     int index = defaultPdfFileName.lastIndexOf(".");
     defaultPdfFileName = defaultPdfFileName.left(index);
     defaultPdfFileName += ".pdf";
-    QString s = QFileDialog::getSaveFileName(
-        this, tr("Export to PDF"), defaultPdfFileName,
-        tr("PDF files (*.pdf)"));
+    QString s = QFileDialog::getSaveFileName(this, tr("Export to PDF"), defaultPdfFileName,
+                                tr("PDF files (*.pdf)"));
 
     if (!s.isEmpty())
     {
-      QPrinter printer;
-      printer.setOutputFormat(QPrinter::PdfFormat);
-      printer.setOutputFileName(s);
-      QFileInfo fi(document->getFileName());
-      printer.setDocName(fi.fileName());
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      QPainter painter(&printer);
-      view->render(&painter);
-      QApplication::restoreOverrideCursor();
+        QPrinter printer;
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setOutputFileName(s);
+        QFileInfo fi(document->getFileName());
+        printer.setDocName(fi.fileName());
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        QPainter painter(&printer);
+        view->render(&painter);
+        QApplication::restoreOverrideCursor();
     }
 }
 
@@ -299,7 +329,7 @@ void MainWindow::printFile()
     printer.setDocName(fi.fileName());
     QPrintDialog dialog(&printer, this);
     if(dialog.exec() != QDialog::Accepted)
-      return;
+        return;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QPainter painter(&printer);
@@ -329,26 +359,25 @@ void MainWindow::extractFile()
     QDir path = fi.dir();
     QString filePathString = path.filePath(filename);
 
-    QString selectedFilename = QFileDialog::getSaveFileName(
-        this, tr("Save file"), filePathString);
+    QString selectedFilename = QFileDialog::getSaveFileName(this, tr("Save file"), filePathString);
 
     if (!selectedFilename.isEmpty())
     {
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      QByteArray data = anhang.getDaten();
-      QFile file(selectedFilename);
-      if (!file.open(QIODevice::WriteOnly))
-      {
-        QMessageBox::critical(0, tr("File Saving Error"),
-                                tr("File\n%1\ncould not be written")
-                                .arg(selectedFilename));
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        QByteArray data = anhang.getDaten();
+        QFile file(selectedFilename);
+        if (!file.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::critical(0, tr("File Saving Error"),
+                                    tr("File\n%1\ncould not be written")
+                                    .arg(selectedFilename));
+            QApplication::restoreOverrideCursor();
+            return;
+        }
+        QDataStream out(&file);
+        out << data;
+        file.close();
         QApplication::restoreOverrideCursor();
-        return;
-      }
-      QDataStream out(&file);
-      out << data;
-      file.close();
-      QApplication::restoreOverrideCursor();
     }
 }
 
@@ -383,12 +412,12 @@ void MainWindow::addToFavorites()
     QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
     for(int i = 0; i < selectedItemList.count(); ++i)
     {
-      DomItem* item = selectedItemList.at(i);
-      QString name = item->getName();
-      QString id = item->getFirstValueAtPath("Identitaet/Wert");
-      QListWidgetItem* newItem = new QListWidgetItem;
-      newItem->setText(name + " [" + id + "]");
-      favoriteList->addItem(newItem);
+        DomItem* item = selectedItemList.at(i);
+        QString name = item->getName();
+        QString id = item->getFirstValueAtPath("Identitaet/Wert");
+        QListWidgetItem* newItem = new QListWidgetItem;
+        newItem->setText(name + " [" + id + "]");
+        favoriteList->addItem(newItem);
     }
 }
 
@@ -486,6 +515,21 @@ void MainWindow::showDocumentInfo()
     QMessageBox::information(this, tr("Document Information"), text);
 }
 
+void MainWindow::editRemark()
+{
+    QString oldRemark = document->getRemark();
+    bool ok;
+    QString newRemark = QInputDialog::getMultiLineText(this, tr("Edit remark"),
+                                            tr("Enter the remark for the PlanPro file:"), oldRemark, &ok);
+    if(ok && newRemark != oldRemark)
+    {
+        document->setRemark(newRemark);
+        doctreemodel->modelChanged(); // because of updated header
+        setWindowModified(true);
+        enableActions();
+    }
+}
+
 void MainWindow::showHelp()
 {
     QMessageBox::information(this, "Info", "TODO");
@@ -493,13 +537,12 @@ void MainWindow::showHelp()
 
 void MainWindow::about()
 {
-    QMessageBox::about(
-        this, tr("About PlanPro Viewer"),
-        tr("<h2>PlanPro Viewer %1.%2.%3</h2>"
-           "Supports PlanPro Version %4.%5.%6<br><br>"
-           "Copyright &copy; 2017-2023 The FormETCS Project.<br>All rights reserved.<br><br>"
-           "This program is released under the terms of the<br>"
-           "GNU General Public License.")
+    QMessageBox::about(this, tr("About PlanPro Viewer"),
+            tr("<h2>PlanPro Viewer %1.%2.%3</h2>"
+            "Supports PlanPro Version %4.%5.%6<br><br>"
+            "Copyright &copy; 2017-2023 The FormETCS Project.<br>All rights reserved.<br><br>"
+            "This program is released under the terms of the<br>"
+            "GNU General Public License.")
             .arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH).arg(PLANPRO_MAJOR).arg(PLANPRO_MINOR).arg(PLANPRO_PATCH));
 }
 
@@ -568,11 +611,17 @@ void MainWindow::createActions()
     openFileAct->setStatusTip(tr("Open a PlanPro XML file"));
     connect(openFileAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    saveFileAct = new QAction(tr("&Save file..."), this);
+    saveFileAct = new QAction(tr("&Save file"), this);
     saveFileAct->setIcon(QIcon(":/images/save.png"));
     saveFileAct->setShortcut(tr("Ctrl+S"));
-    saveFileAct->setStatusTip(tr("Save the current view data to a PlanPro XML file"));
+    saveFileAct->setStatusTip(tr("Save the current PlanPro XML file"));
     connect(saveFileAct, SIGNAL(triggered()), this, SLOT(saveFile()));
+
+    saveAsAct = new QAction(tr("&Save as..."), this);
+    saveAsAct->setIcon(QIcon(":/images/save.png"));
+    saveAsAct->setShortcut(tr("Ctrl+A"));
+    saveAsAct->setStatusTip(tr("Save the current PlanPro data to a different file"));
+    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
     exportToPictureAct = new QAction(tr("P&NG..."), this);
     exportToPictureAct->setIcon(QIcon(":/images/pdf.png"));
@@ -604,6 +653,11 @@ void MainWindow::createActions()
     searchAct->setShortcut(tr("Ctrl+F"));
     searchAct->setStatusTip(tr("Search an object based on its GUID"));
     connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearchFromMenu()));
+
+    editRemarkAct = new QAction(tr("&Edit remark..."), this);
+    editRemarkAct->setShortcut(tr("Alt+R"));
+    editRemarkAct->setStatusTip(tr("Edit the remark section of the current PlanPro XML file"));
+    connect(editRemarkAct, SIGNAL(triggered()), this, SLOT(editRemark()));
 
     centerAct = new QAction(tr("&Center object"), this);
     centerAct->setShortcut(tr("Alt+C"));
@@ -692,12 +746,65 @@ void MainWindow::createActions()
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
 
+void MainWindow::enableActions()
+{
+    if(document->getDocumentType() == PlanProDocument::DocumentTypeInvalid)
+    {
+        saveFileAct->setEnabled(false);
+        saveAsAct->setEnabled(false);
+        exportToPictureAct->setEnabled(false);
+        exportToPdfAct->setEnabled(false);
+        docInfoAct->setEnabled(false);
+        printFileAct->setEnabled(false);
+        searchAct->setEnabled(false);
+        editRemarkAct->setEnabled(false);
+        startViewModeAct->setEnabled(false);
+        endViewModeAct->setEnabled(false);
+        comparisonViewModeAct->setEnabled(false);
+        centerAct->setEnabled(false);
+        extractFileAct->setEnabled(false);
+        measureDistanceAct->setEnabled(false);
+        findReferencingObjectsAct->setEnabled(false);
+        addFavoriteAct->setEnabled(false);
+        removeFavoriteAct->setEnabled(false);
+        clearFavoriteListAct->setEnabled(false);
+
+        scaleSpinBox->setEnabled(false);
+        rotateSpinBox->setEnabled(false);
+    }
+    else
+    {
+        saveFileAct->setEnabled(isWindowModified());
+        saveAsAct->setEnabled(true);
+        exportToPictureAct->setEnabled(true);
+        exportToPdfAct->setEnabled(true);
+        docInfoAct->setEnabled(true);
+        printFileAct->setEnabled(true);
+        searchAct->setEnabled(true);
+        editRemarkAct->setEnabled(true);
+        startViewModeAct->setEnabled(true);
+        endViewModeAct->setEnabled(true);
+        comparisonViewModeAct->setEnabled(true);
+        centerAct->setEnabled(true);
+        extractFileAct->setEnabled(true);
+        measureDistanceAct->setEnabled(true);
+        findReferencingObjectsAct->setEnabled(true);
+        addFavoriteAct->setEnabled(true);
+        removeFavoriteAct->setEnabled(true);
+        clearFavoriteListAct->setEnabled(true);
+
+        scaleSpinBox->setEnabled(true);
+        rotateSpinBox->setEnabled(true);
+    }
+}
+
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openFileAct);
     fileMenu->addSeparator();
     fileMenu->addAction(saveFileAct);
+    fileMenu->addAction(saveAsAct);
     fileMenu->addSeparator();
     exportSubmenu = fileMenu->addMenu(tr("&Export"));
     exportSubmenu->addAction(exportToPictureAct);
@@ -711,6 +818,7 @@ void MainWindow::createMenus()
 
     editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(searchAct);
+    editMenu->addAction(editRemarkAct);
     editMenu->addSeparator();
     editMenu->addAction(setLanguageAct);
 

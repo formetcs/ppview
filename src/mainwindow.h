@@ -52,13 +52,15 @@ protected:
 
 private slots:
     void openFile();
-    void saveFile();
+    bool saveFile();
+    bool saveAs();
     void exportToPicture();
     void exportToPdf();
     void printFile();
     void transformGraphicsView(int);
     void showHelp();
     void showDocumentInfo();
+    void editRemark();
     void about();
     void handleObjectSearchFromSearchWindow();
     void handleObjectSearchFromMenu();
@@ -74,10 +76,13 @@ private slots:
 
 private:
     void createActions();
+    void enableActions();
     void createMenus();
     void createToolBars();
     void createDockWindows();
+    bool okToContinue();
     void openNamedFile(const QString& filename);
+    bool saveNamedFile(const QString& filename);
     void readSettings();
     void writeSettings();
     void createReferenceListRec(DomItem* item, QTreeWidgetItem* parent, int depth);
@@ -93,12 +98,14 @@ private:
     QToolBar* toolBar;
     QAction* openFileAct;
     QAction* saveFileAct;
+    QAction* saveAsAct;
     QAction* exportToPictureAct;
     QAction* exportToPdfAct;
     QAction* printFileAct;
     QAction* docInfoAct;
     QAction* exitAct;
     QAction* searchAct;
+    QAction* editRemarkAct;
     QAction* centerAct;
     QActionGroup* viewModeActGroup;
     QAction* startViewModeAct;
