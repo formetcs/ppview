@@ -15,12 +15,17 @@ DocumentTreeModel::~DocumentTreeModel()
 void DocumentTreeModel::setDocument(PlanProDocument* d)
 {
     doc = d;
-    emit layoutChanged();
+    endResetModel();
+}
+
+void DocumentTreeModel::modelAboutToBeChanged()
+{
+    beginResetModel();
 }
 
 void DocumentTreeModel::modelChanged()
 {
-    emit layoutChanged();
+    endResetModel();
 }
 
 QModelIndex DocumentTreeModel::getModelIndex(DomItem* item)

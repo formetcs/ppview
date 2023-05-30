@@ -79,7 +79,7 @@ QString ObjectInfoWidget::generateInfoTextRec(const DomItem* o, int currentDepth
         QRegularExpressionMatch match = uuidRegExp.match(valuestring);
         if(match.hasMatch())
         {
-            finalvalue = QString("<a href='ppview://%1'>%2</a>").arg(valuestring).arg(valuestring);
+            finalvalue = QString("<a href='ppview://%1'>%2</a>").arg(valuestring, valuestring);
         }
         returnval += QString("<td>%1</td></tr>\n<tr>").arg(finalvalue);
         return returnval;

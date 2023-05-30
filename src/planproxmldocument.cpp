@@ -48,7 +48,7 @@ bool PlanProXmlDocument::loadFile(const QString& filename)
         delete rootItem;
         rootItem = NULL;
     }
-    documentChanged();
+    clearCache();
     return returnval;
 }
 

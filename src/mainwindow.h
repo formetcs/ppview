@@ -54,6 +54,7 @@ private slots:
     void openFile();
     bool saveFile();
     bool saveAs();
+    void closeFile();
     void exportToPicture();
     void exportToPdf();
     void printFile();
@@ -99,6 +100,7 @@ private:
     QAction* openFileAct;
     QAction* saveFileAct;
     QAction* saveAsAct;
+    QAction* closeFileAct;
     QAction* exportToPictureAct;
     QAction* exportToPdfAct;
     QAction* printFileAct;

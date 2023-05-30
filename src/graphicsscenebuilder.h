@@ -16,7 +16,7 @@ class GraphicsSceneBuilder
 {
 public:
     GraphicsSceneBuilder(PlanProDocument* doc, GraphicsScene* scene);
-    void createGraphicsScene();
+    bool createGraphicsScene();
 
 private:
     QPointF calculatePunktObjekt(const DomItem* o);

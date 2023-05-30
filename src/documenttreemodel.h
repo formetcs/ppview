@@ -25,6 +25,7 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
 public slots:
+    void modelAboutToBeChanged();
     void modelChanged();
 
 private:

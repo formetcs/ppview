@@ -1,5 +1,6 @@
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
+#include <QProgressDialog>
 
 #include "graphicsscenebuilder.h"
 #include "planprodocument.h"
@@ -16,17 +17,26 @@ GraphicsSceneBuilder::GraphicsSceneBuilder(PlanProDocument* doc, GraphicsScene* 
 }
 
 
-void GraphicsSceneBuilder::createGraphicsScene()
+bool GraphicsSceneBuilder::createGraphicsScene()
 {
     if(!document || !graphicsScene)
     {
-        return;
+        return false;
     }
 
     graphicsScene->clear();
     QList<PlanProDocument::ObjectListItem> objectlist = document->getCombinedObjectList();
+    QProgressDialog progress(QObject::tr("Creating track layout..."), QObject::tr("Abort"), 0, objectlist.count());
+    progress.setModal(true);
+    progress.setMinimumDuration(500);
     for (int i = 0; i < objectlist.count(); ++i)
     {
+        progress.setValue(i);
+        if(progress.wasCanceled())
+        {
+            graphicsScene->clear();
+            return false;
+        }
         PlanProDocument::ObjectListItem oli = objectlist.at(i);
         PlanProDocument::PlanningState state = oli.state;
         DomItem* item = (state == PlanProDocument::PlanningStateStart) ? oli.itemStart : oli.itemEnd;
@@ -2069,7 +2079,9 @@ void GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setZValue(-5);
         }
     }
+    progress.setValue(objectlist.count());
     graphicsScene->setSceneRect(graphicsScene->itemsBoundingRect());
+    return true;
 }
 
 

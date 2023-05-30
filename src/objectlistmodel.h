@@ -25,6 +25,7 @@ public:
 public slots:
     void changeViewMode(MainWindow::ViewMode mode);
     void changeCategory(const QString& cat);
+    void modelAboutToBeChanged();
     void modelChanged();
 
 private:

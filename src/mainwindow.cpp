@@ -174,7 +174,6 @@ bool MainWindow::okToContinue()
         {
             return false;
         }
-
     }
     return true;
 }
@@ -194,36 +193,46 @@ void MainWindow::openNamedFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
-        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        selectionManager->clearSelection();
         scene->clear();
         categoryComboBox->clear();
+        favoriteList->clear();
+        referenceList->clear();
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        doctreemodel->modelAboutToBeChanged();
+        objectlistmodel->modelAboutToBeChanged();
         bool success = document->loadFile(filename);
+        QApplication::restoreOverrideCursor();
         if(!success)
         {
             setWindowTitle(APPLICATION_NAME);
-            QApplication::restoreOverrideCursor();
             QMessageBox::critical(0, tr("File Reading Error"),
                                 tr("File\n%1\ncould not be opened").arg(filename));
         }
         else
         {
             GraphicsSceneBuilder builder(document, scene);
-            builder.createGraphicsScene();
-            scene->changeFilterSettings(filterWidget->getFilterState());
-            QStringList categoryList = document->getCategoryList();
-            if(!categoryList.isEmpty())
+            if(!builder.createGraphicsScene())
             {
-                categoryComboBox->addItem(tr("(all)"));
-                categoryComboBox->addItems(categoryList);
+                document->clear();
+                setWindowTitle(APPLICATION_NAME);
             }
+            else
+            {
+                scene->changeFilterSettings(filterWidget->getFilterState());
+                QStringList categoryList = document->getCategoryList();
+                if(!categoryList.isEmpty())
+                {
+                    categoryComboBox->addItem(tr("(all)"));
+                    categoryComboBox->addItems(categoryList);
+                }
 
-            QFileInfo fi(filename);
-            setWindowTitle(QString("%1[*] - %2").arg(fi.fileName()).arg(APPLICATION_NAME));
-            QApplication::restoreOverrideCursor();
+                QFileInfo fi(filename);
+                setWindowTitle(QString("%1[*] - %2").arg(fi.fileName(), APPLICATION_NAME));
+            }
         }
-        favoriteList->clear();
-        referenceList->clear();
-        selectionManager->clearSelection();
+        doctreemodel->modelChanged();
+        objectlistmodel->modelChanged();
         setWindowModified(false);
         enableActions();
     }
@@ -264,10 +273,28 @@ bool MainWindow::saveNamedFile(const QString& filename)
         return false;
     }
     QFileInfo fi(filename);
-    setWindowTitle(QString("%1[*] - %2").arg(fi.fileName()).arg(APPLICATION_NAME));
+    setWindowTitle(QString("%1[*] - %2").arg(fi.fileName(), APPLICATION_NAME));
     setWindowModified(false);
     enableActions();
     return true;
+}
+
+void MainWindow::closeFile()
+{
+    if(okToContinue())
+    {
+        selectionManager->clearSelection();
+        scene->clear();
+        categoryComboBox->clear();
+        favoriteList->clear();
+        referenceList->clear();
+        document->clear();
+        setWindowTitle(APPLICATION_NAME);
+        doctreemodel->modelChanged();
+        objectlistmodel->modelChanged();
+        setWindowModified(false);
+        enableActions();
+    }
 }
 
 void MainWindow::exportToPicture()
@@ -343,7 +370,7 @@ void MainWindow::extractFile()
     QModelIndexList selectedList = selectionModel->selectedIndexes();
     if(selectedList.count() != 1)
     {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+        QMessageBox::information(this, tr("Error"), tr("Exactly 1 object must be selected"));
         return;
     }
     QModelIndex index = selectedList.at(0);
@@ -351,7 +378,7 @@ void MainWindow::extractFile()
     Anhang anhang(domItem);
     if(!anhang.isAnhang())
     {
-        QMessageBox::critical(this, tr("Error"), tr("Selected object contains no binary data"));
+        QMessageBox::information(this, tr("Error"), tr("Selected object contains no binary data"));
         return;
     }
     QString filename = anhang.getDateiname() + "." + anhang.getDateityp();
@@ -386,7 +413,7 @@ void MainWindow::measureDistance()
     QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
     if(selectedItemList.count() != 2)
     {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 2 objects must be selected"));
+        QMessageBox::information(this, tr("Error"), tr("Exactly 2 objects must be selected"));
         return;
     }
     PlanProGraph graph(document);
@@ -395,7 +422,7 @@ void MainWindow::measureDistance()
     int result = graph.calculateDistance(item1, item2);
     if(result < -2)
     {
-        QMessageBox::critical(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
+        QMessageBox::information(this, tr("Error"), tr("At least one object is no Punkt_Objekt subtype"));
         return;
     }
     if(result < 0)
@@ -438,7 +465,7 @@ void MainWindow::findReferencingObjects()
     QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
     if(selectedItemList.count() != 1)
     {
-        QMessageBox::critical(this, tr("Error"), tr("Exactly 1 object must be selected"));
+        QMessageBox::information(this, tr("Error"), tr("Exactly 1 object must be selected"));
         return;
     }
     referenceList->clear();
@@ -509,8 +536,7 @@ void MainWindow::showDocumentInfo()
         QString toolname = document->getToolName();
         QString toolversion = document->getToolVersion();
         QString remark = document->getRemark();
-        text = tr("Document Type: %1\n\nTimestamp: %2\nTool: %3, Version %4\n\n%5").arg(doctype).arg(timestamp).arg(toolname).arg(toolversion).arg(remark);
-        //text = doctype + "\n\n" + tr("Timestamp: ") + timestamp + "\n" + tr("Tool: ") + toolname + ", Version " + toolversion + "\n\n" + remark;
+        text = tr("Document Type: %1\n\nTimestamp: %2\nTool: %3, Version %4\n\n%5").arg(doctype, timestamp, toolname, toolversion, remark);
     }
     QMessageBox::information(this, tr("Document Information"), text);
 }
@@ -617,11 +643,16 @@ void MainWindow::createActions()
     saveFileAct->setStatusTip(tr("Save the current PlanPro XML file"));
     connect(saveFileAct, SIGNAL(triggered()), this, SLOT(saveFile()));
 
-    saveAsAct = new QAction(tr("&Save as..."), this);
+    saveAsAct = new QAction(tr("Save &as..."), this);
     saveAsAct->setIcon(QIcon(":/images/save.png"));
     saveAsAct->setShortcut(tr("Ctrl+A"));
     saveAsAct->setStatusTip(tr("Save the current PlanPro data to a different file"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+    closeFileAct = new QAction(tr("&Close file"), this);
+    closeFileAct->setShortcut(tr("Ctrl+Alt+C"));
+    closeFileAct->setStatusTip(tr("Close the current PlanPro XML file"));
+    connect(closeFileAct, SIGNAL(triggered()), this, SLOT(closeFile()));
 
     exportToPictureAct = new QAction(tr("P&NG..."), this);
     exportToPictureAct->setIcon(QIcon(":/images/pdf.png"));
@@ -633,7 +664,7 @@ void MainWindow::createActions()
     exportToPdfAct->setStatusTip(tr("Export the visible area as PDF file"));
     connect(exportToPdfAct, SIGNAL(triggered()), this, SLOT(exportToPdf()));
 
-    docInfoAct = new QAction(tr("&Show document information..."), this);
+    docInfoAct = new QAction(tr("Show document &information..."), this);
     docInfoAct->setShortcut(tr("Ctrl+I"));
     docInfoAct->setStatusTip(tr("Print the visible area"));
     connect(docInfoAct, SIGNAL(triggered()), this, SLOT(showDocumentInfo()));
@@ -752,6 +783,7 @@ void MainWindow::enableActions()
     {
         saveFileAct->setEnabled(false);
         saveAsAct->setEnabled(false);
+        closeFileAct->setEnabled(false);
         exportToPictureAct->setEnabled(false);
         exportToPdfAct->setEnabled(false);
         docInfoAct->setEnabled(false);
@@ -776,6 +808,7 @@ void MainWindow::enableActions()
     {
         saveFileAct->setEnabled(isWindowModified());
         saveAsAct->setEnabled(true);
+        closeFileAct->setEnabled(true);
         exportToPictureAct->setEnabled(true);
         exportToPdfAct->setEnabled(true);
         docInfoAct->setEnabled(true);
@@ -805,6 +838,8 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(saveFileAct);
     fileMenu->addAction(saveAsAct);
+    fileMenu->addSeparator();
+    fileMenu->addAction(closeFileAct);
     fileMenu->addSeparator();
     exportSubmenu = fileMenu->addMenu(tr("&Export"));
     exportSubmenu->addAction(exportToPictureAct);

@@ -18,7 +18,17 @@ PlanProDocument::~PlanProDocument()
     }
 }
 
-void PlanProDocument::documentChanged()
+void PlanProDocument::clear()
+{
+    if(rootItem != NULL)
+    {
+        delete rootItem;
+        rootItem = NULL;
+    }
+    clearCache();
+}
+
+void PlanProDocument::endDataChange()
 {
     clearCache();
     emit dataChanged();

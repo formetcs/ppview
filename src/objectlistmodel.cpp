@@ -12,24 +12,29 @@ ObjectListModel::ObjectListModel(QObject *parent)
 void ObjectListModel::setDocument(PlanProDocument* d)
 {
     doc = d;
-    emit layoutChanged();
+    endResetModel();
 }
 
 void ObjectListModel::changeViewMode(MainWindow::ViewMode mode)
 {
     viewMode = mode;
-    emit layoutChanged();
+    endResetModel();
 }
 
 void ObjectListModel::changeCategory(const QString& cat)
 {
     category = cat;
-    emit layoutChanged();
+    endResetModel();
+}
+
+void ObjectListModel::modelAboutToBeChanged()
+{
+    beginResetModel();
 }
 
 void ObjectListModel::modelChanged()
 {
-    emit layoutChanged();
+    endResetModel();
 }
 
 DomItem* ObjectListModel::getItem(const QModelIndex& index) const

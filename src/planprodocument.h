@@ -67,7 +67,8 @@ public:
 
 
 public slots:
-    void documentChanged();
+    void endDataChange();
+    void clear();
 
 signals:
     void dataChanged();
