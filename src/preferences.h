@@ -22,6 +22,14 @@ public:
     void setWindowState(QByteArray ws);
     bool getFilterSetting(QString filter);
     void setFilterSetting(QString filter, bool enabled);
+    int getZoomStep();
+    void setZoomStep(int step);
+    int getMinZoom();
+    void setMinZoom(int min);
+    int getRotateStep();
+    void setRotateStep(int step);
+    int getMaxRecursionDepth();
+    void setMaxRecursionDepth(int depth);
 
 protected:
     Preferences();
@@ -34,6 +42,10 @@ private:
     QSize size;
     QByteArray windowState;
     QHash<QString, bool> filterSettings;
+    int zoomStep;
+    int minZoom;
+    int rotateStep;
+    int maxRecursionDepth;
 };
 
 #endif // PREFERENCES_H

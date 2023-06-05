@@ -341,14 +341,6 @@ void MainWindow::exportToPdf()
     }
 }
 
-void MainWindow::transformGraphicsView(int)
-{
-    QTransform transform;
-    transform.scale(scaleSpinBox->value() / 100.0, scaleSpinBox->value() / 100.0);
-    transform.rotate(rotateSpinBox->value());
-    view->setTransform(transform);
-}
-
 void MainWindow::printFile()
 {
     QPrinter printer;
@@ -362,6 +354,53 @@ void MainWindow::printFile()
     QPainter painter(&printer);
     view->render(&painter);
     QApplication::restoreOverrideCursor();
+}
+
+void MainWindow::transformGraphicsView()
+{
+    QTransform transform;
+    transform.scale(scaleSpinBox->value() / 100.0, scaleSpinBox->value() / 100.0);
+    transform.rotate(rotateSpinBox->value());
+    view->setTransform(transform);
+}
+
+void MainWindow::zoomIn()
+{
+    int zoomStep = Preferences::getInstance()->getZoomStep();
+    int val = scaleSpinBox->value() + zoomStep;
+    scaleSpinBox->setValue(val);
+}
+
+void MainWindow::zoomOut()
+{
+    int zoomStep = Preferences::getInstance()->getZoomStep();
+    int minZoom = Preferences::getInstance()->getMinZoom();
+    int val = scaleSpinBox->value() - zoomStep;
+    if(val < minZoom)
+    {
+        val = minZoom;
+    }
+    scaleSpinBox->setValue(val);
+}
+
+void MainWindow::rotateLeft()
+{
+    int rotateStep = Preferences::getInstance()->getRotateStep();
+    int val = rotateSpinBox->value() - rotateStep;
+    rotateSpinBox->setValue(val);
+}
+
+void MainWindow::rotateRight()
+{
+    int rotateStep = Preferences::getInstance()->getRotateStep();
+    int val = rotateSpinBox->value() + rotateStep;
+    rotateSpinBox->setValue(val);
+}
+
+void MainWindow::resetView()
+{
+    scaleSpinBox->setValue(100);
+    rotateSpinBox->setValue(0);
 }
 
 void MainWindow::extractFile()
@@ -482,7 +521,8 @@ void MainWindow::findReferencingObjects()
 
 void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, int depth)
 {
-    if(depth > 10)
+    int maxDepth = Preferences::getInstance()->getMaxRecursionDepth();
+    if(depth > maxDepth)
     {
         return;
     }
@@ -633,24 +673,24 @@ void MainWindow::createActions()
 {
     openFileAct = new QAction(tr("&Open file..."), this);
     openFileAct->setIcon(QIcon(":/images/fileopen.png"));
-    openFileAct->setShortcut(tr("Ctrl+O"));
+    openFileAct->setShortcut(QKeySequence::Open);
     openFileAct->setStatusTip(tr("Open a PlanPro XML file"));
     connect(openFileAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
     saveFileAct = new QAction(tr("&Save file"), this);
     saveFileAct->setIcon(QIcon(":/images/save.png"));
-    saveFileAct->setShortcut(tr("Ctrl+S"));
+    saveFileAct->setShortcut(QKeySequence::Save);
     saveFileAct->setStatusTip(tr("Save the current PlanPro XML file"));
     connect(saveFileAct, SIGNAL(triggered()), this, SLOT(saveFile()));
 
     saveAsAct = new QAction(tr("Save &as..."), this);
     saveAsAct->setIcon(QIcon(":/images/save.png"));
-    saveAsAct->setShortcut(tr("Ctrl+A"));
+    saveAsAct->setShortcut(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the current PlanPro data to a different file"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
     closeFileAct = new QAction(tr("&Close file"), this);
-    closeFileAct->setShortcut(tr("Ctrl+Alt+C"));
+    closeFileAct->setShortcut(QKeySequence::Close);
     closeFileAct->setStatusTip(tr("Close the current PlanPro XML file"));
     connect(closeFileAct, SIGNAL(triggered()), this, SLOT(closeFile()));
 
@@ -666,17 +706,17 @@ void MainWindow::createActions()
 
     docInfoAct = new QAction(tr("Show document &information..."), this);
     docInfoAct->setShortcut(tr("Ctrl+I"));
-    docInfoAct->setStatusTip(tr("Print the visible area"));
+    docInfoAct->setStatusTip(tr("Show the document information of the current PlanPro XML file"));
     connect(docInfoAct, SIGNAL(triggered()), this, SLOT(showDocumentInfo()));
 
     printFileAct = new QAction(tr("&Print..."), this);
     printFileAct->setIcon(QIcon(":/images/fileprint.png"));
-    printFileAct->setShortcut(tr("Ctrl+P"));
+    printFileAct->setShortcut(QKeySequence::Print);
     printFileAct->setStatusTip(tr("Print the visible area"));
     connect(printFileAct, SIGNAL(triggered()), this, SLOT(printFile()));
 
     exitAct = new QAction(tr("E&xit"), this);
-    exitAct->setShortcut(tr("Ctrl+Q"));
+    exitAct->setShortcut(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Close the program"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -686,7 +726,7 @@ void MainWindow::createActions()
     connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearchFromMenu()));
 
     editRemarkAct = new QAction(tr("&Edit remark..."), this);
-    editRemarkAct->setShortcut(tr("Alt+R"));
+    editRemarkAct->setShortcut(tr("Ctrl+E"));
     editRemarkAct->setStatusTip(tr("Edit the remark section of the current PlanPro XML file"));
     connect(editRemarkAct, SIGNAL(triggered()), this, SLOT(editRemark()));
 
@@ -694,6 +734,31 @@ void MainWindow::createActions()
     centerAct->setShortcut(tr("Alt+C"));
     centerAct->setStatusTip(tr("Center the selected object in the graphics view"));
     connect(centerAct, SIGNAL(triggered()), this, SLOT(centerObject()));
+
+    zoomInAct = new QAction(tr("Zoom &in"), this);
+    zoomInAct->setShortcut(QKeySequence::ZoomIn);
+    zoomInAct->setStatusTip(tr("Zoom into the graphics view"));
+    connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+    zoomOutAct = new QAction(tr("Zoom &out"), this);
+    zoomOutAct->setShortcut(QKeySequence::ZoomOut);
+    zoomOutAct->setStatusTip(tr("Zoom out of the graphics view"));
+    connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
+
+    rotateLeftAct = new QAction(tr("Rotate &left"), this);
+    rotateLeftAct->setShortcut(tr("Ctrl+Left"));
+    rotateLeftAct->setStatusTip(tr("Rotate the graphics view counter-clockwise"));
+    connect(rotateLeftAct, SIGNAL(triggered()), this, SLOT(rotateLeft()));
+
+    rotateRightAct = new QAction(tr("Rotate &right"), this);
+    rotateRightAct->setShortcut(tr("Ctrl+Right"));
+    rotateRightAct->setStatusTip(tr("Rotate the graphics view clockwise"));
+    connect(rotateRightAct, SIGNAL(triggered()), this, SLOT(rotateRight()));
+
+    resetViewAct = new QAction(tr("Reset &view"), this);
+    resetViewAct->setShortcut(tr("Alt+V"));
+    resetViewAct->setStatusTip(tr("Reset the zoom and rotation of the view to the original value"));
+    connect(resetViewAct, SIGNAL(triggered()), this, SLOT(resetView()));
 
     startViewModeAct = new QAction(tr("&Start State"), this);
     startViewModeAct->setShortcut(tr("F5"));
@@ -732,17 +797,17 @@ void MainWindow::createActions()
     connect(deselectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(deselectAllFilters()));
 
     extractFileAct = new QAction(tr("&Extract file..."), this);
-    extractFileAct->setShortcut(tr("Ctrl+E"));
+    extractFileAct->setShortcut(tr("Alt+E"));
     extractFileAct->setStatusTip(tr("Extract binary data from the selected object"));
     connect(extractFileAct, SIGNAL(triggered()), this, SLOT(extractFile()));
 
     measureDistanceAct = new QAction(tr("Measure &distance..."), this);
-    measureDistanceAct->setShortcut(tr("Ctrl+D"));
+    measureDistanceAct->setShortcut(tr("Alt+D"));
     measureDistanceAct->setStatusTip(tr("Calculate the distance between two selected Punkt_Objekt subtypes"));
     connect(measureDistanceAct, SIGNAL(triggered()), this, SLOT(measureDistance()));
 
     findReferencingObjectsAct = new QAction(tr("Find &referencing objects"), this);
-    findReferencingObjectsAct->setShortcut(tr("Ctrl+R"));
+    findReferencingObjectsAct->setShortcut(tr("Alt+R"));
     findReferencingObjectsAct->setStatusTip(tr("Find all objects referencing the selected object"));
     connect(findReferencingObjectsAct, SIGNAL(triggered()), this, SLOT(findReferencingObjects()));
 
@@ -762,13 +827,13 @@ void MainWindow::createActions()
     connect(clearFavoriteListAct, SIGNAL(triggered()), favoriteList, SLOT(clear()));
 
     setLanguageAct = new QAction(tr("Preferences..."), this);
-    setLanguageAct->setShortcut(tr("Ctrl+L"));
+    setLanguageAct->setShortcut(QKeySequence::Preferences);
     setLanguageAct->setStatusTip(tr("Set the language of the program"));
     connect(setLanguageAct, SIGNAL(triggered()), this, SLOT(setLanguage()));
 
     helpContentsAct = new QAction(tr("&Help"), this);
     helpContentsAct->setIcon(QIcon(":/images/contents.png"));
-    helpContentsAct->setShortcut(tr("F1"));
+    helpContentsAct->setShortcut(QKeySequence::HelpContents);
     helpContentsAct->setStatusTip(tr("Show program help"));
     connect(helpContentsAct, SIGNAL(triggered()), this, SLOT(showHelp()));
 
@@ -794,6 +859,11 @@ void MainWindow::enableActions()
         endViewModeAct->setEnabled(false);
         comparisonViewModeAct->setEnabled(false);
         centerAct->setEnabled(false);
+        zoomInAct->setEnabled(false);
+        zoomOutAct->setEnabled(false);
+        rotateLeftAct->setEnabled(false);
+        rotateRightAct->setEnabled(false);
+        resetViewAct->setEnabled(false);
         extractFileAct->setEnabled(false);
         measureDistanceAct->setEnabled(false);
         findReferencingObjectsAct->setEnabled(false);
@@ -819,6 +889,11 @@ void MainWindow::enableActions()
         endViewModeAct->setEnabled(true);
         comparisonViewModeAct->setEnabled(true);
         centerAct->setEnabled(true);
+        zoomInAct->setEnabled(true);
+        zoomOutAct->setEnabled(true);
+        rotateLeftAct->setEnabled(true);
+        rotateRightAct->setEnabled(true);
+        resetViewAct->setEnabled(true);
         extractFileAct->setEnabled(true);
         measureDistanceAct->setEnabled(true);
         findReferencingObjectsAct->setEnabled(true);
@@ -866,6 +941,12 @@ void MainWindow::createMenus()
     viewMenu->addSeparator();
     viewMenu->addAction(centerAct);
     viewMenu->addSeparator();
+    viewMenu->addAction(zoomInAct);
+    viewMenu->addAction(zoomOutAct);
+    viewMenu->addAction(rotateLeftAct);
+    viewMenu->addAction(rotateRightAct);
+    viewMenu->addAction(resetViewAct);
+    viewMenu->addSeparator();
     viewMenu->addAction(selectAllFiltersAct);
     viewMenu->addAction(deselectAllFiltersAct);
 
@@ -907,7 +988,7 @@ void MainWindow::createToolBars()
     scaleSpinBox->setMaximum(1000);
     scaleSpinBox->setValue(100);
     toolBar->addWidget(scaleSpinBox);
-    connect(scaleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView(int)));
+    connect(scaleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView()));
     QLabel* label2 = new QLabel(tr("Rotate [°]"));
     toolBar->addWidget(label2);
     rotateSpinBox = new QSpinBox();
@@ -915,7 +996,7 @@ void MainWindow::createToolBars()
     rotateSpinBox->setMaximum(360);
     rotateSpinBox->setValue(0);
     toolBar->addWidget(rotateSpinBox);
-    connect(rotateSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView(int)));
+    connect(rotateSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView()));
 }
 
 void MainWindow::createDockWindows()

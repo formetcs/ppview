@@ -58,7 +58,12 @@ private slots:
     void exportToPicture();
     void exportToPdf();
     void printFile();
-    void transformGraphicsView(int);
+    void transformGraphicsView();
+    void zoomIn();
+    void zoomOut();
+    void rotateLeft();
+    void rotateRight();
+    void resetView();
     void showHelp();
     void showDocumentInfo();
     void editRemark();
@@ -109,6 +114,11 @@ private:
     QAction* searchAct;
     QAction* editRemarkAct;
     QAction* centerAct;
+    QAction* zoomInAct;
+    QAction* zoomOutAct;
+    QAction* rotateLeftAct;
+    QAction* rotateRightAct;
+    QAction* resetViewAct;
     QActionGroup* viewModeActGroup;
     QAction* startViewModeAct;
     QAction* endViewModeAct;
