@@ -25,8 +25,9 @@ private slots:
 private:
     int getMaxDomDepth(const DomItem* o) const;
     int getLeafCount(const DomItem* o) const;
+    QString generateAttributeString(const DomItem* o) const;
     QString generateInfoText(const DomItem* o) const;
-    QString generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth) const;
+    QString generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth, QString originalId) const;
 
     QRegularExpression uuidRegExp;
 };

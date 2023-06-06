@@ -58,26 +58,54 @@ int ObjectInfoWidget::getLeafCount(const DomItem* o) const
     return tempcount;
 }
 
+QString ObjectInfoWidget::generateAttributeString(const DomItem* o) const
+{
+    QString returnval = QString();
+    if(!o)
+    {
+        return returnval;
+    }
+    QHash<QString, QString> attributes = o->getAttributeMap();
+    QHashIterator<QString, QString> i(attributes);
+    while(i.hasNext())
+    {
+        i.next();
+        QString name = i.key();
+        name = name.mid(name.indexOf(":") + 1);
+        QString value = i.value();
+        value = value.mid(value.indexOf(":") + 1);
+        returnval += name + "=\"" + value + '"';
+    }
+    if(!returnval.isEmpty())
+    {
+        returnval.append("]");
+        returnval.prepend(" [");
+    }
+    return returnval;
+}
+
 QString ObjectInfoWidget::generateInfoText(const DomItem* o) const
 {
     int maxdepth = getMaxDomDepth(o);
+    QString id = o->getFirstValueAtPath("Identitaet/Wert");
     QString returnval = QString("<table border='1' cellpadding='2'>\n");
-    returnval += QString("<tr><th bgcolor='deepskyblue' colspan ='%1'>%2</th></tr>\n<tr>").arg(maxdepth) .arg(o->getName());
-    returnval += generateInfoTextRec(o, 1, maxdepth);
+    returnval += QString("<tr><th bgcolor='deepskyblue' colspan ='%1'>%2%3</th></tr>\n<tr>").arg(maxdepth) .arg(o->getName(), generateAttributeString(o));
+    returnval += generateInfoTextRec(o, 1, maxdepth, id);
     returnval = returnval.left(returnval.size() - 4); // remove the ending "<tr>"
     returnval += QString("</table>\n");
     return returnval;
 }
 
-QString ObjectInfoWidget::generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth) const
+QString ObjectInfoWidget::generateInfoTextRec(const DomItem* o, int currentDepth, int maxDepth, QString originalId) const
 {
     QString returnval = QString();
     if(o->childCount() == 0)
     {
         QString valuestring = o->getValue();
+        valuestring.truncate(1000);
         QString finalvalue = valuestring;
         QRegularExpressionMatch match = uuidRegExp.match(valuestring);
-        if(match.hasMatch())
+        if(match.hasMatch() && valuestring != originalId)
         {
             finalvalue = QString("<a href='ppview://%1'>%2</a>").arg(valuestring, valuestring);
         }
@@ -93,8 +121,8 @@ QString ObjectInfoWidget::generateInfoTextRec(const DomItem* o, int currentDepth
         {
             colspan = maxDepth - currentDepth;
         }
-        returnval += QString("<td bgcolor='lightskyblue' rowspan ='%1' colspan ='%2'><b>%3</b></td>").arg(leafcount) .arg(colspan) .arg(childnode->getName());
-        returnval += generateInfoTextRec(childnode, currentDepth + 1, maxDepth);
+        returnval += QString("<td bgcolor='lightskyblue' rowspan ='%1' colspan ='%2'><b>%3</b>%4</td>").arg(leafcount) .arg(colspan) .arg(childnode->getName(), generateAttributeString(childnode));
+        returnval += generateInfoTextRec(childnode, currentDepth + 1, maxDepth, originalId);
     }
     return returnval;
 }
