@@ -1,5 +1,6 @@
 #include "objectlistmodel.h"
 #include "planprodocument.h"
+#include "preferences.h"
 
 ObjectListModel::ObjectListModel(QObject *parent)
     : QAbstractTableModel{parent}
@@ -140,17 +141,29 @@ QVariant ObjectListModel::data(const QModelIndex& index, int role) const
 
         PlanProDocument::ObjectListItem item = objectlist.at(index.row());
         
+        if(role == Qt::ForegroundRole && item.state == PlanProDocument::PlanningStateBoth)
+        {
+            return Preferences::getInstance()->getObjectListFgBothBrush();
+        }
+        if(role == Qt::ForegroundRole && item.state == PlanProDocument::PlanningStateStart)
+        {
+            return Preferences::getInstance()->getObjectListFgStartBrush();
+        }
+        if(role == Qt::ForegroundRole && item.state == PlanProDocument::PlanningStateEnd)
+        {
+            return Preferences::getInstance()->getObjectListFgEndBrush();
+        }
         if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateBoth)
         {
-            return QBrush(Qt::white);
+            return Preferences::getInstance()->getObjectListBgBothBrush();
         }
         if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateStart)
         {
-            return QBrush(Qt::yellow);
+            return Preferences::getInstance()->getObjectListBgStartBrush();
         }
         if(role == Qt::BackgroundRole && item.state == PlanProDocument::PlanningStateEnd)
         {
-            return QBrush(Qt::red);
+            return Preferences::getInstance()->getObjectListBgEndBrush();
         }
         if(role == Qt::DisplayRole)
         {

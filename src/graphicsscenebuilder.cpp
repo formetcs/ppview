@@ -5,6 +5,7 @@
 #include "graphicsscenebuilder.h"
 #include "planprodocument.h"
 #include "graphicsscene.h"
+#include "preferences.h"
 
 
 const double TRAVERSE_DELTA = 0.1; // to avoid problems with double precision
@@ -44,21 +45,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
         QBrush combinedBrush;
         if(state == PlanProDocument::PlanningStateStart)
         {
-            combinedPen = QPen(Qt::yellow);
-            combinedBrush = QBrush(Qt::yellow);
+            combinedPen = Preferences::getInstance()->getGraphicsViewStartPen();
+            combinedBrush = Preferences::getInstance()->getGraphicsViewStartBrush();
         }
         else if(state == PlanProDocument::PlanningStateEnd)
         {
-            combinedPen = QPen(Qt::red);
-            combinedBrush = QBrush(Qt::red);
+            combinedPen = Preferences::getInstance()->getGraphicsViewEndPen();
+            combinedBrush = Preferences::getInstance()->getGraphicsViewEndBrush();
         }
         else
         {
-            combinedPen = QPen(Qt::black);
-            combinedBrush = QBrush(Qt::black);
+            combinedPen = Preferences::getInstance()->getGraphicsViewBothPen();
+            combinedBrush = Preferences::getInstance()->getGraphicsViewBothBrush();
         }
         QString name = item->getName();
         QString id = item->getFirstValueAtPath("Identitaet/Wert");
+        QPen pen = Preferences::getInstance()->getGraphicsViewPen(name);
+        QBrush brush = Preferences::getInstance()->getGraphicsViewBrush(name);
         if(name == "GEO_Punkt")
         {
             QString tooltip = "GEO_Punkt\n";
@@ -67,23 +70,25 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             double y = item->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
             if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
             {
-                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, QPen(Qt::black), QBrush(Qt::white));
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, pen, brush);
                 gitem->setToolTip(tooltip);
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setZValue(-3);
+                gitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
-                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, QPen(Qt::black), QBrush(Qt::white));
+                QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, pen, brush);
                 gitem->setToolTip(tooltip);
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setZValue(-3);
+                gitem->setVisible(false);
             }
             QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(x - 2, -y - 2, 4, 4, combinedPen, combinedBrush);
             gitem->setToolTip(tooltip);
@@ -92,6 +97,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             gitem->setZValue(-3);
+            gitem->setVisible(false);
         }
         else if(name == "GEO_Knoten")
         {
@@ -108,23 +114,25 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     double py = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
                     if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                     {
-                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::black), QBrush(Qt::black));
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, pen, brush);
                         gitem->setToolTip(tooltip);
                         gitem->setData(GRAPHICSITEM_TYPE, name);
                         gitem->setData(GRAPHICSITEM_ID, id);
                         gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                         gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                         gitem->setZValue(-2);
+                        gitem->setVisible(false);
                     }
                     if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                     {
-                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::black), QBrush(Qt::black));
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, pen, brush);
                         gitem->setToolTip(tooltip);
                         gitem->setData(GRAPHICSITEM_TYPE, name);
                         gitem->setData(GRAPHICSITEM_ID, id);
                         gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                         gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                         gitem->setZValue(-2);
+                        gitem->setVisible(false);
                     }
                     QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, combinedPen, combinedBrush);
                     gitem->setToolTip(tooltip);
@@ -133,6 +141,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-2);
+                    gitem->setVisible(false);
                     break;
                 }
             }
@@ -170,23 +179,25 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 double by = punktB->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, QPen(Qt::black));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, pen);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-20);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, QPen(Qt::black));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, pen);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-20);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(ax, -ay, bx, -by, combinedPen);
                 gitem->setToolTip(tooltip);
@@ -195,6 +206,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setZValue(-20);
+                gitem->setVisible(false);
             }
         }
         else if(name == "TOP_Knoten")
@@ -213,23 +225,25 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     double py = item2->getFirstValueAtPath("GEO_Punkt_Allg/GK_Y/Wert").toDouble();
                     if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                     {
-                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::red), QBrush(Qt::red));
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, pen, brush);
                         gitem->setToolTip(tooltip);
                         gitem->setData(GRAPHICSITEM_TYPE, name);
                         gitem->setData(GRAPHICSITEM_ID, id);
                         gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                         gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                         gitem->setZValue(-1);
+                        gitem->setVisible(false);
                     }
                     if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                     {
-                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, QPen(Qt::red), QBrush(Qt::red));
+                        QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, pen, brush);
                         gitem->setToolTip(tooltip);
                         gitem->setData(GRAPHICSITEM_TYPE, name);
                         gitem->setData(GRAPHICSITEM_ID, id);
                         gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                         gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                         gitem->setZValue(-1);
+                        gitem->setVisible(false);
                     }
                     QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(px - 2, -py - 2, 4, 4, combinedPen, combinedBrush);
                     gitem->setToolTip(tooltip);
@@ -238,6 +252,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-1);
+                    gitem->setVisible(false);
                     break;
                 }
             }
@@ -293,7 +308,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -305,6 +320,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-10);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -313,7 +329,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -325,6 +341,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-10);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -343,6 +360,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-10);
+            groupitem->setVisible(false);
         }
         else if(name == "Datenpunkt")
         {
@@ -357,21 +375,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -379,6 +399,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "ZUB_Bereichsgrenze")
@@ -392,21 +413,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::red), QBrush(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::red), QBrush(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -414,6 +437,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Bahnsteig_Zugang")
@@ -427,21 +451,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::cyan), QBrush(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::cyan), QBrush(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -449,6 +475,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "BUE_Anlage")
@@ -464,21 +491,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -486,6 +515,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "BUE_Gefahrraum_Eckpunkt")
@@ -499,21 +529,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -521,6 +553,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "BUE_Kante")
@@ -534,21 +567,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -556,6 +591,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "GFR_Tripelspiegel")
@@ -569,21 +605,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -591,6 +629,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Schrankenantrieb")
@@ -604,21 +643,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::blue), QBrush(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -626,6 +667,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Sonstiger_Punkt")
@@ -639,21 +681,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::magenta), QBrush(Qt::magenta));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::magenta), QBrush(Qt::magenta));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -661,6 +705,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Hoehenpunkt")
@@ -674,21 +719,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -696,6 +743,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Technischer_Punkt")
@@ -709,21 +757,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -731,6 +781,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Ueberhoehung")
@@ -744,21 +795,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -766,6 +819,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "FMA_Element")
@@ -779,21 +833,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -801,6 +857,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "FMA_Komponente")
@@ -816,21 +873,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -838,6 +897,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Zugeinwirkung")
@@ -853,21 +913,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("brown"), QBrush("brown"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -875,6 +937,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "PZB_Element")
@@ -888,21 +951,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::gray), QBrush(Qt::gray));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::gray), QBrush(Qt::gray));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -910,6 +975,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Signal")
@@ -925,21 +991,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::green), QBrush(Qt::green));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::green), QBrush(Qt::green));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -947,6 +1015,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Signal_Befestigung")
@@ -960,21 +1029,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("greenyellow"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen(Qt::black), QBrush("greenyellow"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -982,6 +1053,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "Gleis_Abschluss")
@@ -995,21 +1067,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -1017,6 +1091,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "W_Kr_Gsp_Komponente")
@@ -1030,21 +1105,23 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             {
                 if(state == PlanProDocument::PlanningStateStart || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
                 {
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, QPen("coral"), QBrush("coral"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, pen, brush);
                     gitem->setToolTip(tooltip);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                    gitem->setVisible(false);
                 }
                 QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addEllipse(point.x() - 2, -point.y() - 2, 4, 4, combinedPen, combinedBrush);
                 gitem->setToolTip(tooltip);
@@ -1052,6 +1129,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
+                gitem->setVisible(false);
             }
         }
         else if(name == "ZUB_Streckeneigenschaft")
@@ -1067,7 +1145,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1079,6 +1157,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1087,7 +1166,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::yellow));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1099,6 +1178,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1117,6 +1197,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Stell_Bereich")
         {
@@ -1131,7 +1212,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("orange"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1143,6 +1224,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1151,7 +1233,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("orange"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1163,6 +1245,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1181,6 +1264,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Bahnsteig_Dach")
         {
@@ -1195,7 +1279,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1207,6 +1291,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1215,7 +1300,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1227,6 +1312,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1245,6 +1331,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Bahnsteig_Kante")
         {
@@ -1259,7 +1346,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1271,6 +1358,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1279,7 +1367,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::cyan));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1291,6 +1379,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1309,6 +1398,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "BUE_Gleisbezogener_Gefahrraum")
         {
@@ -1323,7 +1413,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1335,6 +1425,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1343,7 +1434,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::blue));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1355,6 +1446,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1373,6 +1465,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Fstr_Fahrweg")
         {
@@ -1387,7 +1480,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::magenta));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1399,6 +1492,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1407,7 +1501,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::magenta));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1419,6 +1513,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1437,6 +1532,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Geschwindigkeitsprofil")
         {
@@ -1451,7 +1547,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1463,6 +1559,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1471,7 +1568,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1483,6 +1580,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1501,6 +1599,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Strecke")
         {
@@ -1515,7 +1614,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1527,6 +1626,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1535,7 +1635,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1547,6 +1647,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1565,6 +1666,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Technischer_Bereich")
         {
@@ -1579,7 +1681,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1591,6 +1693,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1599,7 +1702,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen(Qt::red));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1611,6 +1714,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1629,6 +1733,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Abschnitt")
         {
@@ -1643,7 +1748,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1655,6 +1760,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1663,7 +1769,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1675,6 +1781,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1693,6 +1800,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Art")
         {
@@ -1707,7 +1815,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1719,6 +1827,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1727,7 +1836,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1739,6 +1848,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1757,6 +1867,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Baubereich")
         {
@@ -1771,7 +1882,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1783,6 +1894,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1791,7 +1903,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1803,6 +1915,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1821,6 +1934,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Bezeichnung")
         {
@@ -1835,7 +1949,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1847,6 +1961,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1855,7 +1970,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1867,6 +1982,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1885,6 +2001,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Fahrbahn")
         {
@@ -1899,7 +2016,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1911,6 +2028,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1919,7 +2037,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1931,6 +2049,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -1949,6 +2068,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Lichtraum")
         {
@@ -1963,7 +2083,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -1975,6 +2095,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -1983,7 +2104,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -1995,6 +2116,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -2013,6 +2135,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
         else if(name == "Gleis_Schaltgruppe")
         {
@@ -2027,7 +2150,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
@@ -2039,6 +2162,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateStart);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             if(state == PlanProDocument::PlanningStateEnd || state == PlanProDocument::PlanningStateBoth)
             {
@@ -2047,7 +2171,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 for (int j = 0; j < linelist.count(); ++j)
                 {
                     QLineF segment = linelist.at(j);
-                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, QPen("olive"));
+                    QGraphicsItem* gitem = (QGraphicsItem*) graphicsScene->addLine(segment, pen);
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
@@ -2059,6 +2183,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateEnd);
                 groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 groupitem->setZValue(-5);
+                groupitem->setVisible(false);
             }
             QGraphicsItemGroup* groupitem = new QGraphicsItemGroup();
             graphicsScene->addItem(groupitem);
@@ -2077,6 +2202,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
+            groupitem->setVisible(false);
         }
     }
     progress.setValue(objectlist.count());
