@@ -567,16 +567,27 @@ void MainWindow::showDocumentInfo()
     QString text = tr("No file loaded");
     if(document->getDocumentType() != PlanProDocument::DocumentTypeInvalid)
     {
-        QString doctype = tr("State");
+        QString doctype;
+        QString objectcount;
         if(document->getDocumentType() == PlanProDocument::DocumentTypePlanning)
         {
             doctype = tr("Planning");
+            int startcount = document->getObjectList(PlanProDocument::PlanningStateStart).count();
+            int endcount = document->getObjectList(PlanProDocument::PlanningStateEnd).count();
+            objectcount = tr("Number of PlanPro objects (Start state): %1\n"
+                             "Number of PlanPro objects (End state): %2").arg(startcount).arg(endcount);
+        }
+        else
+        {
+            doctype = tr("State");
+            int endcount = document->getObjectList(PlanProDocument::PlanningStateEnd).count();
+            objectcount = tr("Number of PlanPro objects: %1").arg(endcount);
         }
         QString timestamp = document->getTimestamp().toString();
         QString toolname = document->getToolName();
         QString toolversion = document->getToolVersion();
         QString remark = document->getRemark();
-        text = tr("Document Type: %1\n\nTimestamp: %2\nTool: %3, Version %4\n\n%5").arg(doctype, timestamp, toolname, toolversion, remark);
+        text = tr("Document Type: %1\n\n%2\n\nTimestamp: %3\nTool: %4, Version %5\n\n%6").arg(doctype, objectcount,  timestamp, toolname, toolversion, remark);
     }
     QMessageBox::information(this, tr("Document Information"), text);
 }
