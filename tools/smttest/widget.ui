@@ -29,6 +29,23 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxCmdline">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <item>
+        <property name="text">
+         <string>/Users/stefan/tools/z3/bin/z3 -in</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>/Users/stefan/tools/cvc5/bin/cvc5</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -65,6 +82,123 @@
       <widget class="QPushButton" name="pushButtonVerify">
        <property name="text">
         <string>Verify</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonEnterCommand">
+       <property name="text">
+        <string>Enter Command</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbTopKante">
+       <property name="text">
+        <string>TOP_Kante</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbTopKnoten">
+       <property name="text">
+        <string>TOP_Knoten</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbSignal">
+       <property name="text">
+        <string>Signal</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbDatenpunkt">
+       <property name="text">
+        <string>Datenpunkt</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbWKrGspKomponente">
+       <property name="text">
+        <string>W_Kr_Gsp_Komponente</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbPzbElement">
+       <property name="text">
+        <string>PZB_Element</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbBueAnlage">
+       <property name="text">
+        <string>BUE_Anlage</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbZubStreckeneigenschaft">
+       <property name="text">
+        <string>ZUB_Streckeneigenschaft</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbProxyObjekt">
+       <property name="text">
+        <string>Proxy_Objekt</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbOtherPunktObjekt">
+       <property name="text">
+        <string>(other Punkt_Objekt)</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbOtherBasisObjekt">
+       <property name="text">
+        <string>(other Basis_Objekt)</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

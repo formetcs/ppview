@@ -30,8 +30,13 @@ private slots:
 
     void handleSmtOutput();
 
+    void on_pushButtonEnterCommand_clicked();
+
 private:
+    void createDatatypeDeclarations();
     Ui::Widget *ui;
     QProcess* smtprocess;
+    QString variables;
+    int msecs;
 };
 #endif // WIDGET_H
