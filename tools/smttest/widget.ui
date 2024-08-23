@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>906</width>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QTextEdit" name="textEditInput"/>
      </item>
@@ -49,11 +49,11 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QPushButton" name="pushButtonClear">
        <property name="text">
-        <string>Clear</string>
+        <string>Clear Input</string>
        </property>
       </widget>
      </item>
@@ -196,6 +196,16 @@
       <widget class="QCheckBox" name="cbOtherBasisObjekt">
        <property name="text">
         <string>(other Basis_Objekt)</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cbGuidAsAdt">
+       <property name="text">
+        <string>GUID as ADT</string>
        </property>
        <property name="checked">
         <bool>true</bool>

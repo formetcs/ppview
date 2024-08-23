@@ -33,7 +33,8 @@ private slots:
     void on_pushButtonEnterCommand_clicked();
 
 private:
-    void createDatatypeDeclarations();
+    QString createDatatypeDeclarations(QSet<QString> idSet);
+    QString convertIdString(QString rawId);
     Ui::Widget *ui;
     QProcess* smtprocess;
     QString variables;

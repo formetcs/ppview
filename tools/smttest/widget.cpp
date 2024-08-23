@@ -26,30 +26,62 @@ Widget::~Widget()
     delete smtprocess;
 }
 
-void Widget::createDatatypeDeclarations()
+QString Widget::createDatatypeDeclarations(QSet<QString> idSet)
 {
-    ui->textEditInput->append("(declare-datatype ENUMWirkrichtung ((in) (gegen) (beide)))");
-    ui->textEditInput->append("(declare-datatype ENUMTOP_Anschluss ((Ende) (Links) (Rechts) (Spitze) (Verbindung) (Ende_Bestdig) (Schnitt) (sonstige)))");
-    ui->textEditInput->append("(declare-datatype ENUMSignal_Art ((Hauptsignal) (Hauptsperrsignal) (Mehrabschnittssignal) (Mehrabschnittssperrsignal) (Sperrsignal) (Vorsignal) (Vorsignalwiederholer) (Zugdeckungssignal) (andereSA)))");
-    ui->textEditInput->append("(declare-datatype ENUMSignal_Funktion ((Alleinstehendes_Zusatzsignal) (Ausfahr_Signal) (BUE_Ueberwachungssignal) (Vorsignal_Vorsignalwiederholer) (Zug_Ziel_Signal) (Ausfahr_Zwischen_Signal) (Block_Signal) (Deckungs_Signal) (Einfahr_Ausfahr_Signal) (Einfahr_Block_Signal) (Einfahr_Signal) (Gruppenausfahr_Gruppenzwischen_Signal) (Gruppenausfahr_Signal) (Gruppenzwischen_Signal) (Nachrueck_Signal) (Zugdeckungs_Signal) (Zwischen_Signal) (andereSF)))");
-    ui->textEditInput->append("(declare-datatype ENUMPZB_Art ((P1000_2000_Hz) (P1000_Hz) (P2000_Hz) (P500_Hz)))");
-    ui->textEditInput->append("(define-sort Guid () (_ BitVec 128))");
-    ui->textEditInput->append("(declare-datatype PPPunktObjektExt ((Signal (signalArt ENUMSignal_Art) (signalFunktion ENUMSignal_Funktion)) (Datenpunkt (idBezug Guid) (dpLaenge Int) (dpTyp Int)) (WKrGspKomponente (geschwindigkeitL Int) (geschwindigkeitR Int)) (PZBElement (pzbArt ENUMPZB_Art)) (BUEAnlage) (anderesPO)))");
-    ui->textEditInput->append("(declare-datatype PPObjektExt ((BasisObjekt) (ProxyObjekt) (ZUBStreckeneigenschaftObjekt) (TopKnoten) (TopKante (idKnotenA Guid) (idKnotenB Guid) (laenge Int) (anschlussA ENUMTOP_Anschluss) (anschlussB ENUMTOP_Anschluss)) (PunktObjekt (idTopKante Guid) (abstand Int) (wirkrichtung ENUMWirkrichtung) (seitlAbstand Int) (poext PPPunktObjektExt))))");
-    ui->textEditInput->append("(declare-datatype PPObjekt ((PlanProObjekt (id Guid) (objext PPObjektExt))))");
+    QString returnstring = QString();
+    returnstring.append("(declare-datatype ENUMWirkrichtung ((in) (gegen) (beide)))\n");
+    returnstring.append("(declare-datatype ENUMTOP_Anschluss ((Ende) (Links) (Rechts) (Spitze) (Verbindung) (Ende_Bestdig) (Schnitt) (sonstige)))\n");
+    returnstring.append("(declare-datatype ENUMSignal_Art ((Hauptsignal) (Hauptsperrsignal) (Mehrabschnittssignal) (Mehrabschnittssperrsignal) (Sperrsignal) (Vorsignal) (Vorsignalwiederholer) (Zugdeckungssignal) (andereSA)))\n");
+    returnstring.append("(declare-datatype ENUMSignal_Funktion ((Alleinstehendes_Zusatzsignal) (Ausfahr_Signal) (BUE_Ueberwachungssignal) (Vorsignal_Vorsignalwiederholer) (Zug_Ziel_Signal) (Ausfahr_Zwischen_Signal) (Block_Signal) (Deckungs_Signal) (Einfahr_Ausfahr_Signal) (Einfahr_Block_Signal) (Einfahr_Signal) (Gruppenausfahr_Gruppenzwischen_Signal) (Gruppenausfahr_Signal) (Gruppenzwischen_Signal) (Nachrueck_Signal) (Zugdeckungs_Signal) (Zwischen_Signal) (andereSF)))\n");
+    returnstring.append("(declare-datatype ENUMPZB_Art ((P1000_2000_Hz) (P1000_Hz) (P2000_Hz) (P500_Hz)))\n");
+    if(ui->cbGuidAsAdt->isChecked())
+    {
+        QString dataTypeString = QString("(declare-datatype Guid (");
+        QSetIterator<QString> i(idSet);
+        while (i.hasNext()) {
+            QString id = i.next();
+            dataTypeString.append(QString("(%1) ").arg(id));
+        }
+        dataTypeString.append(QString("))\n"));
+        returnstring.append(dataTypeString);
+    }
+    else
+    {
+        returnstring.append("(define-sort Guid () (_ BitVec 128))\n");
+    }
+    returnstring.append("(declare-datatype PPPunktObjektExt ((Signal (signalArt ENUMSignal_Art) (signalFunktion ENUMSignal_Funktion)) (Datenpunkt (idBezug Guid) (dpLaenge Int) (dpTyp Int)) (WKrGspKomponente (geschwindigkeitL Int) (geschwindigkeitR Int)) (PZBElement (pzbArt ENUMPZB_Art)) (BUEAnlage) (anderesPO)))\n");
+    returnstring.append("(declare-datatype PPObjektExt ((BasisObjekt) (ProxyObjekt) (ZUBStreckeneigenschaftObjekt) (TopKnoten) (TopKante (idKnotenA Guid) (idKnotenB Guid) (laenge Int) (anschlussA ENUMTOP_Anschluss) (anschlussB ENUMTOP_Anschluss)) (PunktObjekt (idTopKante Guid) (abstand Int) (wirkrichtung ENUMWirkrichtung) (seitlAbstand Int) (poext PPPunktObjektExt))))\n");
+    returnstring.append("(declare-datatype PPObjekt ((PlanProObjekt (id Guid) (objext PPObjektExt))))\n");
+    return returnstring;
+}
+
+QString Widget::convertIdString(QString rawId)
+{
+    QString returnstring = rawId.toUpper();
+    if(ui->cbGuidAsAdt->isChecked())
+    {
+        returnstring.prepend("ID_");
+    }
+    else
+    {
+        returnstring.remove("-");
+        returnstring.prepend("#x");
+    }
+    return returnstring;
 }
 
 void Widget::on_pushButtonAddHeader_clicked()
 {
-    QString logic = QInputDialog::getText(this, "Set Logic", "Enter the logic that should be used", QLineEdit::Normal, "ALL");
-    if (!logic.isEmpty())
+    QStringList items;
+    items << "ALL" << "QF_UF" << "QF_UFLIA" << "AUFLIA";
+    bool ok;
+    QString logic = QInputDialog::getItem(this, "Set Logic", "Enter the logic that should be used", items, 0, true, &ok);
+    if (ok && !logic.isEmpty())
     {
         ui->textEditInput->clear();
         ui->textEditInput->append("(set-option :print-success false)");
         ui->textEditInput->append("(set-option :produce-models true)");
         ui->textEditInput->append(QString("(set-logic %1)").arg(logic));
-
-        createDatatypeDeclarations();
     }
 }
 
@@ -74,70 +106,78 @@ void Widget::on_pushButtonParsePlanPro_clicked()
     }
 
     QString inPlanDefinition = QString("(define-fun inPlan ((ppo PPObjekt)) Bool (or ");
+    QSet<QString> idSet;
+    QString planProData = QString();
+    int objectCount = 1;
 
     QList<DomItem*> objectlist = document->getObjectList(PlanProDocument::PlanningStateEnd);
     for(int i = 0; i < objectlist.count(); ++i)
     {
         DomItem* item = objectlist.at(i);
         QString id = item->getFirstValueAtPath("Identitaet/Wert");
-        id.remove("-");
-        id.prepend("#x");
+        id = convertIdString(id);
         QString type = item->getName();
-        QString objectDefinition;
         if(type == "TOP_Knoten")
         {
-            if(!ui->cbTopKnoten->isChecked())
+            if(ui->cbTopKnoten->isChecked())
             {
-                continue;
+                QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 TopKnoten))\n").arg(objectCount).arg(id);
+                planProData.append(objectDefinition);
+                inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                idSet.insert(id);
+                objectCount++;
             }
-            objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 TopKnoten))").arg(i).arg(id);
-            inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
         }
         else if(type == "TOP_Kante")
         {
-            if(!ui->cbTopKante->isChecked())
+            if(ui->cbTopKante->isChecked())
             {
-                continue;
+                QString idA = item->getFirstValueAtPath("ID_TOP_Knoten_A/Wert");
+                idA = convertIdString(idA);
+                QString idB = item->getFirstValueAtPath("ID_TOP_Knoten_B/Wert");
+                idB = convertIdString(idB);
+                QString laenge = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Laenge/Wert");
+                double doublen = laenge.toDouble();
+                doublen *= 1000.0;
+                int intlen = (int) doublen;
+                QString anschlussA = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Anschluss_A/Wert");
+                QString anschlussB = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Anschluss_B/Wert");
+                QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (TopKante %3 %4 %5 %6 %7)))\n").arg(objectCount).arg(id).arg(idA).arg(idB).arg(intlen).arg(anschlussA).arg(anschlussB);
+                planProData.append(objectDefinition);
+                inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                idSet.insert(id);
+                idSet.insert(idA);
+                idSet.insert(idB);
+                objectCount++;
             }
-            QString idA = item->getFirstValueAtPath("ID_TOP_Knoten_A/Wert");
-            idA.remove("-");
-            idA.prepend("#x");
-            QString idB = item->getFirstValueAtPath("ID_TOP_Knoten_B/Wert");
-            idB.remove("-");
-            idB.prepend("#x");
-            QString laenge = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Laenge/Wert");
-            double doublen = laenge.toDouble();
-            doublen *= 1000.0;
-            int intlen = (int) doublen;
-            QString anschlussA = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Anschluss_A/Wert");
-            QString anschlussB = item->getFirstValueAtPath("TOP_Kante_Allg/TOP_Anschluss_B/Wert");
-            objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (TopKante %3 %4 %5 %6 %7)))").arg(i).arg(id).arg(idA).arg(idB).arg(intlen).arg(anschlussA).arg(anschlussB);
-            inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
         }
         else if(type == "ZUB_Streckeneigenschaft")
         {
-            if(!ui->cbZubStreckeneigenschaft->isChecked())
+            if(ui->cbZubStreckeneigenschaft->isChecked())
             {
-                continue;
+                QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 ZUBStreckeneigenschaft))\n").arg(objectCount).arg(id);
+                planProData.append(objectDefinition);
+                inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                idSet.insert(id);
+                objectCount++;
             }
-            objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 ZUBStreckeneigenschaft))").arg(i).arg(id);
-            inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
         }
         else if(type == "Proxy_Objekt")
         {
-            if(!ui->cbProxyObjekt->isChecked())
+            if(ui->cbProxyObjekt->isChecked())
             {
-                continue;
+                QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 ProxyObjekt))\n").arg(objectCount).arg(id);
+                planProData.append(objectDefinition);
+                inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                idSet.insert(id);
+                objectCount++;
             }
-            objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 ProxyObjekt))").arg(i).arg(id);
-            inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
         }
         else if(item->getFirstChildItem("Punkt_Objekt_TOP_Kante") != NULL)
         {
             DomItem* poitem = item->getFirstChildItem("Punkt_Objekt_TOP_Kante");
             QString idTopKante = poitem->getFirstValueAtPath("ID_TOP_Kante/Wert");
-            idTopKante.remove("-");
-            idTopKante.prepend("#x");
+            idTopKante = convertIdString(idTopKante);
             QString abstand = poitem->getFirstValueAtPath("Abstand/Wert");
             double doubabst = abstand.toDouble();
             doubabst *= 1000.0;
@@ -155,102 +195,117 @@ void Widget::on_pushButtonParsePlanPro_clicked()
 
             if(type == "Signal")
             {
-                if(!ui->cbSignal->isChecked())
+                if(ui->cbSignal->isChecked())
                 {
-                    continue;
+                    QString signalArt = item->getFirstValueAtPath("Signal_Real/Signal_Real_Aktiv_Schirm/Signal_Art/Wert");
+                    if(signalArt.isEmpty() || signalArt == "andere")
+                    {
+                        signalArt = QString("andereSA");
+                    }
+                    QString signalFunktion = item->getFirstValueAtPath("Signal_Real/Signal_Real_Aktiv/Signal_Funktion/Wert");
+                    if(signalFunktion.isEmpty() || signalFunktion == "andere")
+                    {
+                        signalFunktion = QString("andereSF");
+                    }
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (Signal %7 %8))))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(signalArt).arg(signalFunktion);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    objectCount++;
                 }
-                QString signalArt = item->getFirstValueAtPath("Signal_Real/Signal_Real_Aktiv_Schirm/Signal_Art/Wert");
-                if(signalArt.isEmpty() || signalArt == "andere")
-                {
-                    signalArt = QString("andereSA");
-                }
-                QString signalFunktion = item->getFirstValueAtPath("Signal_Real/Signal_Real_Aktiv/Signal_Funktion/Wert");
-                if(signalFunktion.isEmpty() || signalFunktion == "andere")
-                {
-                    signalFunktion = QString("andereSF");
-                }
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (Signal %7 %8))))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(signalArt).arg(signalFunktion);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
             else if(type == "Datenpunkt")
             {
-                if(!ui->cbDatenpunkt->isChecked())
+                if(ui->cbDatenpunkt->isChecked())
                 {
-                    continue;
+                    QString idBezug = item->getFirstValueAtPath("DP_Bezug_Betrieblich/ID_DP_Bezugspunkt/Wert");
+                    idBezug = convertIdString(idBezug);
+                    QString laenge = item->getFirstValueAtPath("Datenpunkt_Allg/Datenpunkt_Laenge/Wert");
+                    double doublen = laenge.toDouble();
+                    doublen *= 1000.0;
+                    int intlen = (int) doublen;
+                    QString dptyp = item->getFirstValueAtPath("DP_Typ/DP_Typ_GETCS/DP_Typ_ETCS/Wert");
+                    int intdptyp = dptyp.toInt();
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (Datenpunkt %7 %8 %9))))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(idBezug).arg(intlen).arg(intdptyp);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    idSet.insert(idBezug);
+                    objectCount++;
                 }
-                QString idBezug = item->getFirstValueAtPath("DP_Bezug_Betrieblich/ID_DP_Bezugspunkt/Wert");
-                idBezug.remove("-");
-                idBezug.prepend("#x");
-                QString laenge = item->getFirstValueAtPath("Datenpunkt_Allg/Datenpunkt_Laenge/Wert");
-                double doublen = laenge.toDouble();
-                doublen *= 1000.0;
-                int intlen = (int) doublen;
-                QString dptyp = item->getFirstValueAtPath("DP_Typ/DP_Typ_GETCS/DP_Typ_ETCS/Wert");
-                int intdptyp = dptyp.toInt();
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (Datenpunkt %7 %8 %9))))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(idBezug).arg(intlen).arg(intdptyp);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
             else if(type == "BUE_Anlage")
             {
-                if(!ui->cbBueAnlage->isChecked())
+                if(ui->cbBueAnlage->isChecked())
                 {
-                    continue;
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 BUEAnlage)))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    objectCount++;
                 }
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 BUEAnlage)))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
             else if(type == "W_Kr_Gsp_Komponente")
             {
-                if(!ui->cbWKrGspKomponente->isChecked())
+                if(ui->cbWKrGspKomponente->isChecked())
                 {
-                    continue;
+                    QString speedL = item->getFirstValueAtPath("Zungenpaar/Geschwindigkeit_L/Wert");
+                    int intspeedL = speedL.toInt();
+                    QString speedR = item->getFirstValueAtPath("Zungenpaar/Geschwindigkeit_R/Wert");
+                    int intspeedR = speedR.toInt();
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (WKrGspKomponente %7 %8))))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(intspeedL).arg(intspeedR);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    objectCount++;
                 }
-                QString speedL = item->getFirstValueAtPath("Zungenpaar/Geschwindigkeit_L/Wert");
-                int intspeedL = speedL.toInt();
-                QString speedR = item->getFirstValueAtPath("Zungenpaar/Geschwindigkeit_R/Wert");
-                int intspeedR = speedR.toInt();
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (WKrGspKomponente %7 %8))))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(intspeedL).arg(intspeedR);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
             else if(type == "PZB_Element")
             {
-                if(!ui->cbPzbElement->isChecked())
+                if(ui->cbPzbElement->isChecked())
                 {
-                    continue;
+                    QString pzbart = item->getFirstValueAtPath("PZB_Art/Wert");
+                    pzbart.prepend("P");
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (PZBElement %7))))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(pzbart);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    objectCount++;
                 }
-                QString pzbart = item->getFirstValueAtPath("PZB_Art/Wert");
-                pzbart.prepend("P");
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 (PZBElement %7))))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString).arg(pzbart);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
             else
             {
-                if(!ui->cbOtherPunktObjekt->isChecked())
+                if(ui->cbOtherPunktObjekt->isChecked())
                 {
-                    continue;
+                    QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 anderesPO)))\n").arg(objectCount).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString);
+                    planProData.append(objectDefinition);
+                    inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                    idSet.insert(id);
+                    idSet.insert(idTopKante);
+                    objectCount++;
                 }
-                objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 (PunktObjekt %3 %4 %5 %6 anderesPO)))").arg(i).arg(id).arg(idTopKante).arg(intabst).arg(wirkrichtung).arg(seitabstString);
-                inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
             }
-
         }
         else
         {
-            if(!ui->cbOtherBasisObjekt->isChecked())
+            if(ui->cbOtherBasisObjekt->isChecked())
             {
-                continue;
+                QString objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 BasisObjekt))\n").arg(objectCount).arg(id);
+                planProData.append(objectDefinition);
+                inPlanDefinition.append(QString("(= ppo o%1) ").arg(objectCount));
+                idSet.insert(id);
+                objectCount++;
             }
-            objectDefinition = QString("(define-fun o%1 () PPObjekt (PlanProObjekt %2 BasisObjekt))").arg(i).arg(id);
-            inPlanDefinition.append(QString("(= ppo o%1) ").arg(i));
         }
-
-        if(!objectDefinition.isEmpty())
-        {
-            ui->textEditInput->append(objectDefinition);
-        }
-
     }
 
+    ui->textEditInput->append(createDatatypeDeclarations(idSet));
+    ui->textEditInput->append(planProData);
     inPlanDefinition.append("))");
     ui->textEditInput->append(inPlanDefinition);
 
