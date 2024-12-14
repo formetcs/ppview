@@ -2,6 +2,7 @@
 *.slo
 *.lo
 *.o
+*.obj
 *.a
 *.la
 *.lai
@@ -10,7 +11,11 @@
 *.dll
 *.dylib
 
-# Qt-es
+# Binaries
+*.exe
+*.app/
+
+# Qt files
 object_script.*.Release
 object_script.*.Debug
 *_plugin_import.cpp
@@ -38,6 +43,9 @@ target_wrapper.*
 # QtCreator
 *.autosave
 
+# QtCreator build directory
+build/
+
 # QtCreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
@@ -51,6 +59,27 @@ compile_commands.json
 # QtCreator local machine specific files for imported projects
 *creator.user*
 
+# Visual Studio generated files
+*.ib_pdb_index
+*.idb
+*.ilk
+*.pdb
+*.sln
+*.suo
+*.vcproj
+*vcproj.*.*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj
+*vcxproj.*
+
+# Other temporary files
+*~
+.*.swp
+
 # macOS files
 .DS_Store
 
+# Windows files
+Thumbs.db
