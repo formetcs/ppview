@@ -1,17 +1,36 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/colors.png</file>
-        <file>images/contents.png</file>
-        <file>images/err.png</file>
-        <file>images/exit.png</file>
-        <file>images/fileopen.png</file>
-        <file>images/fileprint.png</file>
-        <file>images/info.png</file>
-        <file>images/pdf.png</file>
         <file>images/ppview.png</file>
-        <file>images/preferences.png</file>
-        <file>images/save.png</file>
-        <file>images/txt.png</file>
-        <file>images/warn.png</file>
+        <file>images/acrobat.svg</file>
+        <file>images/code-variable.svg</file>
+        <file>images/configure.svg</file>
+        <file>images/document-close.svg</file>
+        <file>images/document-edit.svg</file>
+        <file>images/document-open-recent.svg</file>
+        <file>images/document-open.svg</file>
+        <file>images/document-print.svg</file>
+        <file>images/document-properties.svg</file>
+        <file>images/document-save-all.svg</file>
+        <file>images/document-save-as.svg</file>
+        <file>images/document-save.svg</file>
+        <file>images/documentation.svg</file>
+        <file>images/edit-find.svg</file>
+        <file>images/edit-rename.svg</file>
+        <file>images/help-about.svg</file>
+        <file>images/help-contextual.svg</file>
+        <file>images/help-hint.svg</file>
+        <file>images/list-add.svg</file>
+        <file>images/list-remove.svg</file>
+        <file>images/measure.svg</file>
+        <file>images/object-rotate-left.svg</file>
+        <file>images/object-rotate-right.svg</file>
+        <file>images/plugins.svg</file>
+        <file>images/process-stop.svg</file>
+        <file>images/system-run.svg</file>
+        <file>images/system-search.svg</file>
+        <file>images/view-restore.svg</file>
+        <file>images/zoom-in.svg</file>
+        <file>images/zoom-original.svg</file>
+        <file>images/zoom-out.svg</file>
     </qresource>
 </RCC>
