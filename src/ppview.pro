@@ -61,6 +61,7 @@ SOURCES += \
     punktobjekt.cpp \
     selectionmanager.cpp \
     temporarypunktobjekt.cpp \
+    textfiledialog.cpp \
     urobjekt.cpp
 
 HEADERS += \
@@ -82,6 +83,7 @@ HEADERS += \
     punktobjekt.h \
     selectionmanager.h \
     temporarypunktobjekt.h \
+    textfiledialog.h \
     urobjekt.h \
     version.h
 

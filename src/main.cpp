@@ -36,14 +36,17 @@ int main(int argc, char *argv[])
 
     QString language = Preferences::getInstance()->getLanguage();
     QTranslator qtTranslator;
-#ifdef _WINDOWS
+    QTranslator appTranslator;
+#if defined Q_OS_WIN
     if(qtTranslator.load(QApplication::applicationDirPath() + "/translations/qt_" + language))
         app.installTranslator(&qtTranslator);
-#else
-    if(qtTranslator.load(QApplication::applicationDirPath() + "/qt_" + language))
+#elif defined Q_OS_MACOS
+    if(qtTranslator.load(QApplication::applicationDirPath() + "/../Resources/qt_" + language))
+        app.installTranslator(&qtTranslator);
+#else // Q_OS_LINUX and others
+    if(qtTranslator.load("/usr/share/qt6/translations/qt_" + language))
         app.installTranslator(&qtTranslator);
 #endif
-    QTranslator appTranslator;
     if(appTranslator.load(QApplication::applicationDirPath() + "/ppview_" + language))
         app.installTranslator(&appTranslator);
 

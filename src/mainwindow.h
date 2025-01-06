@@ -100,6 +100,9 @@ private slots:
     void removeFromFavorites();
     void findReferencingObjects();
     void setLanguage();
+    void showReadme();
+    void showLicense();
+    void show3rdPartyLicenses();
 
 private:
     void createActions();
@@ -154,6 +157,9 @@ private:
     QAction* clearFavoriteListAct;
     QAction* setLanguageAct;
     QAction* helpContentsAct;
+    QAction* showReadmeAct;
+    QAction* showLicenseAct;
+    QAction* show3rdPartyLicensesAct;
     QAction* aboutAct;
     QSpinBox* scaleSpinBox;
     QSpinBox* rotateSpinBox;

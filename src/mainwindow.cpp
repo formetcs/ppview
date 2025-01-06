@@ -37,6 +37,7 @@
 #include "objectlistmodel.h"
 #include "anhang.h"
 #include "planprograph.h"
+#include "textfiledialog.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -633,14 +634,47 @@ void MainWindow::showHelp()
     QMessageBox::information(this, "Info", "TODO");
 }
 
+void MainWindow::showReadme()
+{
+    TextFileDialog dialog(this);
+    dialog.setWindowTitle(tr("Readme File"));
+    dialog.resize(QSize(650, 300));
+    dialog.loadFile("README.md", true);
+    dialog.exec();
+}
+
+void MainWindow::showLicense()
+{
+    TextFileDialog dialog(this);
+    dialog.setWindowTitle(tr("License"));
+    dialog.resize(QSize(650, 300));
+    dialog.loadFile("LICENSE");
+    dialog.exec();
+}
+
+void MainWindow::show3rdPartyLicenses()
+{
+    TextFileDialog dialog(this);
+    dialog.setWindowTitle(tr("Third Party Licenses"));
+    dialog.resize(QSize(450, 300));
+    dialog.loadFile("third-party-licenses.txt");
+    dialog.exec();
+}
+
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About PlanPro Viewer"),
             tr("<h2>PlanPro Viewer %1.%2.%3</h2>"
             "Supports PlanPro Version %4.%5.%6<br><br>"
-            "Copyright &copy; 2017-2023 The FormETCS Project.<br>All rights reserved.<br><br>"
-            "This program is released under the terms of the<br>"
-            "GNU General Public License.")
+            "Copyright &copy; 2017-2025, The FormETCS Project.<br>All rights reserved.<br><br>"
+            "This program is free software: you can redistribute it and/or modify "
+            "it under the terms of the GNU General Public License as published by "
+            "the Free Software Foundation, either version 3 of the License, or "
+            "(at your option) any later version.<br><br>"
+            "This program is distributed in the hope that it will be useful, "
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the "
+            "GNU General Public License for more details.")
             .arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH).arg(PLANPRO_MAJOR).arg(PLANPRO_MINOR).arg(PLANPRO_PATCH));
 }
 
@@ -882,6 +916,21 @@ void MainWindow::createActions()
     helpContentsAct->setStatusTip(tr("Show program help"));
     connect(helpContentsAct, SIGNAL(triggered()), this, SLOT(showHelp()));
 
+    showReadmeAct = new QAction(tr("Show &Readme File"), this);
+    //showReadmeAct->setShortcut(QKeySequence::HelpContents);
+    showReadmeAct->setStatusTip(tr("Show the content of the readme file"));
+    connect(showReadmeAct, SIGNAL(triggered()), this, SLOT(showReadme()));
+
+    showLicenseAct = new QAction(tr("Show &License"), this);
+    //showLicenseAct->setShortcut(QKeySequence::HelpContents);
+    showLicenseAct->setStatusTip(tr("Show the license file"));
+    connect(showLicenseAct, SIGNAL(triggered()), this, SLOT(showLicense()));
+
+    show3rdPartyLicensesAct = new QAction(tr("Show &Third Party Licenses"), this);
+    //show3rdPartyLicensesAct->setShortcut(QKeySequence::HelpContents);
+    show3rdPartyLicensesAct->setStatusTip(tr("Show the licenses of third party components"));
+    connect(show3rdPartyLicensesAct, SIGNAL(triggered()), this, SLOT(show3rdPartyLicenses()));
+
     aboutAct = new QAction(tr("&About..."), this);
     aboutAct->setStatusTip(tr("Show program and version info"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
@@ -1013,6 +1062,11 @@ void MainWindow::createMenus()
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(helpContentsAct);
+    helpMenu->addSeparator();
+    helpMenu->addAction(showReadmeAct);
+    helpMenu->addAction(show3rdPartyLicensesAct);
+    helpMenu->addSeparator();
+    helpMenu->addAction(showLicenseAct);
     helpMenu->addSeparator();
     helpMenu->addAction(aboutAct);
 }

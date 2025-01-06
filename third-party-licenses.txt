@@ -1,0 +1,9 @@
+Plan Pro Viewer includes or uses the following third-party components:
+
+Qt C++ GUI Framework, licensed under the the terms of the GNU Lesser General Public License version 3. See https://www.qt.io for details.
+
+KDE Oxygen Icons, licensed under the terms of the GNU Lesser General Public License version 3 or later. See https://invent.kde.org/frameworks/oxygen-icons for details.
+
+The P-Hausen example has been taken from the Signalling Engineering Toolbox (https://projects.eclipse.org/projects/technology.set), licensed under the Eclipse Public License V2.0. Used with permission of DB InfraGO AG.
+
+This software uses the PlanPro Data Model, licensed under the RailPL Open Source License. Visit http://www.dbinfrago.com/planpro to get more information.
