@@ -95,3 +95,6 @@ macx:ICON     = ppview.icns
 
 TRANSLATIONS  = ppview_en.ts \
                 ppview_de.ts
+
+FORMS += \
+    finddialog.ui

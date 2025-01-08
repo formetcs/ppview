@@ -22,6 +22,7 @@
 #include <QtGui>
 #include <QtWidgets>
 #include <QtPrintSupport>
+#include <ui_finddialog.h>
 
 #include "mainwindow.h"
 #include "global.h"
@@ -686,12 +687,38 @@ void MainWindow::handleObjectSearchFromSearchWindow()
 
 void MainWindow::handleObjectSearchFromMenu()
 {
-    bool ok;
-    QString text = QInputDialog::getText(this, tr("Search"),
-                                         tr("Enter the GUID of the searched object:"), QLineEdit::Normal,
-                                         QString(), &ok);
-    if (ok && !text.isEmpty())
-        selectionManager->selectItem(text);
+    Ui::FindDialog ui;
+    QDialog dialog(this);
+    ui.setupUi(&dialog);
+    QStringList categoryList = document->getCategoryList();
+    ui.comboBoxCategory->addItems(categoryList);
+    if(dialog.exec() == QDialog::Accepted && !ui.lineEditFind->text().isEmpty())
+    {
+        referenceList->clear();
+        QString category = QString();
+        if(ui.comboBoxCategory->currentIndex() > 0)
+        {
+            category = ui.comboBoxCategory->currentText();
+        }
+
+        QList<DomItem*> resultList = document->findObjects(ui.lineEditFind->text(),
+                                                         (PlanProDocument::FindMatch) ui.comboBoxMatch->currentIndex(),
+                                                         (PlanProDocument::FindState) ui.comboBoxState->currentIndex(),
+                                                         category,
+                                                         ui.checkBoxCaseSensitive->isChecked(),
+                                                         ui.checkBoxAttrName->isChecked(),
+                                                         ui.checkBoxAttrValue->isChecked());
+        for(int i = 0; i < resultList.count(); ++i)
+        {
+            DomItem* currentItem = resultList.at(i);
+            QString name = currentItem->getName();
+            QString id = currentItem->getFirstValueAtPath("Identitaet/Wert");
+            QTreeWidgetItem* newItem = new QTreeWidgetItem();
+            newItem->setText(0, name);
+            newItem->setText(1, id);
+            referenceList->addTopLevelItem(newItem);
+        }
+    }
 }
 
 void MainWindow::centerObject()
@@ -788,7 +815,7 @@ void MainWindow::createActions()
 
     searchAct = new QAction(tr("&Search..."), this);
     searchAct->setIcon(QIcon(":/images/edit-find.svg"));
-    searchAct->setShortcut(tr("Ctrl+F"));
+    searchAct->setShortcut(QKeySequence::Find);
     searchAct->setStatusTip(tr("Search an object based on its GUID"));
     connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearchFromMenu()));
 

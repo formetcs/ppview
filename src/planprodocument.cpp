@@ -22,6 +22,7 @@
 #include "planprodocument.h"
 
 #include <QDateTime>
+#include <QRegularExpression>
 #include <QUuid>
 
 PlanProDocument::PlanProDocument(QObject *parent)
@@ -433,5 +434,152 @@ bool PlanProDocument::hasDependency(const DomItem *item, const QString& id) cons
             return true;
         }
     }
+    return false;
+}
+
+QList<DomItem*> PlanProDocument::findObjects(QString pattern, FindMatch match, FindState state, QString category, bool caseSensitive, bool attrName, bool attrValue)
+{
+    QList<DomItem*> returnlist;
+
+    QList<ObjectListItem> objectlist = getCombinedObjectList(category);
+    for(int i = 0; i < objectlist.count(); ++i)
+    {
+        ObjectListItem currentItem = objectlist.at(i);
+
+        if(state == FindStateStartOnly)
+        {
+            if(currentItem.state == PlanningStateEnd)
+            {
+                continue;
+            }
+            if(hasPatternMatch(currentItem.itemStart, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                returnlist.append(currentItem.itemStart);
+            }
+
+        }
+        else if(state == FindStateEndOnly)
+        {
+            if(currentItem.state == PlanningStateStart)
+            {
+                continue;
+            }
+            if(hasPatternMatch(currentItem.itemEnd, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                returnlist.append(currentItem.itemEnd);
+            }
+        }
+        else if(state == FindStateStartAndEnd)
+        {
+            if(currentItem.state != PlanningStateBoth)
+            {
+                continue;
+            }
+            if(hasPatternMatch(currentItem.itemEnd, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                returnlist.append(currentItem.itemEnd);
+            }
+        }
+        else // state == FindStateStartOrEnd
+        {
+            if(currentItem.itemEnd && hasPatternMatch(currentItem.itemEnd, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                returnlist.append(currentItem.itemEnd);
+                continue; // append only the end item if it is available in both states
+            }
+            if(currentItem.itemStart && hasPatternMatch(currentItem.itemStart, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                returnlist.append(currentItem.itemStart);
+            }
+        }
+    }
+
+    return returnlist;
+}
+
+bool PlanProDocument::hasPatternMatch(const DomItem* item, QString pattern, FindMatch match, bool caseSensitive, bool attrName, bool attrValue, bool recursive)
+{
+    if(item == NULL)
+    {
+        return false;
+    }
+
+    Qt::CaseSensitivity cs = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+    if(match == FindMatchContains)
+    {
+        if(attrName && item->getName().contains(pattern, cs))
+        {
+            return true;
+        }
+        if(attrValue && item->getValue().contains(pattern, cs))
+        {
+            return true;
+        }
+    }
+    else if(match == FindMatchStartsWith)
+    {
+        if(attrName && item->getName().startsWith(pattern, cs))
+        {
+            return true;
+        }
+        if(attrValue && item->getValue().startsWith(pattern, cs))
+        {
+            return true;
+        }
+    }
+    else if(match == FindMatchEndsWith)
+    {
+        if(attrName && item->getName().endsWith(pattern, cs))
+        {
+            return true;
+        }
+        if(attrValue && item->getValue().endsWith(pattern, cs))
+        {
+            return true;
+        }
+    }
+    else if(match == FindMatchExactMatch)
+    {
+        if(attrName && QString::compare(item->getName(), pattern, cs) == 0)
+        {
+            return true;
+        }
+        if(attrValue && QString::compare(item->getValue(), pattern, cs) == 0)
+        {
+            return true;
+        }
+    }
+    else // match == FindMatchRegExp
+    {
+        QRegularExpression regExp(pattern);
+        if(!regExp.isValid())
+        {
+            return false;
+        }
+        QRegularExpressionMatch matchName = regExp.match(item->getName());
+        QRegularExpressionMatch matchValue = regExp.match(item->getValue());
+        if(attrName && matchName.hasMatch())
+        {
+            return true;
+        }
+        if(attrValue && matchValue.hasMatch())
+        {
+            return true;
+        }
+    }
+
+    if(recursive)
+    {
+        for(int i = 0; i < item->childCount(); ++i)
+        {
+            const DomItem* child = item->getChild(i);
+            if(hasPatternMatch(child, pattern, match, caseSensitive, attrName, attrValue, true))
+            {
+                return true;
+            }
+        }
+    }
+
     return false;
 }

@@ -45,6 +45,23 @@ public:
         PlanningStateBoth = 2
     };
 
+    enum FindMatch
+    {
+        FindMatchContains = 0,
+        FindMatchStartsWith = 1,
+        FindMatchEndsWith = 2,
+        FindMatchExactMatch = 3,
+        FindMatchRegExp = 4
+    };
+
+    enum FindState
+    {
+        FindStateStartOrEnd = 0,
+        FindStateStartAndEnd = 1,
+        FindStateStartOnly = 2,
+        FindStateEndOnly = 3
+    };
+
     struct ObjectListItem
     {
         DomItem* itemStart;
@@ -84,6 +101,8 @@ public:
     ObjectListItem getObjectListItemById(const QString& id);
     QList<DomItem*> findDependentObjects(DomItem* item);
     bool hasDependency(const DomItem* item, const QString& id) const;
+    QList<DomItem*> findObjects(QString pattern, FindMatch match = FindMatchContains, FindState state = FindStateStartOrEnd, QString category = QString(), bool caseSensitive = false, bool attrName = true, bool attrValue = true);
+    bool hasPatternMatch(const DomItem* item, QString pattern, FindMatch match = FindMatchContains, bool caseSensitive = false, bool attrName = true, bool attrValue = true, bool recursive = false);
     void clearCache();
 
 

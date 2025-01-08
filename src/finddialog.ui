@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FindDialog</class>
+ <widget class="QDialog" name="FindDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>404</width>
+    <height>230</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Find</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>&amp;Find:</string>
+       </property>
+       <property name="buddy">
+        <cstring>lineEditFind</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="lineEditFind"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>&amp;Match Type:</string>
+         </property>
+         <property name="buddy">
+          <cstring>comboBoxMatch</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxMatch">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Contains</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Starts with</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ends with</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Exact match</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Regular Expression</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxCaseSensitive">
+       <property name="text">
+        <string>&amp;Case sensitive</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>&amp;State:</string>
+         </property>
+         <property name="buddy">
+          <cstring>comboBoxState</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxState">
+         <item>
+          <property name="text">
+           <string>Start or End</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Start and End</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Start only</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>End only</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Cate&amp;gory:</string>
+         </property>
+         <property name="buddy">
+          <cstring>comboBoxCategory</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="comboBoxCategory">
+         <item>
+          <property name="text">
+           <string>(all)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QCheckBox" name="checkBoxAttrName">
+       <property name="text">
+        <string>Attribute &amp;Name</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="checkBoxAttrValue">
+       <property name="text">
+        <string>Attribute &amp;Value</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>lineEditFind</tabstop>
+  <tabstop>comboBoxMatch</tabstop>
+  <tabstop>checkBoxCaseSensitive</tabstop>
+  <tabstop>comboBoxState</tabstop>
+  <tabstop>comboBoxCategory</tabstop>
+  <tabstop>checkBoxAttrName</tabstop>
+  <tabstop>checkBoxAttrValue</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>FindDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>230</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>FindDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>298</x>
+     <y>214</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
