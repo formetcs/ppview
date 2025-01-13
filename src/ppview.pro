@@ -58,6 +58,7 @@ SOURCES += \
     domitem.cpp \
     planproxmldocument.cpp \
     preferences.cpp \
+    preferencesdialog.cpp \
     punktobjekt.cpp \
     selectionmanager.cpp \
     temporarypunktobjekt.cpp \
@@ -80,6 +81,7 @@ HEADERS += \
     domitem.h \
     planproxmldocument.h \
     preferences.h \
+    preferencesdialog.h \
     punktobjekt.h \
     selectionmanager.h \
     temporarypunktobjekt.h \
@@ -97,4 +99,5 @@ TRANSLATIONS  = ppview_en.ts \
                 ppview_de.ts
 
 FORMS += \
-    finddialog.ui
+    finddialog.ui \
+    preferencesdialog.ui

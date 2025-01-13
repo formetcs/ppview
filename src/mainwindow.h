@@ -99,7 +99,7 @@ private slots:
     void addToFavorites();
     void removeFromFavorites();
     void findReferencingObjects();
-    void setLanguage();
+    void showPreferences();
     void showReadme();
     void showLicense();
     void show3rdPartyLicenses();
@@ -155,7 +155,7 @@ private:
     QAction* addFavoriteAct;
     QAction* removeFavoriteAct;
     QAction* clearFavoriteListAct;
-    QAction* setLanguageAct;
+    QAction* preferencesAct;
     QAction* helpContentsAct;
     QAction* showReadmeAct;
     QAction* showLicenseAct;

@@ -40,16 +40,19 @@ int main(int argc, char *argv[])
 #if defined Q_OS_WIN
     if(qtTranslator.load(QApplication::applicationDirPath() + "/translations/qt_" + language))
         app.installTranslator(&qtTranslator);
+    if(appTranslator.load(QApplication::applicationDirPath() + "/translations/ppview_" + language))
+        app.installTranslator(&appTranslator);
 #elif defined Q_OS_MACOS
-    if(qtTranslator.load(QApplication::applicationDirPath() + "/../Resources/qt_" + language))
+    if(qtTranslator.load(QApplication::applicationDirPath() + "/../Resources/translations/qt_" + language))
         app.installTranslator(&qtTranslator);
+    if(appTranslator.load(QApplication::applicationDirPath() + "/../Resources/translations/ppview_" + language))
+        app.installTranslator(&appTranslator);
 #else // Q_OS_LINUX and others
     if(qtTranslator.load("/usr/share/qt6/translations/qt_" + language))
         app.installTranslator(&qtTranslator);
-#endif
-    if(appTranslator.load(QApplication::applicationDirPath() + "/ppview_" + language))
+    if(appTranslator.load(QApplication::applicationDirPath() + "/translations/ppview_" + language))
         app.installTranslator(&appTranslator);
-
+#endif
     QString datafile = QString();
     if(argc > 1)
         datafile = argv[1];

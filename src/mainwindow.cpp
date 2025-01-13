@@ -39,6 +39,7 @@
 #include "anhang.h"
 #include "planprograph.h"
 #include "textfiledialog.h"
+#include "preferencesdialog.h"
 
 MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     : QMainWindow(parent)
@@ -564,24 +565,13 @@ void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, 
     }
 }
 
-void MainWindow::setLanguage()
+void MainWindow::showPreferences()
 {
-    QDir dir(QApplication::applicationDirPath());
-    QStringList filters;
-    filters << "ppview_*.qm";
-    QStringList items = dir.entryList(filters, QDir::Files);
-    items.replaceInStrings("ppview_", "");
-    items.replaceInStrings(".qm", "");
-    QString language = Preferences::getInstance()->getLanguage();
-    int index = items.indexOf(language);
-
-    bool ok;
-    QString item = QInputDialog::getItem(this, tr("Set Language"),
-                                         tr("Set Language (will be effective after restart):"),
-                                         items, index, false, &ok);
-    if (ok && !item.isEmpty())
+    PreferencesDialog dialog(this);
+    if(dialog.exec() == QDialog::Accepted)
     {
-        Preferences::getInstance()->setLanguage(item);
+        dialog.saveSettings();
+        writeSettings();
     }
 }
 
@@ -931,11 +921,11 @@ void MainWindow::createActions()
     clearFavoriteListAct->setStatusTip(tr("Clear the favorite list"));
     connect(clearFavoriteListAct, SIGNAL(triggered()), favoriteList, SLOT(clear()));
 
-    setLanguageAct = new QAction(tr("Preferences..."), this);
-    setLanguageAct->setIcon(QIcon(":/images/configure.svg"));
-    setLanguageAct->setShortcut(QKeySequence::Preferences);
-    setLanguageAct->setStatusTip(tr("Set the language of the program"));
-    connect(setLanguageAct, SIGNAL(triggered()), this, SLOT(setLanguage()));
+    preferencesAct = new QAction(tr("Preferences..."), this);
+    preferencesAct->setIcon(QIcon(":/images/configure.svg"));
+    preferencesAct->setShortcut(QKeySequence::Preferences);
+    preferencesAct->setStatusTip(tr("Set the default behavior of the program"));
+    connect(preferencesAct, SIGNAL(triggered()), this, SLOT(showPreferences()));
 
     helpContentsAct = new QAction(tr("&Help"), this);
     helpContentsAct->setIcon(QIcon(":/images/documentation.svg"));
@@ -1051,7 +1041,7 @@ void MainWindow::createMenus()
     editMenu->addAction(searchAct);
     editMenu->addAction(editRemarkAct);
     editMenu->addSeparator();
-    editMenu->addAction(setLanguageAct);
+    editMenu->addAction(preferencesAct);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewDockSubmenu = viewMenu->addMenu(tr("Show &Dock Windows"));
