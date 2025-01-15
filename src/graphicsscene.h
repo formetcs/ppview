@@ -33,6 +33,7 @@
 const int GRAPHICSITEM_TYPE = 1;
 const int GRAPHICSITEM_ID = 2;
 const int GRAPHICSITEM_VIEWMODE = 3;
+const int GRAPHICSITEM_COMPARISON_STATE = 4;
 
 
 class GraphicsScene : public QGraphicsScene
@@ -49,6 +50,7 @@ public slots:
     void changeFilterSettings(const QString& key, bool state);
     void changeFilterSettings(const QList<FilterState>& statelist);
     void changeViewMode(MainWindow::ViewMode mode);
+    void updateColorSettings();
 
 private slots:
 

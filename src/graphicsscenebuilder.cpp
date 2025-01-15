@@ -116,6 +116,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
             gitem->setData(GRAPHICSITEM_TYPE, name);
             gitem->setData(GRAPHICSITEM_ID, id);
             gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             gitem->setFlag(QGraphicsItem::ItemIsSelectable);
             gitem->setZValue(-3);
             gitem->setVisible(false);
@@ -160,6 +161,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                    gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-2);
                     gitem->setVisible(false);
@@ -225,6 +227,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setZValue(-20);
                 gitem->setVisible(false);
@@ -271,6 +274,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                     gitem->setData(GRAPHICSITEM_TYPE, name);
                     gitem->setData(GRAPHICSITEM_ID, id);
                     gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                    gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                     gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                     gitem->setZValue(-1);
                     gitem->setVisible(false);
@@ -373,12 +377,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-10);
             groupitem->setVisible(false);
@@ -419,6 +425,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -457,6 +464,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -495,6 +503,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -535,6 +544,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -573,6 +583,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -611,6 +622,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -649,6 +661,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -687,6 +700,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -725,6 +739,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -763,6 +778,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -801,6 +817,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -839,6 +856,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -877,6 +895,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -917,6 +936,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -957,6 +977,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -995,6 +1016,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -1035,6 +1057,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -1073,6 +1096,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -1111,6 +1135,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -1149,6 +1174,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 gitem->setFlag(QGraphicsItem::ItemIsSelectable);
                 gitem->setVisible(false);
             }
@@ -1210,12 +1236,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1277,12 +1305,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1344,12 +1374,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1411,12 +1443,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1478,12 +1512,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1545,12 +1581,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1612,12 +1650,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1679,12 +1719,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1746,12 +1788,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1813,12 +1857,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1880,12 +1926,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -1947,12 +1995,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -2014,12 +2064,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -2081,12 +2133,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -2148,12 +2202,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);
@@ -2215,12 +2271,14 @@ bool GraphicsSceneBuilder::createGraphicsScene()
                 gitem->setData(GRAPHICSITEM_TYPE, name);
                 gitem->setData(GRAPHICSITEM_ID, id);
                 gitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+                gitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
                 groupitem->addToGroup(gitem);
             }
             groupitem->setToolTip(tooltip);
             groupitem->setData(GRAPHICSITEM_TYPE, name);
             groupitem->setData(GRAPHICSITEM_ID, id);
             groupitem->setData(GRAPHICSITEM_VIEWMODE, MainWindow::ViewModeStateComparison);
+            groupitem->setData(GRAPHICSITEM_COMPARISON_STATE, state);
             groupitem->setFlag(QGraphicsItem::ItemIsSelectable);
             groupitem->setZValue(-5);
             groupitem->setVisible(false);

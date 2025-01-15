@@ -22,6 +22,8 @@
 #include <QtGui>
 #include <QtWidgets>
 #include "graphicsscene.h"
+#include "planprodocument.h"
+#include "preferences.h"
 
 GraphicsScene::GraphicsScene(QObject* parent) : QGraphicsScene(parent)
 {
@@ -48,6 +50,86 @@ void GraphicsScene::changeViewMode(MainWindow::ViewMode mode)
         else
         {
             item->setVisible(false);
+        }
+    }
+}
+
+void GraphicsScene::updateColorSettings()
+{
+    QList<QGraphicsItem*> graphicsItemList = items();
+    for(int i = 0; i < graphicsItemList.count(); ++i)
+    {
+        QGraphicsItem* item = graphicsItemList.at(i);
+        QString itemType = item->data(GRAPHICSITEM_TYPE).toString();
+        MainWindow::ViewMode itemviewMode = item->data(GRAPHICSITEM_VIEWMODE).value<MainWindow::ViewMode>();
+        QGraphicsLineItem* lineitem = qgraphicsitem_cast<QGraphicsLineItem*>(item);
+        if(lineitem != NULL)
+        {
+            if(itemviewMode != MainWindow::ViewModeStateComparison)
+            {
+                QPen pen = Preferences::getInstance()->getGraphicsViewPen(itemType);
+                lineitem->setPen(pen);
+            }
+            else
+            {
+                PlanProDocument::PlanningState state = lineitem->data(GRAPHICSITEM_COMPARISON_STATE).value<PlanProDocument::PlanningState>();
+                QPen pen;
+                if(state == PlanProDocument::PlanningStateStart)
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewStartPen();
+                    lineitem->setPen(pen);
+                }
+                else if(state == PlanProDocument::PlanningStateEnd)
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewEndPen();
+                    lineitem->setPen(pen);
+                }
+                else
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewBothPen();
+                    lineitem->setPen(pen);
+                }
+            }
+            continue;
+        }
+        QGraphicsEllipseItem* ellipseitem = qgraphicsitem_cast<QGraphicsEllipseItem*>(item);
+        if(ellipseitem != NULL)
+        {
+            if(itemviewMode != MainWindow::ViewModeStateComparison)
+            {
+                QPen pen = Preferences::getInstance()->getGraphicsViewPen(itemType);
+                QBrush brush = Preferences::getInstance()->getGraphicsViewBrush(itemType);
+                ellipseitem->setPen(pen);
+                ellipseitem->setBrush(brush);
+            }
+            else
+            {
+                PlanProDocument::PlanningState state = ellipseitem->data(GRAPHICSITEM_COMPARISON_STATE).value<PlanProDocument::PlanningState>();
+                QPen pen;
+                QBrush brush;
+                if(state == PlanProDocument::PlanningStateStart)
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewStartPen();
+                    brush = Preferences::getInstance()->getGraphicsViewStartBrush();
+                    ellipseitem->setPen(pen);
+                    ellipseitem->setBrush(brush);
+                }
+                else if(state == PlanProDocument::PlanningStateEnd)
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewEndPen();
+                    brush = Preferences::getInstance()->getGraphicsViewEndBrush();
+                    ellipseitem->setPen(pen);
+                    ellipseitem->setBrush(brush);
+                }
+                else
+                {
+                    pen = Preferences::getInstance()->getGraphicsViewBothPen();
+                    brush = Preferences::getInstance()->getGraphicsViewBothBrush();
+                    ellipseitem->setPen(pen);
+                    ellipseitem->setBrush(brush);
+                }
+            }
+            continue;
         }
     }
 }

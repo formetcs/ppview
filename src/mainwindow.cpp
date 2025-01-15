@@ -572,6 +572,7 @@ void MainWindow::showPreferences()
     {
         dialog.saveSettings();
         writeSettings();
+        scene->updateColorSettings();
     }
 }
 
