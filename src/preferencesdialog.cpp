@@ -55,6 +55,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     connect(ui->pushButtonSetFillColor, SIGNAL(clicked()), this, SLOT(handlePushButtonSetFillColorClicked()));
     connect(ui->spinBoxPenWidth, SIGNAL(valueChanged(int)), this, SLOT(penPropertiesChanged()));
     connect(ui->comboBoxPenStyle, SIGNAL(currentIndexChanged(int)), this, SLOT(penPropertiesChanged()));
+    connect(ui->pushButtonSetForegroundColor, SIGNAL(clicked()), this, SLOT(handlePushButtonSetForegroundColorClicked()));
+    connect(ui->pushButtonSetBackgroundColor, SIGNAL(clicked()), this, SLOT(handlePushButtonSetBackgroundColorClicked()));
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -117,6 +119,13 @@ void PreferencesDialog::loadSettings()
         changedPens.insert(currentName, prefs->getGraphicsViewPen(currentName));
         ui->listWidgetObjectTypes->addItem(new QListWidgetItem(currentName));
     }
+
+    ui->listWidgetObjectListItems->item(0)->setForeground(prefs->getObjectListFgStartBrush());
+    ui->listWidgetObjectListItems->item(0)->setBackground(prefs->getObjectListBgStartBrush());
+    ui->listWidgetObjectListItems->item(1)->setForeground(prefs->getObjectListFgEndBrush());
+    ui->listWidgetObjectListItems->item(1)->setBackground(prefs->getObjectListBgEndBrush());
+    ui->listWidgetObjectListItems->item(2)->setForeground(prefs->getObjectListFgBothBrush());
+    ui->listWidgetObjectListItems->item(2)->setBackground(prefs->getObjectListBgBothBrush());
 }
 
 void PreferencesDialog::saveSettings()
@@ -148,6 +157,13 @@ void PreferencesDialog::saveSettings()
         QString currentName = bereichObjektNames.at(i);
         prefs->setGraphicsViewPen(currentName, changedPens.value(currentName));
     }
+
+    prefs->setObjectListFgStartBrush(ui->listWidgetObjectListItems->item(0)->foreground());
+    prefs->setObjectListBgStartBrush(ui->listWidgetObjectListItems->item(0)->background());
+    prefs->setObjectListFgEndBrush(ui->listWidgetObjectListItems->item(1)->foreground());
+    prefs->setObjectListBgEndBrush(ui->listWidgetObjectListItems->item(1)->background());
+    prefs->setObjectListFgBothBrush(ui->listWidgetObjectListItems->item(2)->foreground());
+    prefs->setObjectListBgBothBrush(ui->listWidgetObjectListItems->item(2)->background());
 }
 
 QPen PreferencesDialog::getSelectedPen()
@@ -291,12 +307,22 @@ void PreferencesDialog::handleObjectListSelection()
 
 void PreferencesDialog::handlePushButtonSetLineColorClicked()
 {
-    handleSetColor(true);
+    handleSetLayoutColor(true);
 }
 
 void PreferencesDialog::handlePushButtonSetFillColorClicked()
 {
-    handleSetColor(false);
+    handleSetLayoutColor(false);
+}
+
+void PreferencesDialog::handlePushButtonSetForegroundColorClicked()
+{
+    handleSetObjectListColor(true);
+}
+
+void PreferencesDialog::handlePushButtonSetBackgroundColorClicked()
+{
+    handleSetObjectListColor(false);
 }
 
 void PreferencesDialog::penPropertiesChanged()
@@ -324,7 +350,7 @@ void PreferencesDialog::penPropertiesChanged()
     setSelectedPen(pen);
 }
 
-void PreferencesDialog::handleSetColor(bool linecolor)
+void PreferencesDialog::handleSetLayoutColor(bool linecolor)
 {
     QPen pen = getSelectedPen();
     QBrush brush = getSelectedBrush();
@@ -352,4 +378,33 @@ void PreferencesDialog::handleSetColor(bool linecolor)
         setSelectedBrush(brush);
     }
     handleObjectListSelection(); // to update the color boxes
+}
+
+void PreferencesDialog::handleSetObjectListColor(bool foreground)
+{
+    QList<QListWidgetItem*> selectedList = ui->listWidgetObjectListItems->selectedItems();
+    QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
+    QBrush brush;
+    if(foreground)
+    {
+        brush = selectedItem->foreground();
+    }
+    else
+    {
+        brush = selectedItem->background();
+    }
+    QColor resultColor = QColorDialog::getColor(brush.color(), this, tr("Set Color"));
+    if(!resultColor.isValid())
+    {
+        return;
+    }
+    brush.setColor(resultColor);
+    if(foreground)
+    {
+        selectedItem->setForeground(brush);
+    }
+    else
+    {
+        selectedItem->setBackground(brush);
+    }
 }

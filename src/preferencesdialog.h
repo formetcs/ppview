@@ -43,10 +43,13 @@ private slots:
     void handleObjectListSelection();
     void handlePushButtonSetLineColorClicked();
     void handlePushButtonSetFillColorClicked();
+    void handlePushButtonSetForegroundColorClicked();
+    void handlePushButtonSetBackgroundColorClicked();
     void penPropertiesChanged();
 
 private:
-    void handleSetColor(bool linecolor);
+    void handleSetLayoutColor(bool linecolor);
+    void handleSetObjectListColor(bool foreground);
     QStringList getAvailableLanguages();
     QPen getSelectedPen();
     void setSelectedPen(QPen p);

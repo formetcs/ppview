@@ -285,6 +285,63 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabObjectList">
+      <attribute name="title">
+       <string>&amp;Object List</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <item>
+        <widget class="QListWidget" name="listWidgetObjectListItems">
+         <item>
+          <property name="text">
+           <string>Combined View: Start</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Combined View: End</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Combined View: Both</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QPushButton" name="pushButtonSetForegroundColor">
+           <property name="text">
+            <string>Set &amp;Foreground Color...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButtonSetBackgroundColor">
+           <property name="text">
+            <string>Set &amp;Background Color...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
