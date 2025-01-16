@@ -170,6 +170,10 @@ QPen PreferencesDialog::getSelectedPen()
 {
     Preferences* prefs = Preferences::getInstance();
     QList<QListWidgetItem*> selectedList = ui->listWidgetObjectTypes->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return QPen();
+    }
     QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
     if(ui->listWidgetObjectTypes->row(selectedItem) == 0) // CombinedView: Start
     {
@@ -193,6 +197,10 @@ QPen PreferencesDialog::getSelectedPen()
 void PreferencesDialog::setSelectedPen(QPen p)
 {
     QList<QListWidgetItem*> selectedList = ui->listWidgetObjectTypes->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
     QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
     if(ui->listWidgetObjectTypes->row(selectedItem) == 0) // CombinedView: Start
     {
@@ -217,6 +225,10 @@ QBrush PreferencesDialog::getSelectedBrush()
 {
     Preferences* prefs = Preferences::getInstance();
     QList<QListWidgetItem*> selectedList = ui->listWidgetObjectTypes->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return QBrush();
+    }
     QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
     if(ui->listWidgetObjectTypes->row(selectedItem) == 0) // CombinedView: Start
     {
@@ -240,6 +252,10 @@ QBrush PreferencesDialog::getSelectedBrush()
 void PreferencesDialog::setSelectedBrush(QBrush b)
 {
     QList<QListWidgetItem*> selectedList = ui->listWidgetObjectTypes->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
     QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
     if(ui->listWidgetObjectTypes->row(selectedItem) == 0) // CombinedView: Start
     {
@@ -262,6 +278,10 @@ void PreferencesDialog::setSelectedBrush(QBrush b)
 
 void PreferencesDialog::handleObjectListSelection()
 {
+    if(ui->listWidgetObjectTypes->selectedItems().isEmpty())
+    {
+        return;
+    }
     QPen pen = getSelectedPen();
     QBrush brush = getSelectedBrush();
     QPalette palette1;
@@ -383,6 +403,10 @@ void PreferencesDialog::handleSetLayoutColor(bool linecolor)
 void PreferencesDialog::handleSetObjectListColor(bool foreground)
 {
     QList<QListWidgetItem*> selectedList = ui->listWidgetObjectListItems->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
     QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
     QBrush brush;
     if(foreground)

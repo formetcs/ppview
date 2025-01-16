@@ -224,6 +224,18 @@
           <layout class="QHBoxLayout" name="horizontalLayout_8">
            <item>
             <widget class="QFrame" name="frameLineColor">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>32</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="autoFillBackground">
               <bool>true</bool>
              </property>
@@ -248,6 +260,18 @@
           <layout class="QHBoxLayout" name="horizontalLayout_9">
            <item>
             <widget class="QFrame" name="frameFillColor">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>32</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="autoFillBackground">
               <bool>true</bool>
              </property>
