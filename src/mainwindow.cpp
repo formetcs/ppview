@@ -22,7 +22,6 @@
 #include <QtGui>
 #include <QtWidgets>
 #include <QtPrintSupport>
-#include <ui_finddialog.h>
 
 #include "mainwindow.h"
 #include "global.h"
@@ -40,8 +39,9 @@
 #include "planprograph.h"
 #include "textfiledialog.h"
 #include "preferencesdialog.h"
+#include "ui_finddialog.h"
 
-MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
+MainWindow::MainWindow(const QString& fileName, QWidget* parent)
     : QMainWindow(parent)
 {
     setWindowTitle(APPLICATION_NAME);
@@ -72,18 +72,14 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
 
     objectInfo = new ObjectInfoWidget();
 
-    searchEdit = new QLineEdit();
-    searchEdit->setPlaceholderText(tr("Object GUID"));
-    searchButton = new QPushButton(tr("Search"));
-
-    favoriteList = new QListWidget();
-    favoriteList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    referenceList = new QTreeWidget();
-    referenceList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    referenceList->setColumnCount(2);
+    bookmarkList = new QListWidget();
+    bookmarkList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    searchResultList = new QTreeWidget();
+    searchResultList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    searchResultList->setColumnCount(2);
     QStringList headerLabels;
     headerLabels << tr("Type") << tr("ID");
-    referenceList->setHeaderLabels(headerLabels);
+    searchResultList->setHeaderLabels(headerLabels);
 
     filterWidget = new FilterWidget();
     filterWidget->readSettings();
@@ -99,8 +95,8 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     selectionManager->setScene(scene);
     selectionManager->setDocumentTreeView(documentTreeView);
     selectionManager->setObjectListView(objectListView);
-    selectionManager->setFavoriteListWidget(favoriteList);
-    selectionManager->setReferenceListWidget(referenceList);
+    selectionManager->setBookmarkListWidget(bookmarkList);
+    selectionManager->setSearchResultListWidget(searchResultList);
 
     setCentralWidget(view);
 
@@ -113,7 +109,6 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     setAcceptDrops(true);
 
     connect(filterWidget, SIGNAL(filterStateChanged(QString,bool)), scene, SLOT(changeFilterSettings(QString,bool)));
-    connect(searchButton, SIGNAL(clicked()), this, SLOT(handleObjectSearchFromSearchWindow()));
     connect(categoryComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCategory()));
     connect(selectionManager, SIGNAL(selectionChanged(QList<DomItem*>)), objectInfo, SLOT(setInfoText(QList<DomItem*>)));
     connect(document, SIGNAL(dataChanged()), doctreemodel, SLOT(modelChanged()));
@@ -121,7 +116,7 @@ MainWindow::MainWindow(const QString& dataFileName, QWidget* parent)
     connect(objectInfo, SIGNAL(uuidClicked(QString)), selectionManager, SLOT(selectItem(QString)));
 
     enableActions();
-    openNamedFile(dataFileName);
+    openNamedFile(fileName);
 }
 
 MainWindow::~MainWindow()
@@ -206,8 +201,8 @@ void MainWindow::openFile()
 {
     if(okToContinue())
     {
-        QString s = QFileDialog::getOpenFileName(this, tr("Open file"), QDir::homePath(),
-                                                 tr("PlanPro XML files (*.ppxml);;All files (*.*)") );
+        QString s = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::homePath(),
+                                                 tr("PlanPro XML Files (*.ppxml);;All Files (*.*)") );
 
         openNamedFile(s);
     }
@@ -220,8 +215,8 @@ void MainWindow::openNamedFile(const QString& filename)
         selectionManager->clearSelection();
         scene->clear();
         categoryComboBox->clear();
-        favoriteList->clear();
-        referenceList->clear();
+        bookmarkList->clear();
+        searchResultList->clear();
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
         doctreemodel->modelAboutToBeChanged();
         objectlistmodel->modelAboutToBeChanged();
@@ -273,8 +268,8 @@ bool MainWindow::saveAs()
     int index = defaultFileName.lastIndexOf(".");
     defaultFileName = defaultFileName.left(index);
     defaultFileName += ".ppxml";
-    QString s = QFileDialog::getSaveFileName(this, tr("Save file"), defaultFileName,
-                                tr("PlanPro XML files (*.ppxml)"));
+    QString s = QFileDialog::getSaveFileName(this, tr("Save File"), defaultFileName,
+                                tr("PlanPro XML Files (*.ppxml)"));
 
     return saveNamedFile(s);
 }
@@ -310,8 +305,8 @@ void MainWindow::closeFile()
         selectionManager->clearSelection();
         scene->clear();
         categoryComboBox->clear();
-        favoriteList->clear();
-        referenceList->clear();
+        bookmarkList->clear();
+        searchResultList->clear();
         document->clear();
         setWindowTitle(APPLICATION_NAME);
         doctreemodel->modelChanged();
@@ -321,14 +316,14 @@ void MainWindow::closeFile()
     }
 }
 
-void MainWindow::exportToPicture()
+void MainWindow::saveAsPicture()
 {
     QString defaultFileName = document->getFileName();
     int index = defaultFileName.lastIndexOf(".");
     defaultFileName = defaultFileName.left(index);
     defaultFileName += ".png";
-    QString s = QFileDialog::getSaveFileName(this, tr("Export to PNG"), defaultFileName,
-                                tr("Portable Network Graphics (*.png)"));
+    QString s = QFileDialog::getSaveFileName(this, tr("Save as PNG"), defaultFileName,
+                                tr("Portable Network Graphics Files (*.png)"));
 
     if (!s.isEmpty())
     {
@@ -342,14 +337,14 @@ void MainWindow::exportToPicture()
     }
 }
 
-void MainWindow::exportToPdf()
+void MainWindow::saveAsPdf()
 {
     QString defaultPdfFileName = document->getFileName();
     int index = defaultPdfFileName.lastIndexOf(".");
     defaultPdfFileName = defaultPdfFileName.left(index);
     defaultPdfFileName += ".pdf";
-    QString s = QFileDialog::getSaveFileName(this, tr("Export to PDF"), defaultPdfFileName,
-                                tr("PDF files (*.pdf)"));
+    QString s = QFileDialog::getSaveFileName(this, tr("Save as PDF"), defaultPdfFileName,
+                                tr("Portable Document Format Files (*.pdf)"));
 
     if (!s.isEmpty())
     {
@@ -449,7 +444,7 @@ void MainWindow::extractFile()
     QDir path = fi.dir();
     QString filePathString = path.filePath(filename);
 
-    QString selectedFilename = QFileDialog::getSaveFileName(this, tr("Save file"), filePathString);
+    QString selectedFilename = QFileDialog::getSaveFileName(this, tr("Save File"), filePathString);
 
     if (!selectedFilename.isEmpty())
     {
@@ -497,7 +492,7 @@ void MainWindow::measureDistance()
     QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(doubleDistance, 0, 'f', 3));
 }
 
-void MainWindow::addToFavorites()
+void MainWindow::addToBookmarks()
 {
     QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
     for(int i = 0; i < selectedItemList.count(); ++i)
@@ -507,18 +502,18 @@ void MainWindow::addToFavorites()
         QString id = item->getFirstValueAtPath("Identitaet/Wert");
         QListWidgetItem* newItem = new QListWidgetItem;
         newItem->setText(name + " [" + id + "]");
-        favoriteList->addItem(newItem);
+        bookmarkList->addItem(newItem);
     }
 }
 
-void MainWindow::removeFromFavorites()
+void MainWindow::removeFromBookmarks()
 {
-    QList<QListWidgetItem*> selectedList = favoriteList->selectedItems();
+    QList<QListWidgetItem*> selectedList = bookmarkList->selectedItems();
     for(int i = 0; i < selectedList.size(); ++i)
     {
         QListWidgetItem* item = selectedList.at(i);
-        int row = favoriteList->row(item);
-        favoriteList->takeItem(row);
+        int row = bookmarkList->row(item);
+        bookmarkList->takeItem(row);
         delete item;
     }
 }
@@ -531,16 +526,16 @@ void MainWindow::findReferencingObjects()
         QMessageBox::information(this, tr("Error"), tr("Exactly 1 object must be selected"));
         return;
     }
-    referenceList->clear();
+    searchResultList->clear();
     DomItem* item = selectedItemList.at(0);
     QString name = item->getName();
     QString id = item->getFirstValueAtPath("Identitaet/Wert");
     QTreeWidgetItem* tlItem = new QTreeWidgetItem();
     tlItem->setText(0, name);
     tlItem->setText(1, id);
-    referenceList->addTopLevelItem(tlItem);
+    searchResultList->addTopLevelItem(tlItem);
     createReferenceListRec(item, tlItem, 1);
-    referenceList->expandItem(tlItem);
+    searchResultList->expandItem(tlItem);
 }
 
 void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, int depth)
@@ -561,7 +556,7 @@ void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, 
         newItem->setText(1, id);
         parent->addChild(newItem);
         createReferenceListRec(currentItem, newItem, depth + 1);
-        referenceList->expandItem(newItem);
+        searchResultList->expandItem(newItem);
     }
 }
 
@@ -589,14 +584,14 @@ void MainWindow::showDocumentInfo()
             doctype = tr("Planning");
             int startcount = document->getObjectList(PlanProDocument::PlanningStateStart).count();
             int endcount = document->getObjectList(PlanProDocument::PlanningStateEnd).count();
-            objectcount = tr("Number of PlanPro objects (Start state): %1\n"
-                             "Number of PlanPro objects (End state): %2").arg(startcount).arg(endcount);
+            objectcount = tr("PlanPro Object Count (Start state): %1\n"
+                             "PlanPro Object Count (End state): %2").arg(startcount).arg(endcount);
         }
         else
         {
             doctype = tr("State");
             int endcount = document->getObjectList(PlanProDocument::PlanningStateEnd).count();
-            objectcount = tr("Number of PlanPro objects: %1").arg(endcount);
+            objectcount = tr("PlanPro Object Count: %1").arg(endcount);
         }
         QString timestamp = document->getTimestamp().toString();
         QString toolname = document->getToolName();
@@ -611,7 +606,7 @@ void MainWindow::editRemark()
 {
     QString oldRemark = document->getRemark();
     bool ok;
-    QString newRemark = QInputDialog::getMultiLineText(this, tr("Edit remark"),
+    QString newRemark = QInputDialog::getMultiLineText(this, tr("Edit Remark"),
                                             tr("Enter the remark for the PlanPro file:"), oldRemark, &ok);
     if(ok && newRemark != oldRemark)
     {
@@ -624,7 +619,7 @@ void MainWindow::editRemark()
 
 void MainWindow::showHelp()
 {
-    QMessageBox::information(this, "Info", "TODO");
+    QMessageBox::information(this, "Info", "The Online Help will be available in a future release");
 }
 
 void MainWindow::showReadme()
@@ -671,13 +666,19 @@ void MainWindow::about()
             .arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH).arg(PLANPRO_MAJOR).arg(PLANPRO_MINOR).arg(PLANPRO_PATCH));
 }
 
-void MainWindow::handleObjectSearchFromSearchWindow()
+void MainWindow::goToObject()
 {
-    QString searchedId = searchEdit->text();
-    selectionManager->selectItem(searchedId);
+    bool ok;
+    QString searchedId = QInputDialog::getText(this, tr("Go To Object"),
+                                tr("Enter the GUID of the object:"),
+                                QLineEdit::Normal, QString(), &ok);
+    if(ok && !searchedId.isEmpty())
+    {
+        selectionManager->selectItem(searchedId);
+    }
 }
 
-void MainWindow::handleObjectSearchFromMenu()
+void MainWindow::handleObjectSearch()
 {
     Ui::FindDialog ui;
     QDialog dialog(this);
@@ -686,7 +687,7 @@ void MainWindow::handleObjectSearchFromMenu()
     ui.comboBoxCategory->addItems(categoryList);
     if(dialog.exec() == QDialog::Accepted && !ui.lineEditFind->text().isEmpty())
     {
-        referenceList->clear();
+        searchResultList->clear();
         QString category = QString();
         if(ui.comboBoxCategory->currentIndex() > 0)
         {
@@ -708,7 +709,7 @@ void MainWindow::handleObjectSearchFromMenu()
             QTreeWidgetItem* newItem = new QTreeWidgetItem();
             newItem->setText(0, name);
             newItem->setText(1, id);
-            referenceList->addTopLevelItem(newItem);
+            searchResultList->addTopLevelItem(newItem);
         }
     }
 }
@@ -756,39 +757,39 @@ void MainWindow::changeCategory()
 
 void MainWindow::createActions()
 {
-    openFileAct = new QAction(tr("&Open file..."), this);
+    openFileAct = new QAction(tr("&Open File..."), this);
     openFileAct->setIcon(QIcon(":/images/document-open.svg"));
     openFileAct->setShortcut(QKeySequence::Open);
     openFileAct->setStatusTip(tr("Open a PlanPro XML file"));
     connect(openFileAct, SIGNAL(triggered()), this, SLOT(openFile()));
 
-    saveFileAct = new QAction(tr("&Save file"), this);
+    saveFileAct = new QAction(tr("&Save File"), this);
     saveFileAct->setIcon(QIcon(":/images/document-save.svg"));
     saveFileAct->setShortcut(QKeySequence::Save);
     saveFileAct->setStatusTip(tr("Save the current PlanPro XML file"));
     connect(saveFileAct, SIGNAL(triggered()), this, SLOT(saveFile()));
 
-    saveAsAct = new QAction(tr("Save &as..."), this);
+    saveAsAct = new QAction(tr("Save &As..."), this);
     saveAsAct->setIcon(QIcon(":/images/document-save-as.svg"));
     saveAsAct->setShortcut(QKeySequence::SaveAs);
     saveAsAct->setStatusTip(tr("Save the current PlanPro data to a different file"));
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
-    closeFileAct = new QAction(tr("&Close file"), this);
+    closeFileAct = new QAction(tr("&Close File"), this);
     closeFileAct->setIcon(QIcon(":/images/document-close.svg"));
     closeFileAct->setShortcut(QKeySequence::Close);
     closeFileAct->setStatusTip(tr("Close the current PlanPro XML file"));
     connect(closeFileAct, SIGNAL(triggered()), this, SLOT(closeFile()));
 
-    exportToPictureAct = new QAction(tr("P&NG..."), this);
-    exportToPictureAct->setStatusTip(tr("Export the visible area as PNG picture"));
-    connect(exportToPictureAct, SIGNAL(triggered()), this, SLOT(exportToPicture()));
+    saveAsPictureAct = new QAction(tr("Save As P&NG..."), this);
+    saveAsPictureAct->setStatusTip(tr("Save the visible layout area as PNG picture"));
+    connect(saveAsPictureAct, SIGNAL(triggered()), this, SLOT(saveAsPicture()));
 
-    exportToPdfAct = new QAction(tr("P&DF..."), this);
-    exportToPdfAct->setStatusTip(tr("Export the visible area as PDF file"));
-    connect(exportToPdfAct, SIGNAL(triggered()), this, SLOT(exportToPdf()));
+    saveAsPdfAct = new QAction(tr("Save As P&DF..."), this);
+    saveAsPdfAct->setStatusTip(tr("Save the visible layout area as PDF file"));
+    connect(saveAsPdfAct, SIGNAL(triggered()), this, SLOT(saveAsPdf()));
 
-    docInfoAct = new QAction(tr("Show document &information..."), this);
+    docInfoAct = new QAction(tr("Document &Information..."), this);
     docInfoAct->setIcon(QIcon(":/images/help-about.svg"));
     docInfoAct->setShortcut(tr("Ctrl+I"));
     docInfoAct->setStatusTip(tr("Show the document information of the current PlanPro XML file"));
@@ -797,7 +798,7 @@ void MainWindow::createActions()
     printFileAct = new QAction(tr("&Print..."), this);
     printFileAct->setIcon(QIcon(":/images/document-print.svg"));
     printFileAct->setShortcut(QKeySequence::Print);
-    printFileAct->setStatusTip(tr("Print the visible area"));
+    printFileAct->setStatusTip(tr("Print the visible layout area"));
     connect(printFileAct, SIGNAL(triggered()), this, SLOT(printFile()));
 
     exitAct = new QAction(tr("E&xit"), this);
@@ -805,49 +806,49 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Close the program"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    searchAct = new QAction(tr("&Search..."), this);
+    searchAct = new QAction(tr("&Find..."), this);
     searchAct->setIcon(QIcon(":/images/edit-find.svg"));
     searchAct->setShortcut(QKeySequence::Find);
-    searchAct->setStatusTip(tr("Search an object based on its GUID"));
-    connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearchFromMenu()));
+    searchAct->setStatusTip(tr("Search for objects based on given patterns"));
+    connect(searchAct, SIGNAL(triggered()), this, SLOT(handleObjectSearch()));
 
-    editRemarkAct = new QAction(tr("&Edit remark..."), this);
-    editRemarkAct->setIcon(QIcon(":/images/edit-rename.svg"));
+    editRemarkAct = new QAction(tr("&Edit Remark..."), this);
+    editRemarkAct->setIcon(QIcon(":/images/document-edit.svg"));
     editRemarkAct->setShortcut(tr("Ctrl+E"));
     editRemarkAct->setStatusTip(tr("Edit the remark section of the current PlanPro XML file"));
     connect(editRemarkAct, SIGNAL(triggered()), this, SLOT(editRemark()));
 
-    centerAct = new QAction(tr("&Center object"), this);
+    centerAct = new QAction(tr("&Center Object"), this);
     centerAct->setIcon(QIcon(":/images/view-restore.svg"));
     centerAct->setShortcut(tr("Alt+C"));
     centerAct->setStatusTip(tr("Center the selected object in the graphics view"));
     connect(centerAct, SIGNAL(triggered()), this, SLOT(centerObject()));
 
-    zoomInAct = new QAction(tr("Zoom &in"), this);
+    zoomInAct = new QAction(tr("Zoom &In"), this);
     zoomInAct->setIcon(QIcon(":/images/zoom-in.svg"));
     zoomInAct->setShortcut(QKeySequence::ZoomIn);
     zoomInAct->setStatusTip(tr("Zoom into the graphics view"));
     connect(zoomInAct, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
-    zoomOutAct = new QAction(tr("Zoom &out"), this);
+    zoomOutAct = new QAction(tr("Zoom &Out"), this);
     zoomOutAct->setIcon(QIcon(":/images/zoom-out.svg"));
     zoomOutAct->setShortcut(QKeySequence::ZoomOut);
     zoomOutAct->setStatusTip(tr("Zoom out of the graphics view"));
     connect(zoomOutAct, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
-    rotateLeftAct = new QAction(tr("Rotate &left"), this);
+    rotateLeftAct = new QAction(tr("Rotate &Left"), this);
     rotateLeftAct->setIcon(QIcon(":/images/object-rotate-left.svg"));
     rotateLeftAct->setShortcut(tr("Ctrl+Left"));
     rotateLeftAct->setStatusTip(tr("Rotate the graphics view counter-clockwise"));
     connect(rotateLeftAct, SIGNAL(triggered()), this, SLOT(rotateLeft()));
 
-    rotateRightAct = new QAction(tr("Rotate &right"), this);
+    rotateRightAct = new QAction(tr("Rotate &Right"), this);
     rotateRightAct->setIcon(QIcon(":/images/object-rotate-right.svg"));
     rotateRightAct->setShortcut(tr("Ctrl+Right"));
     rotateRightAct->setStatusTip(tr("Rotate the graphics view clockwise"));
     connect(rotateRightAct, SIGNAL(triggered()), this, SLOT(rotateRight()));
 
-    resetViewAct = new QAction(tr("Reset &view"), this);
+    resetViewAct = new QAction(tr("Reset &View"), this);
     resetViewAct->setIcon(QIcon(":/images/zoom-original.svg"));
     resetViewAct->setShortcut(tr("Alt+V"));
     resetViewAct->setStatusTip(tr("Reset the zoom and rotation of the view to the original value"));
@@ -879,49 +880,54 @@ void MainWindow::createActions()
     viewModeActGroup->addAction(endViewModeAct);
     viewModeActGroup->addAction(comparisonViewModeAct);
 
-    selectAllFiltersAct = new QAction(tr("&Select all filter settings"), this);
+    selectAllFiltersAct = new QAction(tr("&Select All Filter Settings"), this);
     selectAllFiltersAct->setShortcut(tr("Shift+Alt+S"));
-    selectAllFiltersAct->setStatusTip(tr("Select all objects in the object filter window"));
+    selectAllFiltersAct->setStatusTip(tr("Select all types in the filter settings window"));
     connect(selectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(selectAllFilters()));
 
-    deselectAllFiltersAct = new QAction(tr("D&eselect all filter settings"), this);
+    deselectAllFiltersAct = new QAction(tr("D&eselect All Filter Settings"), this);
     deselectAllFiltersAct->setShortcut(tr("Shift+Alt+D"));
-    deselectAllFiltersAct->setStatusTip(tr("Deselect all objects in the object filter window"));
+    deselectAllFiltersAct->setStatusTip(tr("Deselect all types in the filter settings window"));
     connect(deselectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(deselectAllFilters()));
 
-    extractFileAct = new QAction(tr("&Extract file..."), this);
+    goToObjectAct = new QAction(tr("&Go To Object..."), this);
+    goToObjectAct->setShortcut(tr("Alt+G"));
+    goToObjectAct->setStatusTip(tr("Find and select the object with the given GUID"));
+    connect(goToObjectAct, SIGNAL(triggered()), this, SLOT(goToObject()));
+
+    extractFileAct = new QAction(tr("&Extract File..."), this);
     extractFileAct->setShortcut(tr("Alt+E"));
-    extractFileAct->setStatusTip(tr("Extract binary data from the selected object"));
+    extractFileAct->setStatusTip(tr("Extract binary Base64 attachments from the selected object"));
     connect(extractFileAct, SIGNAL(triggered()), this, SLOT(extractFile()));
 
-    measureDistanceAct = new QAction(tr("Measure &distance..."), this);
+    measureDistanceAct = new QAction(tr("Measure &Distance..."), this);
     measureDistanceAct->setIcon(QIcon(":/images/measure.svg"));
     measureDistanceAct->setShortcut(tr("Alt+D"));
     measureDistanceAct->setStatusTip(tr("Calculate the distance between two selected Punkt_Objekt subtypes"));
     connect(measureDistanceAct, SIGNAL(triggered()), this, SLOT(measureDistance()));
 
-    findReferencingObjectsAct = new QAction(tr("Find &referencing objects"), this);
+    findReferencingObjectsAct = new QAction(tr("Find &Referencing Objects"), this);
     findReferencingObjectsAct->setIcon(QIcon(":/images/system-search.svg"));
     findReferencingObjectsAct->setShortcut(tr("Alt+R"));
     findReferencingObjectsAct->setStatusTip(tr("Find all objects referencing the selected object"));
     connect(findReferencingObjectsAct, SIGNAL(triggered()), this, SLOT(findReferencingObjects()));
 
-    addFavoriteAct = new QAction(tr("&Add Favorite"), this);
-    addFavoriteAct->setIcon(QIcon(":/images/list-add.svg"));
-    addFavoriteAct->setShortcut(tr("Shift+Alt+A"));
-    addFavoriteAct->setStatusTip(tr("Add the selected object to the favorite list"));
-    connect(addFavoriteAct, SIGNAL(triggered()), this, SLOT(addToFavorites()));
+    addBookmarkAct = new QAction(tr("&Add Bookmark"), this);
+    addBookmarkAct->setIcon(QIcon(":/images/list-add.svg"));
+    addBookmarkAct->setShortcut(tr("Shift+Alt+A"));
+    addBookmarkAct->setStatusTip(tr("Add the selected object to the bookmark list"));
+    connect(addBookmarkAct, SIGNAL(triggered()), this, SLOT(addToBookmarks()));
 
-    removeFavoriteAct = new QAction(tr("&Remove Favorite"), this);
-    removeFavoriteAct->setIcon(QIcon(":/images/list-remove.svg"));
-    removeFavoriteAct->setShortcut(tr("Shift+Alt+R"));
-    removeFavoriteAct->setStatusTip(tr("Remove the selected object from the favorite list"));
-    connect(removeFavoriteAct, SIGNAL(triggered()), this, SLOT(removeFromFavorites()));
+    removeBookmarkAct = new QAction(tr("&Remove Bookmark"), this);
+    removeBookmarkAct->setIcon(QIcon(":/images/list-remove.svg"));
+    removeBookmarkAct->setShortcut(tr("Shift+Alt+R"));
+    removeBookmarkAct->setStatusTip(tr("Remove the selected object from the bookmark list"));
+    connect(removeBookmarkAct, SIGNAL(triggered()), this, SLOT(removeFromBookmarks()));
 
-    clearFavoriteListAct = new QAction(tr("&Clear Favorite List"), this);
-    clearFavoriteListAct->setShortcut(tr("Shift+Alt+C"));
-    clearFavoriteListAct->setStatusTip(tr("Clear the favorite list"));
-    connect(clearFavoriteListAct, SIGNAL(triggered()), favoriteList, SLOT(clear()));
+    clearBookmarkListAct = new QAction(tr("&Clear Bookmark List"), this);
+    clearBookmarkListAct->setShortcut(tr("Shift+Alt+C"));
+    clearBookmarkListAct->setStatusTip(tr("Clear the bookmark list"));
+    connect(clearBookmarkListAct, SIGNAL(triggered()), bookmarkList, SLOT(clear()));
 
     preferencesAct = new QAction(tr("Preferences..."), this);
     preferencesAct->setIcon(QIcon(":/images/configure.svg"));
@@ -929,24 +935,21 @@ void MainWindow::createActions()
     preferencesAct->setStatusTip(tr("Set the default behavior of the program"));
     connect(preferencesAct, SIGNAL(triggered()), this, SLOT(showPreferences()));
 
-    helpContentsAct = new QAction(tr("&Help"), this);
+    helpContentsAct = new QAction(tr("&Help..."), this);
     helpContentsAct->setIcon(QIcon(":/images/documentation.svg"));
     helpContentsAct->setShortcut(QKeySequence::HelpContents);
     helpContentsAct->setStatusTip(tr("Show program help"));
     connect(helpContentsAct, SIGNAL(triggered()), this, SLOT(showHelp()));
 
-    showReadmeAct = new QAction(tr("Show &Readme File"), this);
-    //showReadmeAct->setShortcut(QKeySequence::HelpContents);
+    showReadmeAct = new QAction(tr("Show &Readme File..."), this);
     showReadmeAct->setStatusTip(tr("Show the content of the readme file"));
     connect(showReadmeAct, SIGNAL(triggered()), this, SLOT(showReadme()));
 
-    showLicenseAct = new QAction(tr("Show &License"), this);
-    //showLicenseAct->setShortcut(QKeySequence::HelpContents);
+    showLicenseAct = new QAction(tr("Show &License..."), this);
     showLicenseAct->setStatusTip(tr("Show the license file"));
     connect(showLicenseAct, SIGNAL(triggered()), this, SLOT(showLicense()));
 
-    show3rdPartyLicensesAct = new QAction(tr("Show &Third Party Licenses"), this);
-    //show3rdPartyLicensesAct->setShortcut(QKeySequence::HelpContents);
+    show3rdPartyLicensesAct = new QAction(tr("Show &Third Party Licenses..."), this);
     show3rdPartyLicensesAct->setStatusTip(tr("Show the licenses of third party components"));
     connect(show3rdPartyLicensesAct, SIGNAL(triggered()), this, SLOT(show3rdPartyLicenses()));
 
@@ -962,8 +965,8 @@ void MainWindow::enableActions()
         saveFileAct->setEnabled(false);
         saveAsAct->setEnabled(false);
         closeFileAct->setEnabled(false);
-        exportToPictureAct->setEnabled(false);
-        exportToPdfAct->setEnabled(false);
+        saveAsPictureAct->setEnabled(false);
+        saveAsPdfAct->setEnabled(false);
         docInfoAct->setEnabled(false);
         printFileAct->setEnabled(false);
         searchAct->setEnabled(false);
@@ -977,12 +980,13 @@ void MainWindow::enableActions()
         rotateLeftAct->setEnabled(false);
         rotateRightAct->setEnabled(false);
         resetViewAct->setEnabled(false);
+        goToObjectAct->setEnabled(false);
         extractFileAct->setEnabled(false);
         measureDistanceAct->setEnabled(false);
         findReferencingObjectsAct->setEnabled(false);
-        addFavoriteAct->setEnabled(false);
-        removeFavoriteAct->setEnabled(false);
-        clearFavoriteListAct->setEnabled(false);
+        addBookmarkAct->setEnabled(false);
+        removeBookmarkAct->setEnabled(false);
+        clearBookmarkListAct->setEnabled(false);
 
         scaleSpinBox->setEnabled(false);
         rotateSpinBox->setEnabled(false);
@@ -992,8 +996,8 @@ void MainWindow::enableActions()
         saveFileAct->setEnabled(isWindowModified());
         saveAsAct->setEnabled(true);
         closeFileAct->setEnabled(true);
-        exportToPictureAct->setEnabled(true);
-        exportToPdfAct->setEnabled(true);
+        saveAsPictureAct->setEnabled(true);
+        saveAsPdfAct->setEnabled(true);
         docInfoAct->setEnabled(true);
         printFileAct->setEnabled(true);
         searchAct->setEnabled(true);
@@ -1007,12 +1011,13 @@ void MainWindow::enableActions()
         rotateLeftAct->setEnabled(true);
         rotateRightAct->setEnabled(true);
         resetViewAct->setEnabled(true);
+        goToObjectAct->setEnabled(true);
         extractFileAct->setEnabled(true);
         measureDistanceAct->setEnabled(true);
         findReferencingObjectsAct->setEnabled(true);
-        addFavoriteAct->setEnabled(true);
-        removeFavoriteAct->setEnabled(true);
-        clearFavoriteListAct->setEnabled(true);
+        addBookmarkAct->setEnabled(true);
+        removeBookmarkAct->setEnabled(true);
+        clearBookmarkListAct->setEnabled(true);
 
         scaleSpinBox->setEnabled(true);
         rotateSpinBox->setEnabled(true);
@@ -1029,9 +1034,8 @@ void MainWindow::createMenus()
     fileMenu->addSeparator();
     fileMenu->addAction(closeFileAct);
     fileMenu->addSeparator();
-    exportSubmenu = fileMenu->addMenu(tr("&Export"));
-    exportSubmenu->addAction(exportToPictureAct);
-    exportSubmenu->addAction(exportToPdfAct);
+    fileMenu->addAction(saveAsPictureAct);
+    fileMenu->addAction(saveAsPdfAct);
     fileMenu->addSeparator();
     fileMenu->addAction(printFileAct);
     fileMenu->addSeparator();
@@ -1047,6 +1051,7 @@ void MainWindow::createMenus()
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewDockSubmenu = viewMenu->addMenu(tr("Show &Dock Windows"));
+    viewToolbarSubmenu = viewMenu->addMenu(tr("Show &Toolbars"));
     viewMenu->addSeparator();
     viewMenu->addAction(startViewModeAct);
     viewMenu->addAction(endViewModeAct);
@@ -1064,16 +1069,18 @@ void MainWindow::createMenus()
     viewMenu->addAction(deselectAllFiltersAct);
 
     objectMenu = menuBar()->addMenu(tr("&Object"));
+    objectMenu->addAction(goToObjectAct);
+    objectMenu->addSeparator();
     objectMenu->addAction(extractFileAct);
     objectMenu->addSeparator();
     objectMenu->addAction(measureDistanceAct);
     objectMenu->addAction(findReferencingObjectsAct);
 
-    favoriteMenu = menuBar()->addMenu(tr("F&avorites"));
-    favoriteMenu->addAction(addFavoriteAct);
-    favoriteMenu->addAction(removeFavoriteAct);
-    favoriteMenu->addSeparator();
-    favoriteMenu->addAction(clearFavoriteListAct);
+    bookmarkMenu = menuBar()->addMenu(tr("&Bookmarks"));
+    bookmarkMenu->addAction(addBookmarkAct);
+    bookmarkMenu->addAction(removeBookmarkAct);
+    bookmarkMenu->addSeparator();
+    bookmarkMenu->addAction(clearBookmarkListAct);
 
     // Separator before help menu sets it in Motif style
     // at the right border (Convention)
@@ -1092,98 +1099,106 @@ void MainWindow::createMenus()
 
 void MainWindow::createToolBars()
 {
-    toolBar = addToolBar(tr("ToolBar"));
-    toolBar->setObjectName("ToolBar");
-    toolBar->addAction(openFileAct);
-    toolBar->addAction(saveFileAct);
-    toolBar->addSeparator();
-    toolBar->addAction(printFileAct);
-    toolBar->addSeparator();
+    fileToolBar = addToolBar(tr("File"));
+    fileToolBar->setObjectName("File");
+    fileToolBar->addAction(openFileAct);
+    fileToolBar->addAction(saveFileAct);
+    fileToolBar->addSeparator();
+    fileToolBar->addAction(printFileAct);
+    fileToolBar->addSeparator();
+    fileToolBar->addAction(docInfoAct);
+    viewToolbarSubmenu->addAction(fileToolBar->toggleViewAction());
+
+    editToolBar = addToolBar(tr("Edit"));
+    editToolBar->setObjectName("Edit");
+    editToolBar->addAction(searchAct);
+    editToolBar->addAction(editRemarkAct);
+    viewToolbarSubmenu->addAction(editToolBar->toggleViewAction());
+
+    viewToolBar = addToolBar(tr("View"));
+    viewToolBar->setObjectName("View");
     QLabel* label1 = new QLabel(tr("Scale [%]"));
-    toolBar->addWidget(label1);
+    viewToolBar->addWidget(label1);
     scaleSpinBox = new QSpinBox();
     scaleSpinBox->setMinimum(0);
     scaleSpinBox->setMaximum(1000);
     scaleSpinBox->setValue(100);
-    toolBar->addWidget(scaleSpinBox);
+    viewToolBar->addWidget(scaleSpinBox);
     connect(scaleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView()));
-    toolBar->addAction(zoomInAct);
-    toolBar->addAction(zoomOutAct);
-    toolBar->addSeparator();
+    viewToolBar->addAction(zoomInAct);
+    viewToolBar->addAction(zoomOutAct);
+    viewToolBar->addSeparator();
     QLabel* label2 = new QLabel(tr("Rotate [°]"));
-    toolBar->addWidget(label2);
+    viewToolBar->addWidget(label2);
     rotateSpinBox = new QSpinBox();
     rotateSpinBox->setMinimum(-360);
     rotateSpinBox->setMaximum(360);
     rotateSpinBox->setValue(0);
-    toolBar->addWidget(rotateSpinBox);
+    viewToolBar->addWidget(rotateSpinBox);
     connect(rotateSpinBox, SIGNAL(valueChanged(int)), this, SLOT(transformGraphicsView()));
-    toolBar->addAction(rotateLeftAct);
-    toolBar->addAction(rotateRightAct);
-    toolBar->addSeparator();
-    toolBar->addAction(measureDistanceAct);
-    toolBar->addAction(findReferencingObjectsAct);
+    viewToolBar->addAction(rotateLeftAct);
+    viewToolBar->addAction(rotateRightAct);
+    viewToolbarSubmenu->addAction(viewToolBar->toggleViewAction());
+
+    objectToolBar = addToolBar(tr("Object"));
+    objectToolBar->setObjectName("Object");
+    objectToolBar->addAction(measureDistanceAct);
+    objectToolBar->addAction(findReferencingObjectsAct);
+    viewToolbarSubmenu->addAction(objectToolBar->toggleViewAction());
+
+    bookmarkToolBar = addToolBar(tr("Bookmarks"));
+    bookmarkToolBar->setObjectName("Bookmarks");
+    bookmarkToolBar->addAction(addBookmarkAct);
+    bookmarkToolBar->addAction(removeBookmarkAct);
+    viewToolbarSubmenu->addAction(bookmarkToolBar->toggleViewAction());
 }
 
 void MainWindow::createDockWindows()
 {
-    QDockWidget *dock1 = new QDockWidget(tr("Object Info"), this);
-    dock1->setObjectName("Object Info");
-    dock1->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-    dock1->setWidget(objectInfo);
-    addDockWidget(Qt::BottomDockWidgetArea, dock1);
-    viewDockSubmenu->addAction(dock1->toggleViewAction());
+    QDockWidget *dockDocumentStructure = new QDockWidget(tr("Document Structure"), this);
+    dockDocumentStructure->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockDocumentStructure->setObjectName("Document Structure");
+    dockDocumentStructure->setWidget(documentTreeView);
+    addDockWidget(Qt::LeftDockWidgetArea, dockDocumentStructure);
+    viewDockSubmenu->addAction(dockDocumentStructure->toggleViewAction());
 
-    QDockWidget *dock2 = new QDockWidget(tr("Object Filter"), this);
-    dock2->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock2->setObjectName("Object Filter");
-    dock2->setWidget(filterWidget);
-    addDockWidget(Qt::RightDockWidgetArea, dock2);
-    viewDockSubmenu->addAction(dock2->toggleViewAction());
-
-    QDockWidget *dock3 = new QDockWidget(tr("Object Search"), this);
-    dock3->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock3->setObjectName("Object Search");
-    QWidget* searchWidget = new QWidget();
-    QVBoxLayout* layout = new QVBoxLayout;
-    layout->addWidget(searchEdit);
-    layout->addWidget(searchButton);
-    layout->addStretch();
-    searchWidget->setLayout(layout);
-    dock3->setWidget(searchWidget);
-    addDockWidget(Qt::RightDockWidgetArea, dock3);
-    viewDockSubmenu->addAction(dock3->toggleViewAction());
-
-    QDockWidget *dock4 = new QDockWidget(tr("Document Structure"), this);
-    dock4->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock4->setObjectName("Document Structure");
-    dock4->setWidget(documentTreeView);
-    addDockWidget(Qt::LeftDockWidgetArea, dock4);
-    viewDockSubmenu->addAction(dock4->toggleViewAction());
-
-    QDockWidget *dock5 = new QDockWidget(tr("Favorite List"), this);
-    dock5->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock5->setObjectName("Favorite List");
-    dock5->setWidget(favoriteList);
-    addDockWidget(Qt::RightDockWidgetArea, dock5);
-    viewDockSubmenu->addAction(dock5->toggleViewAction());
-
-    QDockWidget *dock6 = new QDockWidget(tr("Reference List"), this);
-    dock6->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock6->setObjectName("Reference List");
-    dock6->setWidget(referenceList);
-    addDockWidget(Qt::RightDockWidgetArea, dock6);
-    viewDockSubmenu->addAction(dock6->toggleViewAction());
-
-    QDockWidget *dock7 = new QDockWidget(tr("Object List"), this);
-    dock7->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dock7->setObjectName("Object List");
+    QDockWidget *dockObjectList = new QDockWidget(tr("Object List"), this);
+    dockObjectList->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockObjectList->setObjectName("Object List");
     QWidget* objectListWidget = new QWidget();
-    QVBoxLayout* layout2 = new QVBoxLayout;
-    layout2->addWidget(categoryComboBox);
-    layout2->addWidget(objectListView);
-    objectListWidget->setLayout(layout2);
-    dock7->setWidget(objectListWidget);
-    addDockWidget(Qt::LeftDockWidgetArea, dock7);
-    viewDockSubmenu->addAction(dock7->toggleViewAction());
+    QVBoxLayout* layoutObjectList = new QVBoxLayout;
+    layoutObjectList->addWidget(categoryComboBox);
+    layoutObjectList->addWidget(objectListView);
+    objectListWidget->setLayout(layoutObjectList);
+    dockObjectList->setWidget(objectListWidget);
+    addDockWidget(Qt::LeftDockWidgetArea, dockObjectList);
+    viewDockSubmenu->addAction(dockObjectList->toggleViewAction());
+
+    QDockWidget *dockObjectInfo = new QDockWidget(tr("Object Properties"), this);
+    dockObjectInfo->setObjectName("Object Properties");
+    dockObjectInfo->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+    dockObjectInfo->setWidget(objectInfo);
+    addDockWidget(Qt::BottomDockWidgetArea, dockObjectInfo);
+    viewDockSubmenu->addAction(dockObjectInfo->toggleViewAction());
+
+    QDockWidget *dockFilterSettings = new QDockWidget(tr("Filter Settings"), this);
+    dockFilterSettings->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockFilterSettings->setObjectName("Filter Settings");
+    dockFilterSettings->setWidget(filterWidget);
+    addDockWidget(Qt::RightDockWidgetArea, dockFilterSettings);
+    viewDockSubmenu->addAction(dockFilterSettings->toggleViewAction());
+
+    QDockWidget *dockBookmarks = new QDockWidget(tr("Bookmarks"), this);
+    dockBookmarks->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockBookmarks->setObjectName("Bookmarks");
+    dockBookmarks->setWidget(bookmarkList);
+    addDockWidget(Qt::RightDockWidgetArea, dockBookmarks);
+    viewDockSubmenu->addAction(dockBookmarks->toggleViewAction());
+
+    QDockWidget *dockSearchResults = new QDockWidget(tr("Search Results"), this);
+    dockSearchResults->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockSearchResults->setObjectName("Search Results");
+    dockSearchResults->setWidget(searchResultList);
+    addDockWidget(Qt::RightDockWidgetArea, dockSearchResults);
+    viewDockSubmenu->addAction(dockSearchResults->toggleViewAction());
 }

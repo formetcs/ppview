@@ -42,8 +42,8 @@ public:
     explicit SelectionManager(QObject* parent = nullptr);
     void setDocument(PlanProDocument* doc);
     void setScene(GraphicsScene* scene);
-    void setFavoriteListWidget(QListWidget* favList);
-    void setReferenceListWidget(QTreeWidget* refList);
+    void setBookmarkListWidget(QListWidget* bmList);
+    void setSearchResultListWidget(QTreeWidget* resList);
     void setDocumentTreeView(QTreeView* docTreeView);
     void setObjectListView(QTreeView* objListView);
     QList<DomItem*> getSelectedItems();
@@ -61,25 +61,25 @@ signals:
 
 private slots:
     void handleGraphicsSceneSelection();
-    void handleFavoriteListSelection();
-    void handleReferenceListSelection();
+    void handleBookmarkListSelection();
+    void handleSearchResultListSelection();
     void handleDocumentTreeSelection(const QItemSelection& selected, const QItemSelection& deselected);
     void handleObjectListSelection(const QItemSelection& selected, const QItemSelection& deselected);
 
 
 private:
     void updateGraphicsSceneSelection();
-    void updateFavoriteListSelection();
-    void updateReferenceListSelection();
-    void updateReferenceListSelectionRec(QTreeWidgetItem* item, QString id);
+    void updateBookmarkListSelection();
+    void updateSearchResultListSelection();
+    void updateSearchResultListSelectionRec(QTreeWidgetItem* item, QString id);
     void updateDocumentTreeSelection();
     void updateObjectListSelection();
 
     QList<DomItem*> selectedItemList;
     PlanProDocument* document;
     GraphicsScene* graphicsScene;
-    QListWidget* favoriteListWidget;
-    QTreeWidget* referenceListWidget;
+    QListWidget* bookmarkListWidget;
+    QTreeWidget* searchResultListWidget;
     QTreeView* documentTreeView;
     QTreeView* objectListView;
 

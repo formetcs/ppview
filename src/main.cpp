@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
     if(appTranslator.load(QApplication::applicationDirPath() + "/translations/ppview_" + language))
         app.installTranslator(&appTranslator);
 #endif
-    QString datafile = QString();
+    QString planprofile = QString();
     if(argc > 1)
-        datafile = argv[1];
-    MainWindow w(datafile);
-    w.show();
+        planprofile = argv[1];
+    MainWindow mainwindow(planprofile);
+    mainwindow.show();
 
     return app.exec();
 }

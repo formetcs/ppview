@@ -36,8 +36,8 @@ SelectionManager::SelectionManager(QObject* parent)
 {
     document = NULL;
     graphicsScene = NULL;
-    favoriteListWidget = NULL;
-    referenceListWidget = NULL;
+    bookmarkListWidget = NULL;
+    searchResultListWidget = NULL;
     documentTreeView = NULL;
     objectListView = NULL;
     viewMode = MainWindow::ViewModeStateEnd;
@@ -62,29 +62,29 @@ void SelectionManager::setScene(GraphicsScene* scene)
     }
 }
 
-void SelectionManager::setFavoriteListWidget(QListWidget* favList)
+void SelectionManager::setBookmarkListWidget(QListWidget* bmList)
 {
-    if(favoriteListWidget)
+    if(bookmarkListWidget)
     {
-        disconnect(favoriteListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
+        disconnect(bookmarkListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleBookmarkListSelection()));
     }
-    favoriteListWidget = favList;
-    if(favoriteListWidget)
+    bookmarkListWidget = bmList;
+    if(bookmarkListWidget)
     {
-        connect(favoriteListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleFavoriteListSelection()));
+        connect(bookmarkListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleBookmarkListSelection()));
     }
 }
 
-void SelectionManager::setReferenceListWidget(QTreeWidget* refList)
+void SelectionManager::setSearchResultListWidget(QTreeWidget* resList)
 {
-    if(referenceListWidget)
+    if(searchResultListWidget)
     {
-        disconnect(referenceListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
+        disconnect(searchResultListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleSearchResultListSelection()));
     }
-    referenceListWidget = refList;
-    if(referenceListWidget)
+    searchResultListWidget = resList;
+    if(searchResultListWidget)
     {
-        connect(referenceListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleReferenceListSelection()));
+        connect(searchResultListWidget, SIGNAL(itemSelectionChanged()), this, SLOT(handleSearchResultListSelection()));
     }
 }
 
@@ -134,8 +134,8 @@ void SelectionManager::clearSelection()
     selectionChangeInProgress = true;
     selectedItemList.clear();
     updateGraphicsSceneSelection();
-    updateFavoriteListSelection();
-    updateReferenceListSelection();
+    updateBookmarkListSelection();
+    updateSearchResultListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
@@ -168,8 +168,8 @@ void SelectionManager::selectItems(const QStringList& ids)
     }
 
     updateGraphicsSceneSelection();
-    updateFavoriteListSelection();
-    updateReferenceListSelection();
+    updateBookmarkListSelection();
+    updateSearchResultListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
@@ -209,8 +209,8 @@ void SelectionManager::handleGraphicsSceneSelection()
         }
     }
 
-    updateFavoriteListSelection();
-    updateReferenceListSelection();
+    updateBookmarkListSelection();
+    updateSearchResultListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
@@ -218,7 +218,7 @@ void SelectionManager::handleGraphicsSceneSelection()
     selectionChangeInProgress = false;
 }
 
-void SelectionManager::handleFavoriteListSelection()
+void SelectionManager::handleBookmarkListSelection()
 {
     if(selectionChangeInProgress)
     {
@@ -228,7 +228,7 @@ void SelectionManager::handleFavoriteListSelection()
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
-    QList<QListWidgetItem*> selectedList = favoriteListWidget->selectedItems();
+    QList<QListWidgetItem*> selectedList = bookmarkListWidget->selectedItems();
     for(int i = 0; i < selectedList.count(); ++i)
     {
         QString itemtext = selectedList.at(i)->text();
@@ -246,7 +246,7 @@ void SelectionManager::handleFavoriteListSelection()
     }
 
     updateGraphicsSceneSelection();
-    updateReferenceListSelection();
+    updateSearchResultListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
@@ -254,7 +254,7 @@ void SelectionManager::handleFavoriteListSelection()
     selectionChangeInProgress = false;
 }
 
-void SelectionManager::handleReferenceListSelection()
+void SelectionManager::handleSearchResultListSelection()
 {
     if(selectionChangeInProgress)
     {
@@ -264,7 +264,7 @@ void SelectionManager::handleReferenceListSelection()
 
     selectedItemList.clear();
     PlanProDocument::PlanningState state = (viewMode == MainWindow::ViewModeStateStart) ? PlanProDocument::PlanningStateStart : PlanProDocument::PlanningStateEnd;
-    QList<QTreeWidgetItem*> selectedList = referenceListWidget->selectedItems();
+    QList<QTreeWidgetItem*> selectedList = searchResultListWidget->selectedItems();
     for(int i = 0; i < selectedList.count(); ++i)
     {
         QString currentId = selectedList.at(i)->text(1);
@@ -280,7 +280,7 @@ void SelectionManager::handleReferenceListSelection()
     }
 
     updateGraphicsSceneSelection();
-    updateFavoriteListSelection();
+    updateBookmarkListSelection();
     updateDocumentTreeSelection();
     updateObjectListSelection();
 
@@ -328,8 +328,8 @@ void SelectionManager::handleDocumentTreeSelection(const QItemSelection& selecte
     }
 
     updateGraphicsSceneSelection();
-    updateFavoriteListSelection();
-    updateReferenceListSelection();
+    updateBookmarkListSelection();
+    updateSearchResultListSelection();
     updateObjectListSelection();
 
     emit selectionChanged(selectedItemList);
@@ -366,8 +366,8 @@ void SelectionManager::handleObjectListSelection(const QItemSelection& selected,
     }
 
     updateGraphicsSceneSelection();
-    updateFavoriteListSelection();
-    updateReferenceListSelection();
+    updateBookmarkListSelection();
+    updateSearchResultListSelection();
     updateDocumentTreeSelection();
 
     emit selectionChanged(selectedItemList);
@@ -400,55 +400,55 @@ void SelectionManager::updateGraphicsSceneSelection()
     }
 }
 
-void SelectionManager::updateFavoriteListSelection()
+void SelectionManager::updateBookmarkListSelection()
 {
-    favoriteListWidget->clearSelection();
+    bookmarkListWidget->clearSelection();
     for(int i = 0; i < selectedItemList.count(); ++i)
     {
         DomItem* currentItem = selectedItemList.at(i);
         QString currentId = currentItem->getFirstValueAtPath("Identitaet/Wert");
-        for(int j = 0; j < favoriteListWidget->count(); ++j)
+        for(int j = 0; j < bookmarkListWidget->count(); ++j)
         {
-            QListWidgetItem* item = favoriteListWidget->item(j);
+            QListWidgetItem* item = bookmarkListWidget->item(j);
             if(item->text().contains(currentId))
             {
                 item->setSelected(true);
-                favoriteListWidget->scrollToItem(item);
+                bookmarkListWidget->scrollToItem(item);
             }
         }
     }
 }
 
-void SelectionManager::updateReferenceListSelection()
+void SelectionManager::updateSearchResultListSelection()
 {
-    referenceListWidget->clearSelection();
+    searchResultListWidget->clearSelection();
     for(int i = 0; i < selectedItemList.count(); ++i)
     {
         DomItem* currentItem = selectedItemList.at(i);
         QString currentId = currentItem->getFirstValueAtPath("Identitaet/Wert");
-        for(int j = 0; j < referenceListWidget->topLevelItemCount(); ++j)
+        for(int j = 0; j < searchResultListWidget->topLevelItemCount(); ++j)
         {
-            QTreeWidgetItem* item = referenceListWidget->topLevelItem(j);
-            updateReferenceListSelectionRec(item, currentId);
+            QTreeWidgetItem* item = searchResultListWidget->topLevelItem(j);
+            updateSearchResultListSelectionRec(item, currentId);
             if(item->text(1) == currentId)
             {
                 item->setSelected(true);
-                referenceListWidget->scrollToItem(item);
+                searchResultListWidget->scrollToItem(item);
             }
         }
     }
 }
 
-void SelectionManager::updateReferenceListSelectionRec(QTreeWidgetItem* item, QString id)
+void SelectionManager::updateSearchResultListSelectionRec(QTreeWidgetItem* item, QString id)
 {
     for(int i = 0; i < item->childCount(); ++i)
     {
         QTreeWidgetItem* currentItem = item->child(i);
-        updateReferenceListSelectionRec(currentItem, id);
+        updateSearchResultListSelectionRec(currentItem, id);
         if(currentItem->text(1) == id)
         {
             currentItem->setSelected(true);
-            referenceListWidget->scrollToItem(currentItem);
+            searchResultListWidget->scrollToItem(currentItem);
         }
     }
 }

@@ -63,7 +63,7 @@ public:
     };
 
 
-    MainWindow(const QString& dataFileName, QWidget* parent = nullptr);
+    MainWindow(const QString& fileName, QWidget* parent = nullptr);
     ~MainWindow();
 
 protected:
@@ -76,8 +76,8 @@ private slots:
     bool saveFile();
     bool saveAs();
     void closeFile();
-    void exportToPicture();
-    void exportToPdf();
+    void saveAsPicture();
+    void saveAsPdf();
     void printFile();
     void transformGraphicsView();
     void zoomIn();
@@ -89,15 +89,15 @@ private slots:
     void showDocumentInfo();
     void editRemark();
     void about();
-    void handleObjectSearchFromSearchWindow();
-    void handleObjectSearchFromMenu();
+    void goToObject();
+    void handleObjectSearch();
     void centerObject();
     void switchViewMode();
     void changeCategory();
     void extractFile();
     void measureDistance();
-    void addToFavorites();
-    void removeFromFavorites();
+    void addToBookmarks();
+    void removeFromBookmarks();
     void findReferencingObjects();
     void showPreferences();
     void showReadme();
@@ -118,20 +118,24 @@ private:
     void createReferenceListRec(DomItem* item, QTreeWidgetItem* parent, int depth);
 
     QMenu* fileMenu;
-    QMenu* exportSubmenu;
     QMenu* editMenu;
     QMenu* viewMenu;
     QMenu* viewDockSubmenu;
+    QMenu* viewToolbarSubmenu;
     QMenu* objectMenu;
-    QMenu* favoriteMenu;
+    QMenu* bookmarkMenu;
     QMenu* helpMenu;
-    QToolBar* toolBar;
+    QToolBar* fileToolBar;
+    QToolBar* editToolBar;
+    QToolBar* viewToolBar;
+    QToolBar* objectToolBar;
+    QToolBar* bookmarkToolBar;
     QAction* openFileAct;
     QAction* saveFileAct;
     QAction* saveAsAct;
     QAction* closeFileAct;
-    QAction* exportToPictureAct;
-    QAction* exportToPdfAct;
+    QAction* saveAsPictureAct;
+    QAction* saveAsPdfAct;
     QAction* printFileAct;
     QAction* docInfoAct;
     QAction* exitAct;
@@ -150,11 +154,12 @@ private:
     QAction* selectAllFiltersAct;
     QAction* deselectAllFiltersAct;
     QAction* extractFileAct;
+    QAction* goToObjectAct;
     QAction* measureDistanceAct;
     QAction* findReferencingObjectsAct;
-    QAction* addFavoriteAct;
-    QAction* removeFavoriteAct;
-    QAction* clearFavoriteListAct;
+    QAction* addBookmarkAct;
+    QAction* removeBookmarkAct;
+    QAction* clearBookmarkListAct;
     QAction* preferencesAct;
     QAction* helpContentsAct;
     QAction* showReadmeAct;
@@ -173,10 +178,8 @@ private:
     FilterWidget* filterWidget;
     QTreeView* documentTreeView;
     QTreeView* objectListView;
-    QListWidget* favoriteList;
-    QTreeWidget* referenceList;
-    QLineEdit* searchEdit;
-    QPushButton* searchButton;
+    QListWidget* bookmarkList;
+    QTreeWidget* searchResultList;
     QComboBox* categoryComboBox;
 
     PlanProXmlDocument* document;

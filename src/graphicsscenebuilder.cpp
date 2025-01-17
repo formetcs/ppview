@@ -48,7 +48,7 @@ bool GraphicsSceneBuilder::createGraphicsScene()
 
     graphicsScene->clear();
     QList<PlanProDocument::ObjectListItem> objectlist = document->getCombinedObjectList();
-    QProgressDialog progress(QObject::tr("Creating track layout..."), QObject::tr("Abort"), 0, objectlist.count());
+    QProgressDialog progress(QObject::tr("Creating Track Layout..."), QObject::tr("Abort"), 0, objectlist.count());
     progress.setModal(true);
     progress.setMinimumDuration(500);
     for (int i = 0; i < objectlist.count(); ++i)

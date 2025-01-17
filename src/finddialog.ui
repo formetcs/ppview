@@ -67,7 +67,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Exact match</string>
+           <string>Exact Match</string>
           </property>
          </item>
          <item>
@@ -82,7 +82,7 @@
      <item>
       <widget class="QCheckBox" name="checkBoxCaseSensitive">
        <property name="text">
-        <string>&amp;Case sensitive</string>
+        <string>&amp;Case Sensitive</string>
        </property>
       </widget>
      </item>
