@@ -31,9 +31,7 @@ Please build PlanPro Viewer from source using the instructions below.
 
 ## Building from Source
 
-PlanPro Viewer uses the Qt GUI toolkit and can be built on Windows, Linux and macOS platforms.
-
-Detailed build instructions will follow later.
+See file [BUILD.md](BUILD.md) for build and installation instructions.
 
 
 ## Limitations
