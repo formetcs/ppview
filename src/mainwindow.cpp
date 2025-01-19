@@ -802,6 +802,7 @@ void MainWindow::createActions()
     connect(printFileAct, SIGNAL(triggered()), this, SLOT(printFile()));
 
     exitAct = new QAction(tr("E&xit"), this);
+    exitAct->setMenuRole(QAction::QuitRole);
     exitAct->setShortcut(QKeySequence::Quit);
     exitAct->setStatusTip(tr("Close the program"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
@@ -881,12 +882,12 @@ void MainWindow::createActions()
     viewModeActGroup->addAction(comparisonViewModeAct);
 
     selectAllFiltersAct = new QAction(tr("&Select All Filter Settings"), this);
-    selectAllFiltersAct->setShortcut(tr("Shift+Alt+S"));
+    selectAllFiltersAct->setShortcut(QKeySequence::SelectAll);
     selectAllFiltersAct->setStatusTip(tr("Select all types in the filter settings window"));
     connect(selectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(selectAllFilters()));
 
     deselectAllFiltersAct = new QAction(tr("D&eselect All Filter Settings"), this);
-    deselectAllFiltersAct->setShortcut(tr("Shift+Alt+D"));
+    deselectAllFiltersAct->setShortcut(QKeySequence::Deselect);
     deselectAllFiltersAct->setStatusTip(tr("Deselect all types in the filter settings window"));
     connect(deselectAllFiltersAct, SIGNAL(triggered()), filterWidget, SLOT(deselectAllFilters()));
 
@@ -929,7 +930,8 @@ void MainWindow::createActions()
     clearBookmarkListAct->setStatusTip(tr("Clear the bookmark list"));
     connect(clearBookmarkListAct, SIGNAL(triggered()), bookmarkList, SLOT(clear()));
 
-    preferencesAct = new QAction(tr("Preferences..."), this);
+    preferencesAct = new QAction(tr("&Preferences..."), this);
+    preferencesAct->setMenuRole(QAction::PreferencesRole);
     preferencesAct->setIcon(QIcon(":/images/configure.svg"));
     preferencesAct->setShortcut(QKeySequence::Preferences);
     preferencesAct->setStatusTip(tr("Set the default behavior of the program"));
@@ -954,6 +956,7 @@ void MainWindow::createActions()
     connect(show3rdPartyLicensesAct, SIGNAL(triggered()), this, SLOT(show3rdPartyLicenses()));
 
     aboutAct = new QAction(tr("&About..."), this);
+    aboutAct->setMenuRole(QAction::AboutRole);
     aboutAct->setStatusTip(tr("Show program and version info"));
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
