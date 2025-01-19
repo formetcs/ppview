@@ -2,33 +2,46 @@
     <qresource prefix="/">
         <file>images/ppview.png</file>
         <file>images/acrobat.svg</file>
+        <file>images/archive-extract.svg</file>
+        <file>images/checkbox.svg</file>
         <file>images/code-variable.svg</file>
         <file>images/configure.svg</file>
         <file>images/document-close.svg</file>
         <file>images/document-edit.svg</file>
         <file>images/document-open-recent.svg</file>
         <file>images/document-open.svg</file>
+        <file>images/document-preview.svg</file>
         <file>images/document-print.svg</file>
         <file>images/document-properties.svg</file>
         <file>images/document-save-all.svg</file>
         <file>images/document-save-as.svg</file>
         <file>images/document-save.svg</file>
         <file>images/documentation.svg</file>
+        <file>images/edit-clear-list.svg</file>
         <file>images/edit-find.svg</file>
         <file>images/edit-rename.svg</file>
         <file>images/help-about.svg</file>
+        <file>images/help-contents.svg</file>
         <file>images/help-contextual.svg</file>
         <file>images/help-hint.svg</file>
         <file>images/list-add.svg</file>
         <file>images/list-remove.svg</file>
+        <file>images/mail-signed-verified.svg</file>
         <file>images/measure.svg</file>
         <file>images/object-rotate-left.svg</file>
         <file>images/object-rotate-right.svg</file>
         <file>images/plugins.svg</file>
         <file>images/process-stop.svg</file>
+        <file>images/security-high.svg</file>
+        <file>images/security-low.svg</file>
+        <file>images/security-medium.svg</file>
         <file>images/system-run.svg</file>
         <file>images/system-search.svg</file>
+        <file>images/view-certificate.svg</file>
+        <file>images/view-close.svg</file>
+        <file>images/view-filter.svg</file>
         <file>images/view-restore.svg</file>
+        <file>images/view-statistics.svg</file>
         <file>images/zoom-in.svg</file>
         <file>images/zoom-original.svg</file>
         <file>images/zoom-out.svg</file>

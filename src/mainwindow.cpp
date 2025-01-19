@@ -897,6 +897,7 @@ void MainWindow::createActions()
     connect(goToObjectAct, SIGNAL(triggered()), this, SLOT(goToObject()));
 
     extractFileAct = new QAction(tr("&Extract File..."), this);
+    extractFileAct->setIcon(QIcon(":/images/archive-extract.svg"));
     extractFileAct->setShortcut(tr("Alt+E"));
     extractFileAct->setStatusTip(tr("Extract binary Base64 attachments from the selected object"));
     connect(extractFileAct, SIGNAL(triggered()), this, SLOT(extractFile()));
@@ -926,6 +927,7 @@ void MainWindow::createActions()
     connect(removeBookmarkAct, SIGNAL(triggered()), this, SLOT(removeFromBookmarks()));
 
     clearBookmarkListAct = new QAction(tr("&Clear Bookmark List"), this);
+    clearBookmarkListAct->setIcon(QIcon(":/images/edit-clear-list.svg"));
     clearBookmarkListAct->setShortcut(tr("Shift+Alt+C"));
     clearBookmarkListAct->setStatusTip(tr("Clear the bookmark list"));
     connect(clearBookmarkListAct, SIGNAL(triggered()), bookmarkList, SLOT(clear()));
@@ -938,7 +940,7 @@ void MainWindow::createActions()
     connect(preferencesAct, SIGNAL(triggered()), this, SLOT(showPreferences()));
 
     helpContentsAct = new QAction(tr("&Help..."), this);
-    helpContentsAct->setIcon(QIcon(":/images/documentation.svg"));
+    helpContentsAct->setIcon(QIcon(":/images/help-contents.svg"));
     helpContentsAct->setShortcut(QKeySequence::HelpContents);
     helpContentsAct->setStatusTip(tr("Show program help"));
     connect(helpContentsAct, SIGNAL(triggered()), this, SLOT(showHelp()));
@@ -1145,6 +1147,7 @@ void MainWindow::createToolBars()
 
     objectToolBar = addToolBar(tr("Object"));
     objectToolBar->setObjectName("Object");
+    objectToolBar->addAction(extractFileAct);
     objectToolBar->addAction(measureDistanceAct);
     objectToolBar->addAction(findReferencingObjectsAct);
     viewToolbarSubmenu->addAction(objectToolBar->toggleViewAction());
@@ -1153,6 +1156,7 @@ void MainWindow::createToolBars()
     bookmarkToolBar->setObjectName("Bookmarks");
     bookmarkToolBar->addAction(addBookmarkAct);
     bookmarkToolBar->addAction(removeBookmarkAct);
+    bookmarkToolBar->addAction(clearBookmarkListAct);
     viewToolbarSubmenu->addAction(bookmarkToolBar->toggleViewAction());
 }
 
