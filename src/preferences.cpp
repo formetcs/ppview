@@ -50,8 +50,28 @@ void Preferences::readSettings()
     rotateStep = settings.value("preferences/rotateStep", 15).toInt();
     maxRecursionDepth = settings.value("preferences/maxRecursionDepth", 5).toInt();
 
-    settings.beginGroup("filterSettings");
+    settings.beginGroup("smtCommands");
     QStringList keys = settings.childKeys();
+    for(int i = 0; i < keys.count(); ++i)
+    {
+        QString smtId = keys.at(i);
+        QString command = settings.value(smtId, smtId).toString();
+        smtCommands.insert(smtId, command);
+    }
+    settings.endGroup();
+
+    settings.beginGroup("smtArguments");
+    keys = settings.childKeys();
+    for(int i = 0; i < keys.count(); ++i)
+    {
+        QString smtId = keys.at(i);
+        QString arguments = settings.value(smtId, QString()).toString();
+        smtArguments.insert(smtId, arguments);
+    }
+    settings.endGroup();
+
+    settings.beginGroup("filterSettings");
+    keys = settings.childKeys();
     for(int i = 0; i < keys.count(); ++i)
     {
         QString filter = keys.at(i);
@@ -107,25 +127,42 @@ void Preferences::writeSettings()
     settings.setValue("preferences/rotateStep", rotateStep);
     settings.setValue("preferences/maxRecursionDepth", maxRecursionDepth);
 
-    QHash<QString, bool>::const_iterator i = filterSettings.constBegin();
-    while(i != filterSettings.constEnd())
+    settings.remove("smtCommands");
+    settings.remove("smtArguments");
+
+    QHash<QString, QString>::const_iterator i1 = smtCommands.constBegin();
+    while(i1 != smtCommands.constEnd())
     {
-        settings.setValue("filterSettings/" + i.key(), i.value());
-        ++i;
+        settings.setValue("smtCommands/" + i1.key(), i1.value());
+        ++i1;
     }
 
-    QHash<QString, QPen>::const_iterator i2 = graphicsViewPens.constBegin();
-    while(i2 != graphicsViewPens.constEnd())
+    QHash<QString, QString>::const_iterator i2 = smtArguments.constBegin();
+    while(i2 != smtArguments.constEnd())
     {
-        settings.setValue("colors/pens/" + i2.key(), i2.value());
+        settings.setValue("smtArguments/" + i2.key(), i2.value());
         ++i2;
     }
 
-    QHash<QString, QBrush>::const_iterator i3 = graphicsViewBrushes.constBegin();
-    while(i3 != graphicsViewBrushes.constEnd())
+    QHash<QString, bool>::const_iterator i3 = filterSettings.constBegin();
+    while(i3 != filterSettings.constEnd())
     {
-        settings.setValue("colors/brushes/" + i3.key(), i3.value());
+        settings.setValue("filterSettings/" + i3.key(), i3.value());
         ++i3;
+    }
+
+    QHash<QString, QPen>::const_iterator i4 = graphicsViewPens.constBegin();
+    while(i4 != graphicsViewPens.constEnd())
+    {
+        settings.setValue("colors/pens/" + i4.key(), i4.value());
+        ++i4;
+    }
+
+    QHash<QString, QBrush>::const_iterator i5 = graphicsViewBrushes.constBegin();
+    while(i5 != graphicsViewBrushes.constEnd())
+    {
+        settings.setValue("colors/brushes/" + i5.key(), i5.value());
+        ++i5;
     }
 
     settings.setValue("colors/objectListFgStartBrush", objectListFgStartBrush);
@@ -211,6 +248,52 @@ void Preferences::setDefaultValues()
     graphicsViewBrushes.insert("Signal_Befestigung", QBrush("greenyellow"));
     graphicsViewBrushes.insert("Gleis_Abschluss", QBrush("coral"));
     graphicsViewBrushes.insert("W_Kr_Gsp_Komponente", QBrush("coral"));
+}
+
+QStringList Preferences::getSmtList()
+{
+    QStringList returnlist;
+    QHash<QString, QString>::const_iterator i1 = smtCommands.constBegin();
+    while(i1 != smtCommands.constEnd())
+    {
+        returnlist.append(i1.key());
+        ++i1;
+    }
+    return returnlist;
+}
+
+void Preferences::clearSmtList()
+{
+    smtCommands.clear();
+    smtArguments.clear();
+}
+
+QString Preferences::getSmtCommand(QString smtId)
+{
+    if(!smtCommands.contains(smtId))
+    {
+        return smtId; // defaults to command name identical to id string
+    }
+    return smtCommands.value(smtId);
+}
+
+void Preferences::setSmtCommand(QString smtId, QString command)
+{
+    smtCommands.insert(smtId, command);
+}
+
+QString Preferences::getSmtArguments(QString smtId)
+{
+    if(!smtArguments.contains(smtId))
+    {
+        return QString(); // defaults to no arguments
+    }
+    return smtArguments.value(smtId);
+}
+
+void Preferences::setSmtArguments(QString smtId, QString arguments)
+{
+    smtArguments.insert(smtId, arguments);
 }
 
 bool Preferences::getFilterSetting(QString filter)

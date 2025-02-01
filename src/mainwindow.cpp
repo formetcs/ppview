@@ -40,6 +40,7 @@
 #include "textfiledialog.h"
 #include "preferencesdialog.h"
 #include "ui_finddialog.h"
+#include "smtverifierdialog.h"
 
 MainWindow::MainWindow(const QString& fileName, QWidget* parent)
     : QMainWindow(parent)
@@ -50,6 +51,8 @@ MainWindow::MainWindow(const QString& fileName, QWidget* parent)
     readSettings();
 
     document = new PlanProXmlDocument();
+
+    smtVerifierDialog = new SmtVerifierDialog(document, this);
     
     doctreemodel = new DocumentTreeModel();
     doctreemodel->setDocument(document);
@@ -114,6 +117,7 @@ MainWindow::MainWindow(const QString& fileName, QWidget* parent)
     connect(document, SIGNAL(dataChanged()), doctreemodel, SLOT(modelChanged()));
     connect(document, SIGNAL(dataChanged()), objectlistmodel, SLOT(modelChanged()));
     connect(objectInfo, SIGNAL(uuidClicked(QString)), selectionManager, SLOT(selectItem(QString)));
+    connect(smtVerifierDialog, SIGNAL(counterexamplesFound()), this, SLOT(showSmtCounterexamples()));
 
     enableActions();
     openNamedFile(fileName);
@@ -218,6 +222,7 @@ void MainWindow::openNamedFile(const QString& filename)
         bookmarkList->clear();
         searchResultList->clear();
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        smtVerifierDialog->reset();
         doctreemodel->modelAboutToBeChanged();
         objectlistmodel->modelAboutToBeChanged();
         bool success = document->loadFile(filename);
@@ -307,6 +312,7 @@ void MainWindow::closeFile()
         categoryComboBox->clear();
         bookmarkList->clear();
         searchResultList->clear();
+        smtVerifierDialog->reset();
         document->clear();
         setWindowTitle(APPLICATION_NAME);
         doctreemodel->modelChanged();
@@ -492,6 +498,13 @@ void MainWindow::measureDistance()
     QMessageBox::information(this, tr("Distance"), tr("Distance: %1 m").arg(doubleDistance, 0, 'f', 3));
 }
 
+void MainWindow::verifyPlan()
+{
+    smtVerifierDialog->show();
+    smtVerifierDialog->raise();
+    smtVerifierDialog->activateWindow();
+}
+
 void MainWindow::addToBookmarks()
 {
     QList<DomItem*> selectedItemList = selectionManager->getSelectedItems();
@@ -557,6 +570,29 @@ void MainWindow::createReferenceListRec(DomItem *item, QTreeWidgetItem* parent, 
         parent->addChild(newItem);
         createReferenceListRec(currentItem, newItem, depth + 1);
         searchResultList->expandItem(newItem);
+    }
+}
+
+void MainWindow::showSmtCounterexamples()
+{
+    searchResultList->clear();
+    QStringList resultlist = smtVerifierDialog->getCounterexampleList();
+    for(int i = 0; i < resultlist.count(); i += 2)
+    {
+        QString variable = resultlist.at(i);
+        QString id = resultlist.at(i+1);
+        DomItem* item = document->getObjectById(id);
+        if(item == NULL)
+        {
+            continue;
+        }
+        QString name = item->getName();
+        QTreeWidgetItem* tlItem = new QTreeWidgetItem();
+        tlItem->setText(0, name);
+        tlItem->setText(1, id);
+        tlItem->setToolTip(0, variable);
+        tlItem->setToolTip(1, variable);
+        searchResultList->addTopLevelItem(tlItem);
     }
 }
 
@@ -914,6 +950,12 @@ void MainWindow::createActions()
     findReferencingObjectsAct->setStatusTip(tr("Find all objects referencing the selected object"));
     connect(findReferencingObjectsAct, SIGNAL(triggered()), this, SLOT(findReferencingObjects()));
 
+    smtVerificationAct = new QAction(tr("SMT-&Verification..."), this);
+    smtVerificationAct->setIcon(QIcon(":/images/document-preview.svg"));
+    smtVerificationAct->setShortcut(tr("Shift+Ctrl+V"));
+    smtVerificationAct->setStatusTip(tr("Verify the correctness of the plan"));
+    connect(smtVerificationAct, SIGNAL(triggered()), this, SLOT(verifyPlan()));
+
     addBookmarkAct = new QAction(tr("&Add Bookmark"), this);
     addBookmarkAct->setIcon(QIcon(":/images/list-add.svg"));
     addBookmarkAct->setShortcut(tr("Shift+Alt+A"));
@@ -989,6 +1031,7 @@ void MainWindow::enableActions()
         extractFileAct->setEnabled(false);
         measureDistanceAct->setEnabled(false);
         findReferencingObjectsAct->setEnabled(false);
+        smtVerificationAct->setEnabled(false);
         addBookmarkAct->setEnabled(false);
         removeBookmarkAct->setEnabled(false);
         clearBookmarkListAct->setEnabled(false);
@@ -1020,6 +1063,7 @@ void MainWindow::enableActions()
         extractFileAct->setEnabled(true);
         measureDistanceAct->setEnabled(true);
         findReferencingObjectsAct->setEnabled(true);
+        smtVerificationAct->setEnabled(true);
         addBookmarkAct->setEnabled(true);
         removeBookmarkAct->setEnabled(true);
         clearBookmarkListAct->setEnabled(true);
@@ -1080,6 +1124,9 @@ void MainWindow::createMenus()
     objectMenu->addSeparator();
     objectMenu->addAction(measureDistanceAct);
     objectMenu->addAction(findReferencingObjectsAct);
+
+    toolsMenu = menuBar()->addMenu(tr("&Tools"));
+    toolsMenu->addAction(smtVerificationAct);
 
     bookmarkMenu = menuBar()->addMenu(tr("&Bookmarks"));
     bookmarkMenu->addAction(addBookmarkAct);
@@ -1151,6 +1198,11 @@ void MainWindow::createToolBars()
     objectToolBar->addAction(measureDistanceAct);
     objectToolBar->addAction(findReferencingObjectsAct);
     viewToolbarSubmenu->addAction(objectToolBar->toggleViewAction());
+
+    toolsToolBar = addToolBar(tr("Tools"));
+    toolsToolBar->setObjectName("Tools");
+    toolsToolBar->addAction(smtVerificationAct);
+    viewToolbarSubmenu->addAction(toolsToolBar->toggleViewAction());
 
     bookmarkToolBar = addToolBar(tr("Bookmarks"));
     bookmarkToolBar->setObjectName("Bookmarks");

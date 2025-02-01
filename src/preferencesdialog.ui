@@ -366,6 +366,109 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabSmt">
+      <attribute name="title">
+       <string>&amp;SMT</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
+       <item>
+        <widget class="QListWidget" name="listWidgetSmt"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_12">
+           <item>
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>&amp;ID</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEditId</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditId"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>&amp;Command</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEditCommand</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditCommand"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_14">
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>Ar&amp;guments</string>
+             </property>
+             <property name="buddy">
+              <cstring>lineEditArguments</cstring>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditArguments"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_15">
+           <item>
+            <widget class="QPushButton" name="pushButtonAdd">
+             <property name="text">
+              <string>&amp;Add</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonRemove">
+             <property name="text">
+              <string>&amp;Remove</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonEdit">
+             <property name="text">
+              <string>&amp;Edit</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -389,8 +492,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>260</x>
+     <y>362</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -405,8 +508,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>328</x>
+     <y>362</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

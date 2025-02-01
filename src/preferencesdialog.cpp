@@ -57,6 +57,10 @@ PreferencesDialog::PreferencesDialog(QWidget *parent)
     connect(ui->comboBoxPenStyle, SIGNAL(currentIndexChanged(int)), this, SLOT(penPropertiesChanged()));
     connect(ui->pushButtonSetForegroundColor, SIGNAL(clicked()), this, SLOT(handlePushButtonSetForegroundColorClicked()));
     connect(ui->pushButtonSetBackgroundColor, SIGNAL(clicked()), this, SLOT(handlePushButtonSetBackgroundColorClicked()));
+    connect(ui->listWidgetSmt, SIGNAL(itemSelectionChanged()), this, SLOT(handleSmtListSelection()));
+    connect(ui->pushButtonAdd, SIGNAL(clicked()), this, SLOT(addSmt()));
+    connect(ui->pushButtonRemove, SIGNAL(clicked()), this, SLOT(removeSmt()));
+    connect(ui->pushButtonEdit, SIGNAL(clicked()), this, SLOT(editSmt()));
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -126,6 +130,17 @@ void PreferencesDialog::loadSettings()
     ui->listWidgetObjectListItems->item(1)->setBackground(prefs->getObjectListBgEndBrush());
     ui->listWidgetObjectListItems->item(2)->setForeground(prefs->getObjectListFgBothBrush());
     ui->listWidgetObjectListItems->item(2)->setBackground(prefs->getObjectListBgBothBrush());
+
+    QStringList smtList = prefs->getSmtList();
+    for(int i = 0; i < smtList.count(); ++i)
+    {
+        QString currentId = smtList.at(i);
+        QString command = prefs->getSmtCommand(currentId);
+        QString arguments = prefs->getSmtArguments(currentId);
+        changedSmtCommands.insert(currentId, command);
+        changedSmtArguments.insert(currentId, arguments);
+        ui->listWidgetSmt->addItem(new QListWidgetItem(currentId));
+    }
 }
 
 void PreferencesDialog::saveSettings()
@@ -164,6 +179,18 @@ void PreferencesDialog::saveSettings()
     prefs->setObjectListBgEndBrush(ui->listWidgetObjectListItems->item(1)->background());
     prefs->setObjectListFgBothBrush(ui->listWidgetObjectListItems->item(2)->foreground());
     prefs->setObjectListBgBothBrush(ui->listWidgetObjectListItems->item(2)->background());
+
+    prefs->clearSmtList();
+    QHash<QString, QString>::const_iterator i1 = changedSmtCommands.constBegin();
+    while(i1 != changedSmtCommands.constEnd())
+    {
+        QString smtId = i1.key();
+        QString smtCommand = i1.value();
+        QString smtArguments = changedSmtArguments.value(smtId);
+        prefs->setSmtCommand(smtId, smtCommand);
+        prefs->setSmtArguments(smtId, smtArguments);
+        ++i1;
+    }
 }
 
 QPen PreferencesDialog::getSelectedPen()
@@ -368,6 +395,74 @@ void PreferencesDialog::penPropertiesChanged()
     }
     pen.setStyle(penstyle);
     setSelectedPen(pen);
+}
+
+void PreferencesDialog::addSmt()
+{
+    QString smtId = ui->lineEditId->text();
+    QString command = ui->lineEditCommand->text();
+    QString arguments = ui->lineEditArguments->text();
+    if(changedSmtCommands.contains(smtId))
+    {
+        return;
+    }
+    changedSmtCommands.insert(smtId, command);
+    changedSmtArguments.insert(smtId, arguments);
+    ui->listWidgetSmt->addItem(new QListWidgetItem(smtId));
+}
+
+void PreferencesDialog::removeSmt()
+{
+    QList<QListWidgetItem*> selectedList = ui->listWidgetSmt->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
+    QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
+    int row = ui->listWidgetSmt->row(selectedItem);
+    selectedItem = ui->listWidgetSmt->takeItem(row);
+    QString itemtext = selectedItem->text();
+    changedSmtCommands.remove(itemtext);
+    changedSmtArguments.remove(itemtext);
+    delete selectedItem;
+}
+
+void PreferencesDialog::editSmt()
+{
+    QList<QListWidgetItem*> selectedList = ui->listWidgetSmt->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
+    QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
+    QString itemtext = selectedItem->text();
+    changedSmtCommands.remove(itemtext);
+    changedSmtArguments.remove(itemtext);
+
+    QString newSmtId = ui->lineEditId->text();
+    QString newCommand = ui->lineEditCommand->text();
+    QString newArguments = ui->lineEditArguments->text();
+    if(changedSmtCommands.contains(newSmtId))
+    {
+        return;
+    }
+    changedSmtCommands.insert(newSmtId, newCommand);
+    changedSmtArguments.insert(newSmtId, newArguments);
+    selectedItem->setText(newSmtId);
+}
+
+void PreferencesDialog::handleSmtListSelection()
+{
+    QList<QListWidgetItem*> selectedList = ui->listWidgetSmt->selectedItems();
+    if(selectedList.isEmpty())
+    {
+        return;
+    }
+    QListWidgetItem* selectedItem = selectedList.at(0); // No multiple selection -> only first item
+    QString itemtext = selectedItem->text();
+    ui->lineEditId->setText(itemtext);
+    ui->lineEditCommand->setText(changedSmtCommands.value(itemtext));
+    ui->lineEditArguments->setText(changedSmtArguments.value(itemtext));
 }
 
 void PreferencesDialog::handleSetLayoutColor(bool linecolor)

@@ -24,6 +24,7 @@
 
 #include <QMainWindow>
 
+class SmtVerifierDialog;
 class DomItem;
 class QTreeWidgetItem;
 class QTreeWidget;
@@ -96,9 +97,11 @@ private slots:
     void changeCategory();
     void extractFile();
     void measureDistance();
+    void verifyPlan();
     void addToBookmarks();
     void removeFromBookmarks();
     void findReferencingObjects();
+    void showSmtCounterexamples();
     void showPreferences();
     void showReadme();
     void showLicense();
@@ -123,12 +126,14 @@ private:
     QMenu* viewDockSubmenu;
     QMenu* viewToolbarSubmenu;
     QMenu* objectMenu;
+    QMenu* toolsMenu;
     QMenu* bookmarkMenu;
     QMenu* helpMenu;
     QToolBar* fileToolBar;
     QToolBar* editToolBar;
     QToolBar* viewToolBar;
     QToolBar* objectToolBar;
+    QToolBar* toolsToolBar;
     QToolBar* bookmarkToolBar;
     QAction* openFileAct;
     QAction* saveFileAct;
@@ -157,6 +162,7 @@ private:
     QAction* goToObjectAct;
     QAction* measureDistanceAct;
     QAction* findReferencingObjectsAct;
+    QAction* smtVerificationAct;
     QAction* addBookmarkAct;
     QAction* removeBookmarkAct;
     QAction* clearBookmarkListAct;
@@ -181,6 +187,8 @@ private:
     QListWidget* bookmarkList;
     QTreeWidget* searchResultList;
     QComboBox* categoryComboBox;
+
+    SmtVerifierDialog* smtVerifierDialog;
 
     PlanProXmlDocument* document;
 };

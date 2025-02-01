@@ -9,6 +9,7 @@ Originally designed as a debugging tool for the Automated ETCS Planning Tool [EP
 - Calculation of the relative distance between two objects
 - Extraction of binary attachments from the PlanPro file
 - Comparison of different planning states (start and end state)
+- Verification against formalized planning rules
 
 
 ## Who should use PlanPro Viewer?
@@ -43,6 +44,7 @@ Especially the following limitations have to be taken into account:
   Plans in the zipped container format (file extension *.planpro) are not supported.
 - The user interface always contains some parts in German, even if the language is set to English.
   Because PlanPro is a German format with German object and attribute names, this cannot be avoided completely even in future releases.
+- The SMT Verification is an experimental feature, and only a small subset of PlanPro types and properties are supported.
 
 
 ## Licensing

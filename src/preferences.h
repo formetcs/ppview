@@ -54,6 +54,13 @@ public:
     int getMaxRecursionDepth();
     void setMaxRecursionDepth(int depth);
 
+    QStringList getSmtList();
+    void clearSmtList();
+    QString getSmtCommand(QString smtId);
+    void setSmtCommand(QString smtId, QString command);
+    QString getSmtArguments(QString smtId);
+    void setSmtArguments(QString smtId, QString arguments);
+
     bool getFilterSetting(QString filter);
     void setFilterSetting(QString filter, bool enabled);
 
@@ -103,6 +110,9 @@ private:
     int minZoom;
     int rotateStep;
     int maxRecursionDepth;
+
+    QHash<QString, QString> smtCommands;
+    QHash<QString, QString> smtArguments;
 
     QHash<QString, bool> filterSettings;
 

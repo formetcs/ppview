@@ -46,6 +46,10 @@ private slots:
     void handlePushButtonSetForegroundColorClicked();
     void handlePushButtonSetBackgroundColorClicked();
     void penPropertiesChanged();
+    void addSmt();
+    void removeSmt();
+    void editSmt();
+    void handleSmtListSelection();
 
 private:
     void handleSetLayoutColor(bool linecolor);
@@ -60,6 +64,9 @@ private:
 
     QHash<QString,QPen> changedPens;
     QHash<QString,QBrush> changedBrushes;
+
+    QHash<QString,QString> changedSmtCommands;
+    QHash<QString,QString> changedSmtArguments;
 
     QStringList punktObjektNames;
     QStringList bereichObjektNames;

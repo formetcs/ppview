@@ -61,6 +61,7 @@ SOURCES += \
     preferencesdialog.cpp \
     punktobjekt.cpp \
     selectionmanager.cpp \
+    smtverifierdialog.cpp \
     temporarypunktobjekt.cpp \
     textfiledialog.cpp \
     urobjekt.cpp
@@ -84,6 +85,7 @@ HEADERS += \
     preferencesdialog.h \
     punktobjekt.h \
     selectionmanager.h \
+    smtverifierdialog.h \
     temporarypunktobjekt.h \
     textfiledialog.h \
     urobjekt.h \
@@ -100,4 +102,5 @@ TRANSLATIONS  = ppview_en.ts \
 
 FORMS += \
     finddialog.ui \
-    preferencesdialog.ui
+    preferencesdialog.ui \
+    smtverifierdialog.ui
