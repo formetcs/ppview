@@ -66,6 +66,7 @@ void SmtVerifierDialog::reset()
     options = QString();
     variables.clear();
     counterexampleList.clear();
+    emit counterexamplesFound(); // to clear the result window
     ui->comboBoxProver->clear();
     ui->listWidgetTypes->clear();
     ui->textEditDescription->clear();
@@ -105,6 +106,7 @@ void SmtVerifierDialog::openTestcase()
     options = QString();
     variables.clear();
     counterexampleList.clear();
+    emit counterexamplesFound(); // to clear the result window
 
     QTextStream in(&file);
     while (!in.atEnd())
@@ -205,7 +207,6 @@ void SmtVerifierDialog::openTestcase()
         fileContent = QString();
         options = QString();
         variables.clear();
-        counterexampleList.clear();
         return;
     }
     ui->textEditOutput->append(tr("Ready"));
@@ -260,6 +261,8 @@ void SmtVerifierDialog::startVerification()
     smtprocess->kill();
     smtprocess->waitForFinished();
     ui->textEditOutput->clear();
+    counterexampleList.clear();
+    emit counterexamplesFound(); // to clear the result window
 
     QString smtId = ui->comboBoxProver->currentText();
     Preferences* prefs = Preferences::getInstance();
@@ -296,11 +299,15 @@ void SmtVerifierDialog::handleSmtOutput()
     else if(response.startsWith("unsat"))
     {
         ui->textEditOutput->setText(tr("No counterexamples found, plan is valid (Time: %1 msecs)").arg(duration));
+        counterexampleList.clear();
+        emit counterexamplesFound(); // to clear the result window
         return;
     }
     else if(response.startsWith("unknown"))
     {
         ui->textEditOutput->setText(tr("The validity is unknown (Time: %1 msecs)").arg(duration));
+        counterexampleList.clear();
+        emit counterexamplesFound(); // to clear the result window
         return;
     }
 
