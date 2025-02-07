@@ -161,7 +161,7 @@ int PunktObjekt::getPunktObjektTopKanteCount() const
     {
         return 0;
     }
-    return domItem->getChildItems("Punkt_Objekt_Strecke").count();
+    return domItem->getChildItems("Punkt_Objekt_TOP_Kante").count();
 }
 
 PunktObjektTopKante PunktObjekt::getPunktObjektTopKante(int i) const

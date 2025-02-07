@@ -26,21 +26,74 @@
 
 class DomItem;
 
+
+/*!
+ * \brief Wrapper class around a DomItem to store PlanPro Ur_Objekt subtypes.
+ *
+ * This class encapsulates a DomItem pointing to the root of an Ur_Objekt subtype and provides direct accessor methods to all properties.
+ * Because Ur_Objekt is an abstract type in PlanPro, this class cannot be instantiated directly.
+ * Use one of the specific subtypes to create objects.
+ */
 class UrObjekt
 {
 public:
+    /*!
+     * \brief Checks if this is a valid UrObjekt subtype.
+     *
+     * This is the case if the encapsulated DomItem points to the root of an Ur_Objekt subtype,
+     * which is determined by checking if a child item at the path Identitaet/Wert exists.
+     *
+     * \return true if this is a valid UrObjekt subtype, otherwise false.
+     */
     virtual bool isUrObjekt() const;
+
+    /*!
+     * \brief Get the encapsulated DomItem.
+     *
+     * \return the DomItem
+     */
     DomItem* getDomItem();
+
+    /*!
+     * \brief Get the encapsulated DomItem.
+     *
+     * \return the DomItem
+     */
     const DomItem* getDomItem() const;
 
+    /*!
+     * \brief Get the name of the UrObjekt.
+     *
+     * Note that the real name of the subtype is returned, like Signal or Datenpunkt.
+     *
+     * \return the name of the UrObjekt, or an empty string if the encapsulated DomItem is NULL
+     */
     virtual QString getName() const;
+
+    /*!
+     * \brief Get the identity of the object.
+     *
+     * \return the identity as UUID string, or an empty string if the encapsulated DomItem is NULL or no Ur_Objekt
+     */
     virtual QString getIdentitaet() const;
+
+    /*!
+     * \brief Get the identity of an object provided as DomItem.
+     *
+     * \param item the DomItem which is the root of the object
+     * \return the identity as UUID string, or an empty string if item is NULL or no Ur_Objekt
+     */
     static QString getIdentitaet(const DomItem* item);
 
 protected:
+    /*!
+     * \brief Constructor.
+     *
+     * \param item the DomItem to encapsulate
+     */
     UrObjekt(DomItem* item = nullptr);
 
-    DomItem* domItem;
+    DomItem* domItem; /*!< \brief The encapulated DOM item. */
 };
 
 #endif // UROBJEKT_H
