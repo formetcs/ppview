@@ -65,7 +65,7 @@ public:
     DomItem(const QString& name, DomItem* parent = NULL);
 
     /*!
-     * \brief Destructor.
+     * \brief Destructor. It also deletes all child items recursively.
      */
     ~DomItem();
 
