@@ -29,7 +29,7 @@
 #include "preferences.h"
 
 
-const double TRAVERSE_DELTA = 0.1; // to avoid problems with double precision
+const double TRAVERSE_DELTA = 0.1; /*!< \brief Delta value for distance calculations to avoid problems with double precision. */
 
 
 GraphicsSceneBuilder::GraphicsSceneBuilder(PlanProDocument* doc, GraphicsScene* scene)

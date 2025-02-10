@@ -33,18 +33,51 @@ class GraphicsScene;
 class QGraphicsItem;
 
 
+/*!
+ * \brief Class to build a GraphicsScene from a PlanProDocument.
+ */
 class GraphicsSceneBuilder
 {
 public:
+    /*!
+     * \brief Creates a new GraphicsSceneBuilder.
+     *
+     * This sets up the builder object only. Call createGraphicsScene()
+     * afterwards to actually create the scene.
+     *
+     * \param doc the PlanProDocument
+     * \param scene the graphics scene
+     */
     GraphicsSceneBuilder(PlanProDocument* doc, GraphicsScene* scene);
+
+    /*!
+     * \brief Create the graphics scene.
+     *
+     * This has to be called whenever the coordinates of an object have changed.
+     *
+     * \return true if the scene was created successfully, otherwise false
+     */
     bool createGraphicsScene();
 
 private:
+    /*!
+     * \brief Calculate the coordinates where a Punkt_Objekt subtype has to be drawn.
+     *
+     * \param o the DomItem pointing to the root of a Punkt_Objekt subtype
+     * \return the center point where the item has to be drawn
+     */
     QPointF calculatePunktObjekt(const DomItem* o);
+
+    /*!
+     * \brief Calculate the coordinates where a Bereich_Objekt subtype has to be drawn.
+     *
+     * \param o the DomItem pointing to the root of a Bereich_Objekt subtype
+     * \return a list of QLineF objects containing the coordinates of the line segments which have to be drawn
+     */
     QList<QLineF> calculateBereichObjekt(const DomItem* o);
 
-    PlanProDocument* document;
-    GraphicsScene* graphicsScene;
+    PlanProDocument* document; /*!< \brief The PlanPro document. */
+    GraphicsScene* graphicsScene; /*!< \brief The graphics scene. */
 };
 
 #endif // GRAPHICSSCENEBUILDER_H
