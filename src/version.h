@@ -22,12 +22,36 @@
 #ifndef VERSION_H
 #define VERSION_H
 
+
+/*!
+ * \brief Major version number of the application.
+ */
 #define VERSION_MAJOR 0
+
+/*!
+ * \brief Minor version number of the application.
+ */
 #define VERSION_MINOR 8
+
+/*!
+ * \brief Patch version number of the application.
+ */
 #define VERSION_PATCH 0
 
+
+/*!
+ * \brief Major version number of the supported PlanPro interface.
+ */
 #define PLANPRO_MAJOR 1
+
+/*!
+ * \brief Minor version number of the supported PlanPro interface.
+ */
 #define PLANPRO_MINOR 9
+
+/*!
+ * \brief Patch version number of the supported PlanPro interface.
+ */
 #define PLANPRO_PATCH 0
 
 #endif // VERSION_H

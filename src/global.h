@@ -22,8 +22,20 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+
+/*!
+ * \brief Name of the organization (used for settings storage).
+ */
 #define ORGANIZATION_NAME "FormETCS"
+
+/*!
+ * \brief Domain of the organization (used for settings storage).
+ */
 #define ORGANIZATION_DOMAIN "formetcs.github.com"
+
+/*!
+ * \brief Name of the application.
+ */
 #define APPLICATION_NAME "PlanPro Viewer"
 
 #endif // GLOBAL_H

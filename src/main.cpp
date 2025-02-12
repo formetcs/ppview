@@ -26,6 +26,17 @@
 #include <QApplication>
 #include <QTranslator>
 
+
+/*!
+ * \brief Entry point of the program.
+ *
+ * Initializes the application, loads the translation files and shows the MainWindow.
+ * If the name of a PlanPro file is provided as first (and only) argument, this file will be loaded.
+ *
+ * \param argc the argument count
+ * \param argv array of pointers to the argument strings
+ * \return 0 if the program terminated without error, otherwise a nonzero number
+ */
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
