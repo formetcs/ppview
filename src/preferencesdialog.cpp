@@ -26,8 +26,20 @@
 #include <QColorDialog>
 #include <QDir>
 
+
+/*!
+ * \brief Identifier for objects in the start state of the combined view in the list of changed pens/brushes.
+ */
 #define LAYOUT_START "[Layout:Start]"
+
+/*!
+ * \brief Identifier for objects in the end state of the combined view in the list of changed pens/brushes.
+ */
 #define LAYOUT_END "[Layout:End]"
+
+/*!
+ * \brief Identifier for objects in both states of the combined view in the list of changed pens/brushes.
+ */
 #define LAYOUT_BOTH "[Layout:Both]"
 
 PreferencesDialog::PreferencesDialog(QWidget *parent)
