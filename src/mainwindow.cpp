@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file mainwindow.cpp
+ *
+ * \brief Implementation of the MainWindow class.
+ */
+
 #include <QtGui>
 #include <QtWidgets>
 #include <QtPrintSupport>

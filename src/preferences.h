@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file preferences.h
+ *
+ * \brief Declaration of the Preferences class.
+ */
+
 #ifndef PREFERENCES_H
 #define PREFERENCES_H
 

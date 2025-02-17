@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file planprograph.cpp
+ *
+ * \brief Implementation of the PlanProGraph class.
+ */
+
 #include "planprodocument.h"
 #include "planprograph.h"
 #include "punktobjekt.h"

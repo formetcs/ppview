@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file documenttreemodel.h
+ *
+ * \brief Declaration of the DocumentTreeModel class.
+ */
+
 #ifndef DOCUMENTTREEMODEL_H
 #define DOCUMENTTREEMODEL_H
 

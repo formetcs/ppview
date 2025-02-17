@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file objectlistmodel.h
+ *
+ * \brief Declaration of the ObjectListModel class.
+ */
+
 #ifndef OBJECTLISTMODEL_H
 #define OBJECTLISTMODEL_H
 

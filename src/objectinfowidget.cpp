@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file objectinfowidget.cpp
+ *
+ * \brief Implementation of the ObjectInfoWidget class.
+ */
+
 #include "objectinfowidget.h"
 
 ObjectInfoWidget::ObjectInfoWidget(QWidget* parent)

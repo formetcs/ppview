@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file basisobjekt.h
+ *
+ * \brief Declaration of the BasisObjekt class.
+ */
+
 #ifndef BASISOBJEKT_H
 #define BASISOBJEKT_H
 

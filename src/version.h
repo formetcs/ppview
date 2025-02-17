@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file version.h
+ *
+ * \brief Definition of the version number of the application and the supported PlanPro interface.
+ */
+
 #ifndef VERSION_H
 #define VERSION_H
 

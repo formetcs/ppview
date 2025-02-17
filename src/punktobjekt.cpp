@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file punktobjekt.cpp
+ *
+ * \brief Implementation of the PunktObjekt, PunktObjektStrecke and PunktObjektTopKante classes.
+ */
+
 #include "punktobjekt.h"
 #include "domitem.h"
 

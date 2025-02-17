@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file smtverifierdialog.h
+ *
+ * \brief Declaration of the SmtVerifierDialog class.
+ */
+
 #ifndef SMTVERIFIERDIALOG_H
 #define SMTVERIFIERDIALOG_H
 

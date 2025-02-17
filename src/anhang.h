@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file anhang.h
+ *
+ * \brief Declaration of the Anhang class.
+ */
+
 #ifndef ANHANG_H
 #define ANHANG_H
 
@@ -28,9 +34,9 @@
 
 
 /*!
- * \brief Wrapper class around a DomItem to store PlanPro Anhang types.
+ * \brief Wrapper class around a DomItem to store PlanPro %Anhang types.
  *
- * This class encapsulates a DomItem pointing to the root of a Anhang type and provides direct accessor methods to all properties.
+ * This class encapsulates a DomItem pointing to the root of an %Anhang type and provides direct accessor methods to all properties.
  */
 class Anhang : public UrObjekt
 {
@@ -45,7 +51,7 @@ public:
     /*!
      * \brief Checks if this is a valid Anhang type.
      *
-     * This is the case if this is also an UrObjekt and the encapsulated DomItem points to the root of an Anhang type,
+     * This is the case if this is also an UrObjekt and the encapsulated DomItem points to the root of an %Anhang type,
      * which is determined by checking if a child item at the path Anhang_Allg/Anhang_Art exists.
      *
      * \return true if this is a valid Anhang type, otherwise false.

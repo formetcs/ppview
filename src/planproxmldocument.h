@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file planproxmldocument.h
+ *
+ * \brief Declaration of the PlanProXmlDocument class.
+ */
+
 #ifndef PLANPROXMLDOCUMENT_H
 #define PLANPROXMLDOCUMENT_H
 

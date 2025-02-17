@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file punktobjekt.h
+ *
+ * \brief Declaration of the PunktObjekt, PunktObjektStrecke and PunktObjektTopKante classes.
+ */
+
 #ifndef PUNKTOBJEKT_H
 #define PUNKTOBJEKT_H
 

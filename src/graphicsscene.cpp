@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file graphicsscene.cpp
+ *
+ * \brief Implementation of the GraphicsScene class.
+ */
+
 #include <QtGui>
 #include <QtWidgets>
 #include "graphicsscene.h"

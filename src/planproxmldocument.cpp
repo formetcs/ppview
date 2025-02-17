@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file planproxmldocument.cpp
+ *
+ * \brief Implementation of the PlanProXmlDocument class.
+ */
+
 #include "planproxmldocument.h"
 
 #include <QtCore>

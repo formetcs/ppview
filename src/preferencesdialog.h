@@ -19,11 +19,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file preferencesdialog.h
+ *
+ * \brief Declaration of the PreferencesDialog class.
+ */
+
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
 
+/*!
+ * \brief Namespace for all Qt Designer generated classes.
+ */
 namespace Ui {
 class PreferencesDialog;
 }

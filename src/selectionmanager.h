@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file selectionmanager.h
+ *
+ * \brief Declaration of the SelectionManager class.
+ */
+
 #ifndef SELECTIONMANAGER_H
 #define SELECTIONMANAGER_H
 

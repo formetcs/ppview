@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file temporarypunktobjekt.cpp
+ *
+ * \brief Implementation of the TemporaryPunktObjekt class.
+ */
+
 #include "temporarypunktobjekt.h"
 
 TemporaryPunktObjekt::TemporaryPunktObjekt(QString id, QString idtk, int abst, QString wirkr) : PunktObjekt(nullptr)

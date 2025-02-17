@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file planprograph.h
+ *
+ * \brief Declaration of the PlanProGraph class and the NextTopKanteResult structure.
+ */
+
 #ifndef PLANPROGRAPH_H
 #define PLANPROGRAPH_H
 

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file selectionmanager.cpp
+ *
+ * \brief Implementation of the SelectionManager class.
+ */
+
 #include "graphicsscene.h"
 #include "objectlistmodel.h"
 #include "planprodocument.h"

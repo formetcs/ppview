@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file documenttreemodel.cpp
+ *
+ * \brief Implementation of the DocumentTreeModel class.
+ */
+
 #include "documenttreemodel.h"
 #include "domitem.h"
 #include "planprodocument.h"

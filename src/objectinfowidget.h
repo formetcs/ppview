@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file objectinfowidget.h
+ *
+ * \brief Declaration of the ObjectInfoWidget class.
+ */
+
 #ifndef OBJECTINFOWIDGET_H
 #define OBJECTINFOWIDGET_H
 

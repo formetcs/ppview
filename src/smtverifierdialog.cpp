@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file smtverifierdialog.cpp
+ *
+ * \brief Implementation of the SmtVerifierDialog class.
+ */
+
 #include "smtverifierdialog.h"
 #include "planprodocument.h"
 #include "ui_smtverifierdialog.h"

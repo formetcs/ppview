@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file preferencesdialog.cpp
+ *
+ * \brief Implementation of the PreferencesDialog class.
+ */
+
 #include "preferences.h"
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"

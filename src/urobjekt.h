@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file urobjekt.h
+ *
+ * \brief Declaration of the UrObjekt class.
+ */
+
 #ifndef UROBJEKT_H
 #define UROBJEKT_H
 

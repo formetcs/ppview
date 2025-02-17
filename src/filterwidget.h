@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file filterwidget.h
+ *
+ * \brief Declaration of the FilterWidget class and the FilterState structure.
+ */
+
 #ifndef FILTERWIDGET_H
 #define FILTERWIDGET_H
 

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file graphicsscene.h
+ *
+ * \brief Declaration of the GraphicsScene class.
+ */
+
 #ifndef GRAPHICSSCENE_H
 #define GRAPHICSSCENE_H
 

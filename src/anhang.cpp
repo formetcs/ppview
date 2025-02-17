@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file anhang.cpp
+ *
+ * \brief Implementation of the Anhang class.
+ */
+
 #include "anhang.h"
 #include "domitem.h"
 

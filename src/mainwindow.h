@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file mainwindow.h
+ *
+ * \brief Declaration of the MainWindow class.
+ */
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 

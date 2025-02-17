@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file global.h
+ *
+ * \brief Definition of global macros.
+ */
+
 #ifndef GLOBAL_H
 #define GLOBAL_H
 

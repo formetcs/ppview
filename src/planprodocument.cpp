@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file planprodocument.cpp
+ *
+ * \brief Implementation of the PlanProDocument class.
+ */
+
 #include "planprodocument.h"
 
 #include <QDateTime>

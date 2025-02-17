@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file main.cpp
+ *
+ * \brief Implementation of the main() function.
+ */
+
 #include "mainwindow.h"
 #include "preferences.h"
 #include "global.h"

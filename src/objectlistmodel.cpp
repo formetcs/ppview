@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file objectlistmodel.cpp
+ *
+ * \brief Implementation of the ObjectListModel class.
+ */
+
 #include "objectlistmodel.h"
 #include "planprodocument.h"
 #include "preferences.h"

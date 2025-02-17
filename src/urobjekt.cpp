@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file urobjekt.cpp
+ *
+ * \brief Implementation of the UrObjekt class.
+ */
+
 #include "domitem.h"
 #include "urobjekt.h"
 

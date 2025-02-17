@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file textfiledialog.cpp
+ *
+ * \brief Implementation of the TextFileDialog class.
+ */
+
 #include "textfiledialog.h"
 
 #include <QApplication>

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file basisobjekt.cpp
+ *
+ * \brief Implementation of the BasisObjekt class.
+ */
+
 #include "basisobjekt.h"
 #include "domitem.h"
 

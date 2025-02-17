@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file preferences.cpp
+ *
+ * \brief Implementation of the Preferences class.
+ */
+
 #include "preferences.h"
 
 Preferences* Preferences::preferences = 0;

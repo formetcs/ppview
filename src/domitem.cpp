@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file domitem.cpp
+ *
+ * \brief Implementation of the DomItem class.
+ */
+
 #include "domitem.h"
 
 DomItem::DomItem(const QString& name, const QString& value, DomItem* parent)

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file domitem.h
+ *
+ * \brief Declaration of the DomItem class.
+ */
+
 #ifndef DOMITEM_H
 #define DOMITEM_H
 

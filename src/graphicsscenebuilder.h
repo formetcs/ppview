@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file graphicsscenebuilder.h
+ *
+ * \brief Declaration of the GraphicsSceneBuilder class.
+ */
+
 #ifndef GRAPHICSSCENEBUILDER_H
 #define GRAPHICSSCENEBUILDER_H
 

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file temporarypunktobjekt.h
+ *
+ * \brief Declaration of the TemporaryPunktObjekt class.
+ */
+
 #ifndef TEMPORARYPUNKTOBJEKT_H
 #define TEMPORARYPUNKTOBJEKT_H
 

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file textfiledialog.h
+ *
+ * \brief Declaration of the TextFileDialog class.
+ */
+
 #ifndef TEXTFILEDIALOG_H
 #define TEXTFILEDIALOG_H
 

@@ -19,6 +19,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+/*!
+ * \file graphicsscenebuilder.cpp
+ *
+ * \brief Implementation of the GraphicsSceneBuilder class.
+ */
+
 #include <QGraphicsScene>
 #include <QGraphicsEllipseItem>
 #include <QProgressDialog>
