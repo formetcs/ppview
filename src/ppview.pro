@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+QT       += core gui xml widgets printsupport
 
 win32 {
     message(Building for Windows)
@@ -27,6 +25,8 @@ unix {
 TARGET = ppview
 macx:TARGET = "PlanPro Viewer"
 TEMPLATE = app
+
+CONFIG += lrelease
 
 macx:QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
 
@@ -104,3 +104,13 @@ FORMS += \
     finddialog.ui \
     preferencesdialog.ui \
     smtverifierdialog.ui
+    
+# Install Set for Linux
+isEmpty(PPVIEW_INSTALL_PATH) {
+    PPVIEW_INSTALL_PATH = /usr/local/ppview
+}
+linux:QM_FILES_INSTALL_PATH = $${PPVIEW_INSTALL_PATH}/translations
+linux:target.path = $${PPVIEW_INSTALL_PATH}
+linux:readmefiles.path = $${PPVIEW_INSTALL_PATH}
+linux:readmefiles.files = ../LICENSE ../third-party-licenses.txt ../README.md
+linux:INSTALLS += target readmefiles
