@@ -105,6 +105,18 @@ FORMS += \
     preferencesdialog.ui \
     smtverifierdialog.ui
     
+
+# Deployment Target for macOS
+macx:macdeploytarget.target = macdeploy
+macx:macdeploytarget.commands = $$[QT_INSTALL_BINS]/macdeployqt $$shell_quote($${TARGET}.app); \
+                                test -d $$shell_quote($${TARGET}.app/Contents/Resources/translations) || mkdir -p $$shell_quote($${TARGET}.app/Contents/Resources/translations); \
+                                cp -f $$[QT_INSTALL_TRANSLATIONS]/*.qm $$shell_quote($${TARGET}.app/Contents/Resources/translations); \
+                                cp -f .qm/ppview_*.qm $$shell_quote($${TARGET}.app/Contents/Resources/translations); \
+                                cp -f ../LICENSE ../third-party-licenses.txt ../README.md $$shell_quote($${TARGET}.app/Contents/Resources)
+macx:macdeploytarget.depends = all
+macx:QMAKE_EXTRA_TARGETS += macdeploytarget
+
+
 # Install Set for Linux
 isEmpty(PPVIEW_INSTALL_PATH) {
     PPVIEW_INSTALL_PATH = /usr/local/ppview
