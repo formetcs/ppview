@@ -104,7 +104,11 @@ FORMS += \
     finddialog.ui \
     preferencesdialog.ui \
     smtverifierdialog.ui
-    
+
+
+# Options for Windows Deployment
+win32:CONFIG += windeployqt    
+
 
 # Deployment Target for macOS
 macx:macdeploytarget.target = macdeploy
