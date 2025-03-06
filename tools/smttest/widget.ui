@@ -36,12 +36,12 @@
        </property>
        <item>
         <property name="text">
-         <string>/Users/stefan/tools/z3/bin/z3 -in</string>
+         <string>z3 -in</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>/Users/stefan/tools/cvc5/bin/cvc5</string>
+         <string>cvc5</string>
         </property>
        </item>
       </widget>
