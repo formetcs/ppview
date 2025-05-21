@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/ppview.png</file>
+        <file>images/ppview.svg</file>
         <file>images/acrobat.svg</file>
         <file>images/archive-extract.svg</file>
         <file>images/checkbox.svg</file>

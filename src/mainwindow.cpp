@@ -52,7 +52,7 @@ MainWindow::MainWindow(const QString& fileName, QWidget* parent)
     : QMainWindow(parent)
 {
     setWindowTitle(APPLICATION_NAME);
-    setWindowIcon(QIcon(":/images/ppview.png"));
+    setWindowIcon(QIcon(":/images/ppview.svg"));
 
     readSettings();
 
